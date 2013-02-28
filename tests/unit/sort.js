@@ -1,21 +1,24 @@
-exports.Set = (function () {
+exports.Sort = (function () {
   //private properties
   var testEmitter = new events.EventEmitter(),
   ut = new Utility(),
   server = new Server(),
-  set = {},
-  name = "Set",
-  client = "", tester = {}, server_pid = "", all_tests = {};
+  sort = {},
+  name = "Sort",
+  client = "", tester = {}, server_pid = "", all_tests = {},
+  result = [], local_result = [], global_result = [];
 
   //public property
-  set.debug_mode = true;
+  sort.debug_mode = false;
 
   //public method
-  set.start_test = function (client_pid, callback) {
+  sort.start_test = function (client_pid, callback) {
     testEmitter.on('start', function () {
-      var tags = "set";
+      var tags = "sort";
       var overrides = {};
-      overrides['set-max-intset-entries'] = 512;
+      overrides['list-max-ziplist-entries'] = 32;
+      overrides['list-max-ziplist-value'] = 16;
+      overrides['set-max-intset-entries'] = 32;
       var args = {};
       args['name'] = name;
       args['tags'] = tags;
@@ -39,7 +42,7 @@ exports.Set = (function () {
         });
       } else {
         client.end();
-        if (set.debug_mode) {
+        if (sort.debug_mode) {
           log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
         }
         testEmitter.emit('end');
@@ -54,7 +57,7 @@ exports.Set = (function () {
       });
     });
 
-    if (set.debug_mode) {
+    if (sort.debug_mode) {
       server.set_debug_mode(true);
     }
 
@@ -62,6 +65,68 @@ exports.Set = (function () {
   }
 
   //private methods
+
+  function create_random_dataset(num, cmd, redisKey, callback) {
+    var tosort = new Array();
+    var i = 0;
+    client.del(redisKey, function (err, result) {
+      if (err) {
+        callback(err, null);
+      }
+      g.asyncFor(0, num, function (loop) {
+        var i = loop.iteration();
+        var rn = Math.floor((Math.random() * 10000000000) + 1);
+        if (cmd === 'lpush') {
+          client.lpush(redisKey, i, function (err, res) {
+            if (err) {
+              callback(err, null);
+            }
+            client.set('weight_' + i, rn, function (err, res) {
+              if (err) {
+                callback(err, null);
+              }
+              client.hset('wobj_' + i, 'weight', rn, function (err, res) {
+                if (err) {
+                  callback(err, null);
+                }
+                tosort.push(rn);
+                loop.next();
+              });
+            });
+
+          });
+        } else if (cmd === 'sadd') {
+          client.sadd(redisKey, i, function (err, res) {
+            if (err) {
+              callback(err, null);
+            }
+            client.set('weight_' + i, rn, function (err, res) {
+              if (err) {
+                callback(err, null);
+              }
+              client.hset('wobj_' + i, 'weight', rn, function (err, res) {
+                if (err) {
+                  callback(err, null);
+                }
+                tosort.push(rn);
+                loop.next();
+              });
+            });
+          });
+        }
+      }, function () {
+        var output = new Array();
+        var new_tosort = tosort.slice(0);
+        sorted_array = tosort.sort(ut.sortFunction);
+        for (var i = 0; i < num; i++) {
+          var index = new_tosort.indexOf(sorted_array[i]);
+          output.push(index);
+        }
+        callback(null, output);
+      })
+    });
+  };
+
   function assert_encoding(enc, key, callback) {
     client.object('encoding', key, function (error, res) {
       if (error) {
@@ -86,1853 +151,1234 @@ exports.Set = (function () {
           callback(null, true);
         }
       } catch (e) {
-        console.log(e);
         callback(e, null);
       }
     });
-  };
-  function create_set(key, entries, callback) {
-    client.del(key, function (err, res) {
+  }
+
+  tester.Sort1 = function (errorCallback) {
+    var test_case = "Ziplist: SORT BY key";
+    create_random_dataset(16, 'lpush', 'tosort', function (err, res) {
       if (err) {
         errorCallback(err);
       }
-      g.asyncFor(0, entries.length, function (loop) {
-        client.sadd(key, entries[loop.iteration()], function (err, res) {
-          if (err) {
-            callback(err, null);
-          }
-          loop.next();
-        });
-      }, function () {
-        callback(null, true)
-      });
-    });
-  };
-  function sadd_loop(type, callback) {
-    async.series({
-      a: function (cb) {
-        g.asyncFor(1, 5 + 1, function (loop) {
-          var v = "set" + loop.iteration();
-          client.del(v, function (err, res) {
-            if (err) {
-              callback(err, null);
-            }
-            loop.next();
-          });
-        }, function () {
-          cb(null);
-        });
-      },
-      b: function (cb) {
-        g.asyncFor(0, 200, function (loop) {
-          var i = loop.iteration();
-          client.sadd('set1', i, function (err, res) {
-            if (err) {
-              callback(err, null);
-            }
-            client.sadd('set2', i + 195, function (err, res) {
-              if (err) {
-                callback(err, null);
-              }
-              loop.next();
-            });
-          });
-        }, function () {
-          cb(null);
-        });
-      },
-      c: function (cb) {
-        var n = [199, 195, 1000, 2000];
-        g.asyncFor(0, n.length, function (loop) {
-          var i = loop.iteration();
-          client.sadd('set3', n[i], function (err, res) {
-            if (err) {
-              callback(err, null);
-            }
-            loop.next();
-          });
-        }, function () {
-          cb(null);
-        });
-      },
-      d: function (cb) {
-        g.asyncFor(5, 200, function (loop) {
-          client.sadd('set4', loop.iteration(), function (err, res) {
-            if (err) {
-              callback(err, null);
-            }
-            loop.next();
-          });
-        }, function () {
-          cb(null);
-        });
-      },
-      e: function (cb) {
-        client.sadd('set5', 0, function (err, res) {
-          if (err) {
-            callback(err, null);
-          }
-          cb(null);
-        });
-      },
-      f: function (cb) {
-        //To make sure the sets are encoded as the type we are testing --
-        //also when the VM is enabled and the values may be swapped in and
-        //out while the tests are running -- an extra element is added to
-        //every set that determines its encoding.
-        if (type === 'hashtable')
-          large = "foo";
-        else
-          large = 200;
-        g.asyncFor(1, 5 + 1, function (loop) {
-          var v = "set" + loop.iteration();
-          client.sadd(v, large, function (err, res) {
-            if (err) {
-              callback(err, null);
-            }
-            loop.next();
-          });
-        }, function () {
-          cb(null);
-        });
-      },
-    }, function (err, rep) {
-      callback(null, true);
-    });
-  };
-
-
-  tester.set1 = function (errorCallback) {
-    var test_case = "SADD, SCARD, SISMEMBER, SMEMBERS basics - regular set";
-    var result_array = new Array();
-    create_set('myset', ['foo'], function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      assert_encoding('hashtable', 'myset', function (err, res) {
+      local_result = res;
+      assert_encoding('ziplist', 'tosort', function (err, res) {
         if (err) {
           errorCallback(err);
         }
-        client.sadd('myset', 'bar', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          result_array.push(res);
-          client.sadd('myset', 'bar', function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            result_array.push(res);
-            client.scard('myset', function (err, res) {
-              if (err) {
-                errorCallback(err);
-              }
-              result_array.push(res);
-              client.sismember('myset', 'foo', function (err, res) {
-                if (err) {
-                  errorCallback(err);
-                }
-                result_array.push(res);
-                client.sismember('myset', 'bar', function (err, res) {
-                  if (err) {
-                    errorCallback(err);
-                  }
-                  result_array.push(res);
-                  client.sismember('myset', 'bla', function (err, res) {
-                    if (err) {
-                      errorCallback(err);
-                    }
-                    result_array.push(res);
-                    client.smembers('myset', function (err, res) {
-                      if (err) {
-                        errorCallback(err);
-                      }
-                      result_array.push(res.sort());
-                      try {
-                        if (!assert.deepEqual(result_array, [1, 0, 2, 1, 1, 0, ['bar', 'foo']], test_case)) {
-                          ut.pass(test_case);
-                          testEmitter.emit('next');
-                        }
-                      } catch (e) {
-                        ut.fail(e, true);
-                        testEmitter.emit('next');
-                      }
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  };
-  tester.set2 = function (errorCallback) {
-    var test_case = "SADD, SCARD, SISMEMBER, SMEMBERS basics - intset";
-    var result_array = new Array();
-    create_set('myset', [17], function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      assert_encoding('intset', 'myset', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        client.sadd('myset', 16, function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          result_array.push(res);
-          client.sadd('myset', 16, function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            result_array.push(res);
-            client.scard('myset', function (err, res) {
-              if (err) {
-                errorCallback(err);
-              }
-              result_array.push(res);
-              client.sismember('myset', 16, function (err, res) {
-                if (err) {
-                  errorCallback(err);
-                }
-                result_array.push(res);
-                client.sismember('myset', 17, function (err, res) {
-                  if (err) {
-                    errorCallback(err);
-                  }
-                  result_array.push(res);
-                  client.sismember('myset', 18, function (err, res) {
-                    if (err) {
-                      errorCallback(err);
-                    }
-                    result_array.push(res);
-                    client.smembers('myset', function (err, res) {
-                      if (err) {
-                        errorCallback(err);
-                      }
-                      result_array.push(res.sort());
-                      try {
-                        if (!assert.deepEqual(result_array, [1, 0, 2, 1, 1, 0, ['16', '17']], test_case)) {
-                          ut.pass(test_case);
-                          testEmitter.emit('next');
-                        }
-                      } catch (e) {
-                        ut.fail(e, true);
-                        testEmitter.emit('next');
-                      }
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  };
-  tester.set3 = function (errorCallback) {
-    var test_case = "SADD against non set";
-    client.lpush('mylist', 'foo', function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      client.sadd('mylist', 'bar', function (err, res) {
-        try {
-          if (!assert.ok(ut.match("kind", err), test_case)) {
-            ut.pass(test_case);
-            testEmitter.emit('next');
-          }
-        } catch (e) {
-          ut.fail(e, true);
-          testEmitter.emit('next');
-        }
-
-      });
-    });
-  };
-  tester.set4 = function (errorCallback) {
-    var test_case = "SADD a non-integer against an intset";
-    var entry = new Array(1, 2, 3);
-    create_set('myset', entry, function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      assert_encoding('intset', 'myset', function (err, res) {
-        client.sadd('myset', 'a', function (err, result) {
-          if (err) {
-            errorCallback(err);
-          }
-          assert_encoding('hashtable', 'myset', function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            try {
-              if ((!assert.equal(result, 1, test_case)) && (!assert.ok(res, test_case))) {
-                ut.pass(test_case);
-                testEmitter.emit('next');
-              }
-            } catch (e) {
-              ut.fail(e, true);
-              testEmitter.emit('next');
-            }
-          });
-        });
-      });
-    });
-  };
-  tester.set5 = function (errorCallback) {
-    var test_case = "SADD an integer larger than 64 bits";
-    var entry = new Array();
-    entry[0] = 213244124402402314402033402;
-    create_set('myset', entry, function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      assert_encoding('hashtable', 'myset', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        client.sismember('myset', entry[0], function (err, res) {
+        client.sort('tosort', 'by', 'weight_*', function (err, sorted) {
           if (err) {
             errorCallback(err);
           }
           try {
-            if (!assert.equal(res, 1, test_case)) {
+            if (!assert.deepEqual(sorted, local_result, test_case)) {
+              // def - util.pass(<name>,[debug_mode=false],[logging=true])
               ut.pass(test_case);
-              testEmitter.emit('next');
             }
           } catch (e) {
-            ut.fail(e, true);
-            testEmitter.emit('next');
+            ut.fail(e);
           }
-        });
-      });
-    });
-  };
-  tester.set6 = function (errorCallback) {
-    var test_case = "SADD overflows the maximum allowed integers in an intset";
-    client.del('myset', function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      g.asyncFor(0, 512, function (loop) {
-        var i = loop.iteration();
-        client.sadd('myset', i, function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          loop.next();
-        });
-      }, function () {
-        assert_encoding('intset', 'myset', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          client.sadd('myset', 512, function (err, result) {
-            if (err) {
-              errorCallback(err);
-            }
-            assert_encoding('hashtable', 'myset', function (err, res) {
-              if (err) {
-                errorCallback(err);
-              }
-              try {
-                if ((!assert.equal(result, 1, test_case)) && (!assert.ok(res, test_case))) {
-                  ut.pass(test_case);
-                  testEmitter.emit('next');
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                testEmitter.emit('next');
-              }
-            });
-          });
-        });
-      });
-    });
-  };
-  tester.set7 = function (errorCallback) {
-    var test_case = "Variadic SADD";
-    var result_array = new Array();
-    client.del('myset', function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      client.sadd('myset', 'a', 'b', 'c', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        result_array.push(res);
-        client.sadd('myset', 'A', 'a', 'b', 'c', 'B', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          result_array.push(res);
-          client.smembers('myset', function (err, res) {
-            try {
-              if ((!assert.deepEqual(res.sort(), ['A', 'B', 'a', 'b', 'c'].sort(), test_case)) && (!assert.deepEqual(result_array, [3, 2], test_case))) {
-                ut.pass(test_case);
-                testEmitter.emit('next');
-              }
-            } catch (e) {
-              ut.fail(e, true);
-              testEmitter.emit('next');
-            }
-          });
-        });
-      });
-    });
-  };
-  tester.set8 = function (errorCallback) {
-    var test_case = "Set encoding after DEBUG RELOAD";
-    client.del('myintset', 'myhashset', 'mylargeintset', function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      async.series({
-        one: function (cb) {
-          g.asyncFor(0, 100, function (loop) {
-            var i = loop.iteration();
-            client.sadd('myintset', i, function (err, res) {
-              if (err) {
-                errorCallback(err);
-              }
-              loop.next();
-            });
-          }, function () {
-            cb(null);
-          });
-        },
-        two: function (cb) {
-          g.asyncFor(0, 1280, function (loop) {
-            var i = loop.iteration();
-            client.sadd('mylargeintset', i, function (err, res) {
-              if (err) {
-                errorCallback(err);
-              }
-              loop.next();
-            });
-          }, function () {
-            cb(null);
-          });
-        },
-        three: function (cb) {
-          g.asyncFor(0, 256, function (loop) {
-            var i = loop.iteration();
-            var v = "";
-            if (i <= 9)
-              v = "i00" + i;
-            else if (i <= 99)
-              v = "i0" + i;
-            else
-              v = "i" + i;
-            client.sadd('myhashset', v, function (err, res) {
-              if (err) {
-                errorCallback(err);
-              }
-              loop.next();
-            });
-          }, function () {
-            cb(null);
-          });
-        },
-      }, function (err, rep) {
-        assert_encoding('intset', 'myintset', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          assert_encoding('hashtable', 'mylargeintset', function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            assert_encoding('hashtable', 'myhashset', function (err, res) {
-              if (err) {
-                errorCallback(err)
-              }
-              client.debug('reload', function (err, res) {
-                if (err) {
-                  errorCallback(err);
-                }
-                assert_encoding('intset', 'myintset', function (err, res) {
-                  if (err) {
-                    errorCallback(err);
-                  }
-                  assert_encoding('hashtable', 'mylargeintset', function (err, res) {
-                    if (err) {
-                      errorCallback(err);
-                    }
-                    assert_encoding('hashtable', 'myhashset', function (err, res) {
-                      if (err) {
-                        errorCallback(err);
-                      }
-                      try {
-                        if (!assert.equal(res, true, test_case)) {
-                          ut.pass(test_case);
-                          testEmitter.emit('next');
-                        }
-                      } catch (e) {
-                        ut.fail(e, true);
-                        testEmitter.emit('next');
-                      }
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  };
-  tester.set9 = function (errorCallback) {
-    var test_case = "SREM basics - regular set";
-    var entry = new Array('foo', 'bar', 'ciao');
-    var result_array = new Array();
-    create_set('myset', entry, function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      assert_encoding('hashtable', 'myset', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        client.srem('myset', 'qux', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          result_array.push(res);
-          client.srem('myset', 'foo', function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            result_array.push(res);
-            client.smembers('myset', function (err, res) {
-              try {
-                if ((!assert.equal(res.sort(), 'bar,ciao', test_case)) && (!assert.deepEqual(result_array, [0, 1], test_case))) {
-                  ut.pass(test_case);
-                  testEmitter.emit('next');
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                testEmitter.emit('next');
-              }
-            });
-          });
-        });
-      });
-    });
-  };
-  tester.set10 = function (errorCallback) {
-    var test_case = "SREM basics - intset";
-    var entry = new Array(3, 4, 5);
-    var result_array = new Array();
-    create_set('myset', entry, function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      assert_encoding('intset', 'myset', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        client.srem('myset', 6, function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          result_array.push(res);
-          client.srem('myset', 4, function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            result_array.push(res);
-            client.smembers('myset', function (err, res) {
-              try {
-                if ((!assert.equal(res.sort(), '3,5', test_case)) && (!assert.deepEqual(result_array, [0, 1], test_case))) {
-                  ut.pass(test_case);
-                  testEmitter.emit('next');
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                testEmitter.emit('next');
-              }
-            });
-          });
-        });
-      });
-    });
-  };
-  tester.set11 = function (errorCallback) {
-    var test_case = "SREM with multiple arguments";
-    var result_array = new Array();
-    client.del('myset', function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      client.sadd('myset', 'a', 'b', 'c', 'd', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        client.srem('myset', 'k', 'k', 'k', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          result_array.push(res);
-          client.srem('myset', 'b', 'd', 'x', 'y', function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            result_array.push(res);
-            client.smembers('myset', function (err, res) {
-              try {
-                if ((!assert.equal(res.sort(), 'a,c', test_case)) && (!assert.deepEqual(result_array, [0, 2], test_case))) {
-                  ut.pass(test_case);
-                  testEmitter.emit('next');
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                testEmitter.emit('next');
-              }
-            });
-          });
-        });
-      });
-    });
-  };
-
-  tester.set12 = function (errorCallback) {
-    var test_case = "SREM variadic version with more args needed to destroy the key";
-    client.del('myset', function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      client.sadd('myset', 1, 2, 3, function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        client.srem('myset', 1, 2, 3, 4, 5, 6, 7, 8, function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          try {
-            if (!assert.equal(res, 3, test_case)) {
-              ut.pass(test_case);
-              testEmitter.emit('next');
-            }
-          } catch (e) {
-            ut.fail(e, true);
-            testEmitter.emit('next');
-          }
-        });
-      });
-    });
-  };
-  tester.set13_1 = function (errorCallback) {
-    var t = new Array('hashtable', 'intset');
-    var errors = new Array();
-    var large = {};
-    large[t[0]] = 'foo';
-    large[t[1]] = 200;
-    g.asyncFor(0, t.length, function (mloop) {
-      var type = t[mloop.iteration()];
-      sadd_loop(type, function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        async.series({
-          one: function (cb) {
-            var test_case = "Generated sets must be encoded as " + type;
-            var error = "";
-            g.asyncFor(1, 5 + 1, function (loop) {
-              var i = loop.iteration();
-              var v = "set" + i;
-              assert_encoding(type, v, function (err, res) {
-                if (err) {
-                  error = err;
-                  loop.break();
-                }
-                loop.next();
-              });
-            }, function () {
-              try {
-                if (!assert.equal(error, "", test_case + error)) {
-                  ut.pass(test_case);
-                  cb(null, null);
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                cb(e, null);
-              }
-            });
-          },
-          two: function (cb) {
-            var test_case = "SINTER with two sets - " + type;
-            client.sinter('set1', 'set2', function (err, res) {
-              if (err) {
-                cb(err, null);
-              }
-              try {
-                if (!assert.deepEqual(res.sort(), ['195', '196', '197', '198', '199', large[type]], test_case)) {
-                  ut.pass(test_case);
-                  cb(null, null);
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                cb(e, null);
-              }
-            });
-          },
-          three: function (cb) {
-            var test_case = "SINTERSTORE with two sets - " + type;
-            client.sinterstore('setres', 'set1', 'set2', function (err, res) {
-              if (err) {
-                cb(err, null);
-              }
-              assert_encoding(type, 'setres', function (err, res) {
-                if (err) {
-                  cb(err, null);
-                }
-                client.smembers('setres', function (err, res) {
-                  if (err) {
-                    cb(err, null);
-                  }
-                  try {
-                    if (!assert.deepEqual(res.sort(), ['195', '196', '197', '198', '199', large[type]], test_case)) {
-                      ut.pass(test_case);
-                      cb(null, null);
-                    }
-                  } catch (e) {
-                    ut.fail(e, true);
-                    cb(e, null);
-                  }
-                });
-              });
-            });
-          },
-          four: function (cb) {
-            var test_case = "SINTERSTORE with two sets, after a DEBUG RELOAD  - " + type;
-            client.debug('reload', function (err, res) {
-              if (err) {
-                cb(err, null);
-              }
-              client.sinterstore('setres', 'set1', 'set2', function (err, res) {
-                if (err) {
-                  cb(err, null);
-                }
-                assert_encoding(type, 'setres', function (err, res) {
-                  if (err) {
-                    cb(err, null);
-                  }
-                  client.smembers('setres', function (err, res) {
-                    if (err) {
-                      cb(err, null);
-                    }
-                    try {
-                      if (!assert.deepEqual(res.sort(), ['195', '196', '197', '198', '199', large[type]], test_case)) {
-                        ut.pass(test_case);
-                        cb(null, null);
-                      }
-                    } catch (e) {
-                      ut.fail(e, true);
-                      cb(e, null);
-                    }
-                  });
-                });
-              });
-            });
-          },
-          five: function (cb) {
-            var test_case = "SUNION with two sets - " + type;
-            client.smembers('set1', function (err, s1) {
-              if (err) {
-                cb(err, null);
-              }
-              client.smembers('set2', function (err, s2) {
-                if (err) {
-                  cb(err, null);
-                }
-                var expected = ut.removeDuplicates(s1.concat(s2)).sort();
-                client.sunion('set1', 'set2', function (err, res) {
-                  if (err) {
-                    cb(err, null);
-                  }
-                  try {
-                    if (!assert.deepEqual(res.sort(), expected, test_case)) {
-                      ut.pass(test_case);
-                      cb(null, null);
-                    }
-                  } catch (e) {
-                    ut.fail(e, true);
-                    cb(e, null);
-                  }
-                });
-              });
-            });
-          },
-          six: function (cb) {
-            var test_case = "SUNIONSTORE with two sets  - " + type;
-            client.sunionstore('setres', 'set1', 'set2', function (err, res) {
-              if (err) {
-                cb(err, null);
-              }
-              assert_encoding(type, 'setres', function (err, res) {
-                if (err) {
-                  cb(err, null);
-                }
-                client.smembers('set1', function (err, s1) {
-                  if (err) {
-                    cb(err, null);
-                  }
-                  client.smembers('set2', function (err, s2) {
-                    if (err) {
-                      cb(err, null);
-                    }
-                    var expected = ut.removeDuplicates(s1.concat(s2)).sort();
-                    client.smembers('setres', function (err, res) {
-                      if (err) {
-                        cb(err, null);
-                      }
-                      try {
-                        if (!assert.deepEqual(res.sort(), expected, test_case)) {
-                          ut.pass(test_case);
-                          cb(null, null);
-                        }
-                      } catch (e) {
-                        ut.fail(e, true);
-                        cb(e, null);
-                      }
-                    });
-                  });
-                });
-              });
-            });
-          },
-          seven: function (cb) {
-            var test_case = "SINTER against three sets - " + type;
-            client.sinter('set1', 'set2', 'set3', function (err, res) {
-              if (err) {
-                cb(err, null);
-              }
-              try {
-                if (!assert.deepEqual(res.sort(), ['195', '199', large[type]], test_case)) {
-                  ut.pass(test_case);
-                  cb(null, null);
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                cb(e, null);
-              }
-            });
-          },
-          eight: function (cb) {
-            var test_case = "SINTERSTORE with three sets - " + type;
-            client.sinterstore('setres', 'set1', 'set2', 'set3', function (err, res) {
-              if (err) {
-                cb(err, null);
-              }
-              client.smembers('setres', function (err, res) {
-                if (err) {
-                  cb(err, null);
-                }
-                try {
-                  if (!assert.deepEqual(res.sort(), ['195', '199', large[type]], test_case)) {
-                    ut.pass(test_case);
-                    cb(null, null);
-                  }
-                } catch (e) {
-                  ut.fail(e, true);
-                  cb(e, null);
-                }
-              });
-            });
-          },
-          nine: function (cb) {
-            var test_case = "SUNION with non existing keys - " + type;
-            client.smembers('set1', function (err, s1) {
-              if (err) {
-                cb(err, null);
-              }
-              client.smembers('set2', function (err, s2) {
-                if (err) {
-                  cb(err, null);
-                }
-                var expected = ut.removeDuplicates(s1.concat(s2)).sort();
-                client.sunion('nokey1', 'set1', 'set2', 'nokey2', function (err, res) {
-                  if (err) {
-                    cb(err, null);
-                  }
-                  try {
-                    if (!assert.deepEqual(res.sort(), expected, test_case)) {
-                      ut.pass(test_case);
-                      cb(null, null);
-                    }
-                  } catch (e) {
-                    ut.fail(e, true);
-                    cb(e, null);
-                  }
-                });
-              });
-            });
-          },
-          ten: function (cb) {
-            var test_case = "SDIFF with two sets - " + type;
-            client.sdiff('set1', 'set4', function (err, res) {
-              if (err) {
-                cb(err, null);
-              }
-              try {
-                if (!assert.deepEqual(res.sort(), [0, 1, 2, 3, 4], test_case)) {
-                  ut.pass(test_case);
-                  cb(null, null);
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                cb(e, null);
-              }
-            });
-          },
-          eleven: function (cb) {
-            var test_case = "SDIFF with three sets - " + type;
-            client.sdiff('set1', 'set4', 'set5', function (err, res) {
-              if (err) {
-                cb(err, null);
-              }
-              try {
-                if (!assert.deepEqual(res.sort(), [1, 2, 3, 4], test_case)) {
-                  ut.pass(test_case);
-                  cb(null, null);
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                cb(e, null);
-              }
-            });
-
-          },
-          twelve: function (cb) {
-            var test_case = "SDIFFSTORE with three sets - " + type;
-            client.sdiffstore('setres', 'set1', 'set4', 'set5', function (err, res) {
-              if (err) {
-                cb(err, null);
-              }
-              //The type is determined by type of the first key to diff against.
-              assert_encoding(type, 'setres', function (err, res) {
-                if (err) {
-                  cb(err, null);
-                }
-                client.smembers('setres', function (err, res) {
-                  if (err) {
-                    cb(err, null);
-                  }
-                  try {
-                    if (!assert.deepEqual(res.sort(), [1, 2, 3, 4], test_case)) {
-                      ut.pass(test_case);
-                      cb(null, null);
-                    }
-                  } catch (e) {
-                    ut.fail(e, true);
-                    cb(e, null);
-                  }
-                });
-              });
-            });
-          },
-        }, function (err, rep) {
-          if (err) {
-            // can only push the error here, we need another iteration of loop.
-            errors.push(err);
-          }
-          mloop.next();
-        });
-      });
-    }, function () {
-      if (errors.length != 0) {
-        errorCallback(errors.toString());
-      }
-      testEmitter.emit('next');
-
-    });
-  };
-
-  tester.set15 = function (errorCallback) {
-    var test_case = "SINTER against non-set should throw error";
-    client.set('key1', 'x', function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      client.sinter('key1', 'noset', function (err, res) {
-
-        try {
-          if (!assert.ok(ut.match("wrong kind", err), test_case)) {
-            ut.pass(test_case);
-            testEmitter.emit('next');
-          }
-        } catch (e) {
-          ut.fail(e, true);
           testEmitter.emit('next');
-        }
-      });
-    });
-  }
-  tester.set16 = function (errorCallback) {
-    var test_case = "SUNION against non-set should throw error";
-    client.set('key1', 'x', function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      client.sunion('key1', 'noset', function (err, res) {
-        try {
-          if (!assert.ok(ut.match("wrong kind", err), test_case)) {
-            ut.pass(test_case);
-            testEmitter.emit('next');
-          }
-        } catch (e) {
-          ut.fail(e, true);
-          testEmitter.emit('next');
-        }
-      });
-    });
-  };
-  tester.set17 = function (errorCallback) {
-    var test_case = "SINTERSTORE against non existing keys should delete dstkey";
-    var result = new Array();
-    client.set('setres', 'xxx', function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      client.sinterstore('setres', 'foo111', 'bar222', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        result.push(res);
-        client.exists('setres', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          result.push(res);
-          try {
-            if (!assert.deepEqual(result, [0, 0], test_case)) {
-              ut.pass(test_case);
-              testEmitter.emit('next');
-            }
-          } catch (e) {
-            ut.fail(e, true);
-            testEmitter.emit('next');
-          }
-        });
-      });
-    });
-  }
-  tester.set18 = function (errorCallback) {
-    var test_case = "SUNIONSTORE against non existing keys should delete dstkey";
-    var result = new Array();
-    client.set('setres', 'xxx', function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      client.sunionstore('setres', 'foo111', 'bar222', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        result.push(res);
-        client.exists('setres', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          result.push(res);
-          try {
-            if (!assert.deepEqual(result, [0, 0], test_case)) {
-              ut.pass(test_case);
-              testEmitter.emit('next');
-            }
-          } catch (e) {
-            ut.fail(e, true);
-            testEmitter.emit('next');
-          }
         });
       });
     });
   };
-  tester.set19 = function (errorCallback) {
-    var test_case = "SPOP basics - Hashtable";
-    var Hcontent = ['a', 'b', 'c']
-    var result = new Array();
-    create_set('myset', Hcontent, function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      assert_encoding('hashtable', 'myset', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        client.spop('myset', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          result.push(res);
-          client.spop('myset', function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            result.push(res);
-            client.spop('myset', function (err, res) {
-              if (err) {
-                errorCallback(err);
-              }
-              result.push(res);
-              var sortedres = result.sort();
-              client.scard('myset', function (err, res) {
-                if (err) {
-                  errorCallback(err);
-                }
-                try {
-                  if ((!assert.equal(res, 0, test_case)) && (!assert.deepEqual(sortedres, Hcontent, test_case))) {
-                    ut.pass(test_case);
-                    testEmitter.emit('next');
-                  }
-                } catch (e) {
-                  ut.fail(e, true);
-                  testEmitter.emit('next');
-                }
-              });
-            });
-          });
-        });
-      });
-    });
 
-  };
-  tester.set19_1 = function (errorCallback) {
-    var test_case = "SRANDMEMBER - Hashtable";
-    var Hcontent = ['a', 'b', 'c']
-    var myset = {};
-    create_set('myset', Hcontent, function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      g.asyncFor(0, 100, function (loop) {
-        client.srandmember('myset', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          myset[res] = 1;
-          loop.next();
-        });
-      }, function () {
-        var c = 0, myset_arr = [];
-        for (k in myset) {
-          myset_arr[c++] = k
-        }
-        try {
-          if (!assert.deepEqual(myset_arr.sort(), Hcontent, test_case)) {
-            ut.pass(test_case);
-            testEmitter.emit('next');
-          }
-        } catch (e) {
-          ut.fail(e, true);
-          testEmitter.emit('next');
-        }
-      });
-    });
-
-  };
-  tester.set20 = function (errorCallback) {
-    var test_case = "SPOP basics - Intset";
-    var Icontent = [1, 2, 3]
-    var result = new Array();
-    create_set('myset', Icontent, function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      assert_encoding('intset', 'myset', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        client.spop('myset', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          result.push(res);
-          client.spop('myset', function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            result.push(res);
-            client.spop('myset', function (err, res) {
-              if (err) {
-                errorCallback(err);
-              }
-              result.push(res);
-              var sortedres = result.sort();
-              client.scard('myset', function (err, res) {
-                if (err) {
-                  errorCallback(err);
-                }
-                try {
-                  if ((!assert.equal(res, 0, test_case)) && (!assert.deepEqual(sortedres, Icontent, test_case))) {
-                    ut.pass(test_case);
-                    testEmitter.emit('next');
-                  }
-                } catch (e) {
-                  ut.fail(e, true);
-                  testEmitter.emit('next');
-                }
-              });
-            });
-          });
-        });
-      });
-    });
-
-  }
-  tester.set20_1 = function (errorCallback) {
-    var test_case = "SRANDMEMBER - Intset";
-    var Icontent = [1, 2, 3]
-    var myset = {};
-    create_set('myset', Icontent, function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      g.asyncFor(0, 100, function (loop) {
-        client.srandmember('myset', function (err, res) {
-          if (err) {
-            errorCallback(err);
-          }
-          myset[res] = 1;
-          loop.next();
-        });
-      }, function () {
-        var c = 0, myset_arr = [];
-        for (k in myset) {
-          myset_arr[c++] = k
-        }
-        try {
-          if (!assert.deepEqual(myset_arr.sort(), Icontent, test_case)) {
-            ut.pass(test_case);
-            testEmitter.emit('next');
-          }
-        } catch (e) {
-          ut.fail(e, true);
-          testEmitter.emit('next');
-        }
-      });
-    });
-
-  };
-  function setup_move(callback) {
-    client.del('myset3', 'myset4', function (err, res) {
-      if (err) {
-        callback(err, null);
-      }
-      create_set('myset1', [1, 'a', 'b'], function (err, res) {
-        if (err) {
-          callback(err, null);
-        }
-        create_set('myset2', [2, 3, 4], function (err, res) {
-          if (err) {
-            callback(err, null);
-          }
-          assert_encoding('hashtable', 'myset1', function (err, res) {
-            if (err) {
-              callback(err, null);
-            }
-            assert_encoding('intset', 'myset2', function (err, res) {
-              if (err) {
-                callback(err, null);
-              }
-              callback(null, true)
-            });
-          });
-        });
-      });
-    });
-  }
-  tester.set21 = function (errorCallback) {
-    //move a non-integer element to an intset should convert encoding
-    var test_case = "SMOVE basics - from regular set to intset";
-    var result = new Array();
-    setup_move(function (err, res) {
-      if (err) {
-        errorCallback(err)
-      }
-      client.smove('myset1', 'myset2', 'a', function (err, res) {
-        if (err) {
-          errorCallback(err)
-        }
-        result.push(res);
-        client.smembers('myset1', function (err, res) {
-          if (err) {
-            errorCallback(err)
-          }
-          result.push(res.sort());
-          client.smembers('myset2', function (err, res) {
-            if (err) {
-              errorCallback(err)
-            }
-            result.push(res.sort());
-            assert_encoding('hashtable', 'myset2', function (err, res) {
-              if (err) {
-                errorCallback(err)
-              }
-              //	move an integer element should not convert the encoding
-              setup_move(function (err, res) {
-                if (err) {
-                  errorCallback(err)
-                }
-                client.smove('myset1', 'myset2', 1, function (err, res) {
-                  if (err) {
-                    errorCallback(err)
-                  }
-                  result.push(res);
-                  client.smembers('myset1', function (err, res) {
-                    if (err) {
-                      errorCallback(err)
-                    }
-                    result.push(res.sort());
-                    client.smembers('myset2', function (err, res) {
-                      if (err) {
-                        errorCallback(err)
-                      }
-                      result.push(res.sort());
-                      assert_encoding('intset', 'myset2', function (err, res) {
-                        if (err) {
-                          errorCallback(err)
-                        }
-                        try {
-                          if (!assert.deepEqual(result, [1, [1, 'b'], [2, 3, 4, 'a'], 1, ['a', 'b'], [1, 2, 3, 4]], test_case)) {
-                            ut.pass(test_case);
-                            testEmitter.emit('next');
-                          }
-                        } catch (e) {
-                          ut.fail(e, true);
-                          testEmitter.emit('next');
-                        }
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  };
-  tester.set22 = function (errorCallback) {
-    var test_case = "SMOVE basics - from intset to regular set";
-    var result = new Array();
-    setup_move(function (err, res) {
-      if (err) {
-        errorCallback(err)
-      }
-      client.smove('myset2', 'myset1', 2, function (err, res) {
-        if (err || res != 1) {
-          errorCallback(err)
-        }
-        result.push(res);
-        client.smembers('myset1', function (err, res) {
-          if (err) {
-            errorCallback(err)
-          }
-          result.push(res.sort());
-          client.smembers('myset2', function (err, res) {
-            if (err) {
-              errorCallback(err)
-            }
-            result.push(res.sort());
-            try {
-              if (!assert.deepEqual(result, [1, [1, 2, 'a', 'b'], [3, 4]], test_case)) {
-                ut.pass(test_case);
-                testEmitter.emit('next');
-              }
-            } catch (e) {
-              ut.fail(e, true);
-              testEmitter.emit('next');
-            }
-          });
-        });
-      });
-    });
-  };
-  tester.set23 = function (errorCallback) {
-    var test_case = "SMOVE non existing key";
-    var result = new Array();
-    setup_move(function (err, res) {
-      if (err) {
-        errorCallback(err)
-      }
-      client.smove('myset1', 'myset2', 'foo', function (err, res) {
-        if (err) {
-          errorCallback(err)
-        }
-        result.push(res);
-        client.smembers('myset1', function (err, res) {
-          if (err) {
-            errorCallback(err)
-          }
-          result.push(res.sort());
-          client.smembers('myset2', function (err, res) {
-            if (err) {
-              errorCallback(err)
-            }
-            result.push(res.sort());
-            try {
-              if (!assert.deepEqual(result, [0, [1, 'a', 'b'], [2, 3, 4]], test_case)) {
-                ut.pass(test_case);
-                testEmitter.emit('next');
-              }
-            } catch (e) {
-              ut.fail(e, true);
-              testEmitter.emit('next');
-            }
-          });
-        });
-      });
-    });
-  };
-  tester.set24 = function (errorCallback) {
-    var test_case = "SMOVE non existing src set";
-    var result = new Array();
-    setup_move(function (err, res) {
-      if (err) {
-        errorCallback(err)
-      }
-      client.smove('noset', 'myset2', 'foo', function (err, res) {
-        if (err) {
-          errorCallback(err)
-        }
-        result.push(res);
-        client.smembers('myset2', function (err, res) {
-          result.push(res.sort());
-          try {
-            if (!assert.deepEqual(result, [0, [2, 3, 4]], test_case)) {
-              ut.pass(test_case);
-              testEmitter.emit('next');
-            }
-          } catch (e) {
-            ut.fail(e, true);
-            testEmitter.emit('next');
-          }
-        });
-      });
-    });
-  };
-  tester.set25 = function (errorCallback) {
-    var test_case = "SMOVE from regular set to non existing destination set";
-    var result = new Array();
-    setup_move(function (err, res) {
-      if (err) {
-        errorCallback(err)
-      }
-      client.smove('myset1', 'myset3', 'a', function (err, res) {
-        if (err) {
-          errorCallback(err)
-        }
-        result.push(res);
-        client.smembers('myset1', function (err, res) {
-          if (err) {
-            errorCallback(err)
-          }
-          result.push(res.sort());
-          client.smembers('myset3', function (err, res) {
-            if (err) {
-              errorCallback(err)
-            }
-            result.push(res.sort());
-            assert_encoding('hashtable', 'myset3', function (err, res) {
-              if (err) {
-                errorCallback(err)
-              }
-              try {
-                if (!assert.deepEqual(result, [1, [1, 'b'], ['a']], test_case)) {
-                  ut.pass(test_case);
-                  testEmitter.emit('next');
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                testEmitter.emit('next');
-              }
-            });
-          });
-        });
-      });
-    });
-  }
-  tester.set26 = function (errorCallback) {
-    var test_case = "SMOVE from intset to non existing destination set";
-    var result = new Array();
-    setup_move(function (err, res) {
-      if (err) {
-        errorCallback(err)
-      }
-      client.smove('myset2', 'myset3', 2, function (err, res) {
-        if (err || res != 1) {
-          errorCallback(err)
-        }
-        result.push(res);
-        client.smembers('myset2', function (err, res) {
-          if (err) {
-            errorCallback(err)
-          }
-          result.push(res.sort());
-          client.smembers('myset3', function (err, res) {
-            if (err) {
-              errorCallback(err)
-            }
-            result.push(res.sort());
-            assert_encoding('intset', 'myset3', function (err, res) {
-              if (err) {
-                errorCallback(err)
-              }
-              try {
-                if (!assert.deepEqual(result, [1, [3, 4], [2]], test_case)) {
-                  ut.pass(test_case);
-                  testEmitter.emit('next');
-                }
-              } catch (e) {
-                ut.fail(e, true);
-                testEmitter.emit('next');
-              }
-            });
-          });
-        });
-      });
-    });
-  };
-  tester.set27 = function (errorCallback) {
-    var test_case = "SMOVE wrong src key type";
-    client.set('x', 10, function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      client.smove('x', 'myset2', 'foo', function (err, res) {
-        try {
-          if (!assert.ok(ut.match("wrong kind", err), test_case)) {
-            ut.pass(test_case);
-            testEmitter.emit('next');
-          }
-        } catch (e) {
-          ut.fail(e, true);
-          testEmitter.emit('next');
-        }
-      });
-    });
-  };
-  tester.set27 = function (errorCallback) {
-    var test_case = "SMOVE wrong dst key type";
-    client.set('x', 10, function (err, res) {
-      if (err) {
-        errorCallback(err);
-      }
-      client.smove('myset2', 'x', 'foo', function (err, res) {
-        try {
-          if (!assert.ok(ut.match("wrong kind", err), test_case)) {
-            ut.pass(test_case);
-            testEmitter.emit('next');
-          }
-        } catch (e) {
-          ut.fail(e, true);
-          testEmitter.emit('next');
-        }
-      });
-    });
-  };
-  tester.set28 = function (errorCallback) {
-    var test_case = "intsets implementation stress testing";
-    var error = "";
-    g.asyncFor(0, 20, function (outerloop) {
-      var s = {};
-      client.del('s', function (err, res) {
-        if (err) {
-          errorCallback(err);
-        }
-        var len = g.randomInt(1024);
-        g.asyncFor(0, len, function (innerloop) {
-          var data = "";
-          var c = ut.randpath(new Array(1, 2, 3));
-          if (c == 1) {
-            data = g.randomInt(65536);
-          } else if (c == 2) {
-            data = g.randomInt(4294967296);
-          } else {
-            data = g.randomInt(18446744073709551616);
-          }
-          s[data] = {};
-          client.sadd('s', data, function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            innerloop.next();
-          });
-        }, function () {
-          client.smembers('s', function (err, res) {
-            if (err) {
-              errorCallback(err);
-            }
-            var sorted = res.sort();
-            var c = 0, s_arr = [];
-            for (k in s) {
-              s_arr[c++] = k;
-            }
-            var s_sorted = s_arr.sort();
-            try {
-              if (!assert.deepEqual(sorted, s_sorted, test_case)) {
-                g.asyncFor(0, c, function (loop) {
-                  client.spop('s', function (err, e) {
-                    if (err) {
-                      errorCallback(err);
-                    }
-                    if (!s.hasOwnProperty(e)) {
-                      console.log("Can't find " + e + " on local array");
-                      console.log("Local array: " + sorted);
-                      console.log("Remote array: " + s_sorted);
-                      throw new Error("exception")
-                    }
-                    delete s[e];
-                    loop.next();
-                  });
-                }, function () {
-                  client.scard('s', function (err, res) {
-                    if (err) {
-                      errorCallback(err);
-                    }
-                    if (res !== 0) {
-                      errors.push("Scard: " + res + " not equal to 0");
-                      outerloop.break();
-                    }
-                    var size = 0;
-                    for (k in s) {
-                      size++;
-                    }
-                    if (size !== 0) {
-                      errors.push("Size: " + size + " not equal to 0");
-                      outerloop.break();
-                    }
-                    outerloop.next();
-                  });
-                });
-              }
-            } catch (e) {
-              error = e;
-              outerloop.break();
-            }
-
-          });
-        });
-      });
-    }, function () {
-      if (error)
-        ut.fail(error, test_case);
-      else
-        ut.pass(test_case);
-      testEmitter.emit('next');
-    });
-  };
-  
-	tester.set29 = function (errorCallback) {
-	    var test_case = "SDIFF with first set empty";
-	    client.del('set1', 'set2', 'set3', function (err, res) {
-		    if (err) {
-			    errorCallback(err);
-		    }
-		    client.sadd('set2', '1', '2', '3', '4', function (err, res) {
-			    if (err) {
-				    errorCallback(err);
-			    }
-			    client.sadd('set3', 'a', 'b', 'c', 'd', function (err, res) {
-				    if (err) {
-					    errorCallback(err);
-				    }
-
-				    client.sdiff('set1', 'set2', 'set3', function (err, res) {
-					    if (err) {
-						    errorCallback(err, null);
-					    }
-					    try {
-						    if (!assert.equal(res, '', test_case)) {
-							    ut.pass(test_case);
-						    }
-					    } catch (e) {
-						    ut.fail(e, true);
-					    }
-                        testEmitter.emit('next');
-				    });
-			    });
-		    });
-	    });
-    };
-
-    tester.set30 = function (errorCallback) {
- 	    var test_case = "SINTER should handle non existing key as empty";
- 	    client.del('set1', 'set2', 'set3', function (err, res) {
- 		    if (err) {
- 			    errorCallback(err);
- 		    }
- 		    client.sadd('set1', 'a', 'b', 'c', function (err, res) {
- 			    if (err) {
- 				    errorCallback(err);
- 			    }
- 			    client.sadd('set2', 'b', 'c', 'd', function (err, res) {
- 				    if (err) {
- 					    errorCallback(err);
- 				    }
- 				    client.sinter('set1', 'set2', 'set3', function (err, res) {
- 					    try {
-						    if (!assert.equal(res, '', test_case)) {
-							    ut.pass(test_case);
-						    }
-					    } catch (e) {
-						    ut.fail(e, true);
-					    }
-                        testEmitter.emit('next');
- 				    });
- 			    });
- 		    });
- 	    });
-     };
-
-     tester.set30 = function (errorCallback) {
-	    var test_case = "SINTER with same integer elements but different encoding";
-	    client.del('set1', 'set2', 'set3', function (err, res) {
-		    if (err) {
-			    errorCallback(err);
-		    }
-		    client.sadd('set1', '1', '2', '3', function (err, res) {
-			    if (err) {
-				    errorCallback(err);
-			    }
-			    client.sadd('set2', '1', '2', '3', 'a', function (err, res) {
-				    if (err) {
-					    errorCallback(err);
-				    }
-				    client.srem('set2', 'a', function (err, result) {
-					    if (err) {
-						    errorCallback(err);
-					    }
-					    assert_encoding('intset', 'set1', function (err, res) {
-						    if (err) {
-							    errorCallback(err);
-						    }
-						    assert_encoding('hashtable', 'set2', function (err, res) {
-							    if (err) {
-								    errorCallback(err);
-							    }
-							    client.sinter('set1', 'set2', function (err, res) {
-								    if (err) {
-									    errorCallback(err);
-								    }
-								    try {
-									    if (!assert.equal(res.sort(), '1,2,3', test_case)) {
-										    ut.pass(test_case);
-									    }
-								    } catch (e) {
-									    ut.fail(e, true);
-								    }
-                                    testEmitter.emit('next');
-							    });
-						    });
-					    });
-				    });
-			    });
-		    });
-	    });
-    };
-
-    tester.set31 = function (errorCallback) {
-	    var test_case = "SMOVE with identical source and destination";
-	    client.del('set', function (err, res) {
-		    if (err) {
-			    errorCallback(err);
-		    }
-		    client.sadd('set', 'a', 'b', 'c', function (err, res) {
-			    if (err) {
-				    errorCallback(err);
-			    }
-			    client.smove('set', 'set', 'b', function (err, res) {
-				    if (err) {
-					    errorCallback(err);
-				    }
-				    client.smembers('set', function (err, res) {
-					    if (err) {
-						    errorCallback(err);
-					    }
-					    try {
-						    if (!assert.equal(res.sort(), 'a,b,c', test_case)) {
-							    ut.pass(test_case);
-						    }
-					    } catch (e) {
-						    ut.fail(e, true);
-					    }
-                        testEmitter.emit('next');
-				    });
-			    });
-		    });
-	    });
-    };
-	tester.set32 = function (errorCallback) {
-	    var test_case = "SRANDMEMBER with <count> against non existing key";
-		client.srandmember('nonexisting_key',100,function(err, res){
-			if(err){
+  tester.Sort1_1 = function (errorCallback) {
+    var test_case = "Ziplist: SORT BY key with limit";
+    client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5 , 5, function (err, res1) {
+		if (err) {
+			errorCallback(err);
+		}
+		local_result = res1;
+		client.lrange(res1, 5, 9, function (err, res2) {
+			if (err) {
 				errorCallback(err);
 			}
-			try{
-				if(!assert.deepEqual(res, [], test_case)){
-					ut.pass(test_case);
+			try {
+				if (!assert.deepEqual(res2, local_result, test_case)) {
+				ut.pass(test_case);
 				}
-			}catch(e){
+			} catch (e) {
 				ut.fail(e,true);
 			}
 			testEmitter.emit('next');
-		});
-	};
-	
-	tester.set33 = function (errorCallback) {
-		var typeArray = {};
-		typeArray['hashtable'] = [1,5,10,50,125,50000,33959417,4775547,65434162
-            ,12098459,427716,483706,2726473884,72615637475,
-            'MARY','PATRICIA','LINDA','BARBARA','ELIZABETH','JENNIFER','MARIA',
-			'SUSAN','MARGARET','DOROTHY','LISA','NANCY','KAREN','BETTY','HELEN',
-			'SANDRA','DONNA','CAROL','RUTH','SHARON','MICHELLE','LAURA','SARAH',
-			'KIMBERLY','DEBORAH','JESSICA','SHIRLEY','CYNTHIA','ANGELA','MELISSA',
-			'BRENDA','AMY','ANNA','REBECCA','VIRGINIA','KATHLEEN'];
-		/* typeArray['intset'] = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
-								,20,21,22,23,24,25,26,27,28,29
-								,30,31,32,33,34,35,36,37,38,39
-								,40,41,42,43,44,45,46,47,48,49]; */
-		
-			for(var key in typeArray){
-				var myset = {};
-				var test_case = "SRANDMEMBER with <count> - "+key;
-				create_set('myset', typeArray[key], function (err, res) {
-					if(err){
-						errorCallback(err);
-					}
-					var cnt=0;
-					g.asyncFor(0, typeArray[key].length, function (loop) {
-						client.smembers('myset', function (err, res) {
-							if (err) {
-								errorCallback(err);
-							}
-							myset[res] = 1;
-							loop.next();
-						});
-					}, function () {
-						var c = 0, myset_arr = [];
-						for (k in myset) {
-						  myset_arr[c++] = k
-						}
-						try{
-							if (!assert.deepEqual(myset_arr.sort(), typeArray[key].sort(), test_case)) {
-								ut.pass(test_case);
-							}
-						}catch(e){
-							ut.fail(e,true);
-						}
-						testEmitter.emit('next');
-					});
-				});
-			}
-		};		
-  return set;
+		}); 
+    });
+  };
+
+  tester.Sort2 = function (errorCallback) {
+    var test_case = "Ziplist: SORT BY hash field";
+    client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.deepEqual(sorted, local_result, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+    });
+  };
+
+  tester.Sort3 = function (errorCallback) {
+    var test_case = "Linked list: SORT BY key";
+    local_result = [];
+    create_random_dataset(1000, 'lpush', 'tosort', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      local_result = res;
+      assert_encoding('linkedlist', 'tosort', function (err, res) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.sort('tosort', 'by', 'weight_*', function (err, sorted) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.deepEqual(sorted, local_result, test_case)) {
+              ut.pass(test_case);
+            }
+          } catch (e) {
+            ut.fail(e);
+          }
+          testEmitter.emit('next');
+        });
+      });
+    });
+  };
+
+  tester.Sort3_1 = function (errorCallback) {
+    var test_case = "Linked list: SORT BY key with limit";
+    client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5 , 5, function (err, res1) {
+      if (err) {
+        errorCallback(err);
+      }
+      local_result = res1;
+      client.lrange(res1, 5, 9, function (err, res2) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.deepEqual(res2, local_result, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+    });
+    });
+  };
+
+  tester.Sort4 = function (errorCallback) {
+    var test_case = "Linked list: SORT BY hash field";
+    client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.deepEqual(sorted, local_result, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+    });
+  };
+
+  tester.Sort5 = function (errorCallback) {
+    var test_case = "Big Linked list: SORT BY key";
+    local_result = [];
+    create_random_dataset(10000, 'lpush', 'tosort', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      local_result = res;
+      assert_encoding('linkedlist', 'tosort', function (err, res) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.sort('tosort', 'by', 'weight_*', function (err, sorted) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.deepEqual(sorted, local_result, test_case)) {
+              ut.pass(test_case);
+            }
+          } catch (e) {
+            ut.fail(e);
+          }
+          testEmitter.emit('next');
+        });
+      });
+    });
+  };
+
+  tester.Sort5_1 = function (errorCallback) {
+    var test_case = "Big Linked list: SORT BY key with limit";
+    client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5 , 5, function (err, res1) {
+      if (err) {
+        errorCallback(err);
+      }
+      local_result = res1;
+      client.lrange(res1, 5, 9, function (err, res2) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.deepEqual(res2, local_result, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+    });
+    });
+  };
+
+
+  tester.Sort6 = function (errorCallback) {
+    var test_case = "Big Linked list: SORT BY hash field";
+    client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.deepEqual(sorted, local_result, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+    });
+  };
+
+  tester.Sort7 = function (errorCallback) {
+    var test_case = "Intset: SORT BY key";
+    local_result = [];
+    create_random_dataset(16, 'sadd', 'tosort', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      local_result = res;
+      assert_encoding('intset', 'tosort', function (err, res) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.sort('tosort', 'by', 'weight_*', function (err, sorted) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.deepEqual(sorted, local_result, test_case)) {
+              ut.pass(test_case);
+            }
+          } catch (e) {
+            ut.fail(e, true);
+          }
+          testEmitter.emit('next');
+        });
+      });
+    });
+  };
+
+  tester.Sort8 = function (errorCallback) {
+    var test_case = "Intset: SORT BY hash field";
+    client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.deepEqual(sorted, local_result, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e, true);
+      }
+      testEmitter.emit('next');
+    });
+  };
+
+  tester.Sort9 = function (errorCallback) {
+    var test_case = "Hash table: SORT BY key";
+    local_result = [];
+    create_random_dataset(1000, 'sadd', 'tosort', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      local_result = res;
+      assert_encoding('hashtable', 'tosort', function (err, res) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.sort('tosort', 'by', 'weight_*', function (err, sorted) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.deepEqual(sorted, local_result, test_case)) {
+              ut.pass(test_case);
+            }
+          } catch (e) {
+            ut.fail(e);
+          }
+          testEmitter.emit('next');
+        });
+      });
+    });
+  };
+
+  tester.Sort10 = function (errorCallback) {
+    var test_case = "Hash table: SORT BY hash field";
+    client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.deepEqual(sorted, local_result, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+    });
+  };
+
+  tester.Sort11 = function (errorCallback) {
+    var test_case = "Big Hash table: SORT BY key";
+    local_result = [];
+    create_random_dataset(10000, 'sadd', 'tosort', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      local_result = res;
+      assert_encoding('hashtable', 'tosort', function (err, res) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.sort('tosort', 'by', 'weight_*', function (err, sorted) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.deepEqual(sorted, local_result, test_case)) {
+              ut.pass(test_case);
+            }
+          } catch (e) {
+            ut.fail(e);
+          }
+          testEmitter.emit('next');
+        });
+      });
+    });
+  };
+
+  tester.Sort12 = function (errorCallback) {
+    var test_case = "Big Hash table: SORT BY hash field";
+    client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.deepEqual(sorted, local_result, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+    });
+  };
+
+  tester.Sort13 = function (errorCallback) {
+    var test_case = "SORT GET #";
+    create_random_dataset(16, 'lpush', 'tosort', function (err, result) {
+      if (err) {
+        errorCallback(err);
+      }
+      global_result = result;
+      local_result = result.slice(0).sort(ut.sortFunction);
+      client.sort('tosort', 'get', '#', function (err, sorted) {
+        if (err) {
+          errorCallback(err);
+        }
+        try {
+          if (!assert.deepEqual(g.buffers_to_strings(sorted), local_result, test_case)) {
+            ut.pass(test_case);
+          }
+        } catch (e) {
+          ut.fail(e, true);
+        }
+        testEmitter.emit('next');
+      });
+    });
+  };
+
+  tester.Sort14 = function (errorCallback) {
+    var test_case = "SORT GET <const>";
+    client.sort('tosort', 'get', 'foo', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if ((!assert.equal(16, res.length, test_case)) && (!assert.ok(check(res), test_case))) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+
+      function check(result) {
+        var flag = false;
+        result.forEach(function (val, index, array) {
+          if (val === null) {
+            flag = true;
+          }
+        });
+        return flag;
+      };
+    });
+  };
+
+  tester.Sort15 = function (errorCallback) {
+    var test_case = "SORT GET (key and hash) with sanity check";
+    var result_array1 = new Array();
+    var result_array2 = new Array();
+    var flag1 = false;
+    var flag2 = false;
+    client.sort('tosort', 'get', '#', 'get', 'weight_*', function (err, result1) {
+      if (err) {
+        errorCallback(err);
+      }
+      client.sort('tosort', 'get', '#', 'get', 'wobj_*->weight', function (err, result2) {
+        if (err) {
+          errorCallback(err);
+        }
+        result1.forEach(function (val, index, array) {
+          if (index % 2 == 0) {
+            client.get('weight_' + val, function (err, res1) {
+              if (err) {
+                errorCallback(err);
+              }
+              if (array[index + 1] === res1) {
+                result_array1.push(res1);
+              }
+            });
+          }
+          result_array1.push(result1[index]);
+        });
+        result2.forEach(function (val, index, array) {
+          if (index % 2 == 0) {
+            client.get('weight_' + val, function (err, res1) {
+              if (err) {
+                errorCallback(err);
+              }
+              if (array[index + 1] == res1) {
+                result_array2.push(res1);
+              }
+            });
+          }
+          result_array2.push(result2[index]);
+        });
+        try {
+          if ((!assert.equal(result1.length, result2.length, test_case)) && (!assert.deepEqual(result1, result_array1, test_case)) && (!assert.deepEqual(result2, result_array2, test_case))) {
+            ut.pass(test_case);
+          }
+        } catch (e) {
+          ut.fail(e);
+        }
+        testEmitter.emit('next');
+      });
+    });
+  };
+
+  tester.Sort16 = function (errorCallback) {
+    var test_case = "SORT BY key STORE";
+    local_result = [];
+    client.sort('tosort', 'by', 'weight_*', 'store', 'sort-res', function (err, res1) {
+      if (err) {
+        errorCallback(err);
+      }
+      client.llen('sort-res', function (err, res3) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.lrange('sort-res', 0, -1, function (err, res2) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if ((!assert.deepEqual(g.buffers_to_strings(res2), g.buffers_to_strings(global_result), test_case)) && (!assert.equal(16, res3, test_case))) {
+              ut.pass(test_case);
+            }
+          } catch (e) {
+            ut.fail(e, true);
+          }
+          assert_encoding('ziplist', 'sort-res', function (err, res) {
+            if (err) {
+              errorCallback(err);
+            }
+            testEmitter.emit('next');
+          });
+        });
+      });
+    });
+  };
+
+  tester.Sort17 = function (errorCallback) {
+    var test_case = "SORT BY hash field STORE";
+    client.sort('tosort', 'by', 'wobj_*->weight', 'store', 'sort-res', function (err, res1) {
+      if (err) {
+        errorCallback(err);
+      }
+      client.llen('sort-res', function (err, res3) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.lrange('sort-res', 0, -1, function (err, res2) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if ((!assert.deepEqual(g.buffers_to_strings(res2), g.buffers_to_strings(global_result), test_case)) && (!assert.equal(16, res3, test_case))) {
+              ut.pass(test_case);
+            }
+          } catch (e) {
+            ut.fail(e, true);
+          }
+          assert_encoding('ziplist', 'sort-res', function (err, res) {
+            if (err) {
+              errorCallback(err);
+            }
+            testEmitter.emit('next');
+          });
+        });
+      });
+    });
+  };
+
+  tester.Sort18 = function (errorCallback) {
+    var test_case = "SORT DESC";
+    local_result = global_result.slice(0).sort(function (a, b) {
+      return b - a
+    });
+    client.sort('tosort', 'desc', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.deepEqual(g.buffers_to_strings(res), local_result, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+    });
+  };
+
+  tester.Sort19 = function (errorCallback) {
+    var test_case = "SORT ALPHA against integer encoded strings";
+    var result_array = new Array();
+    client.del('mylist', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      client.lpush('mylist', 2, function (err, res) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.lpush('mylist', 1, function (err, res) {
+          if (err) {
+            errorCallback(err);
+          }
+          client.lpush('mylist', 3, function (err, res) {
+            if (err) {
+              errorCallback(err);
+            }
+            client.lpush('mylist', 10, function (err, res) {
+              if (err) {
+                errorCallback(err);
+              }
+              client.sort('mylist', 'alpha', function (err, res) {
+                try {
+                  if (!assert.deepEqual(res, [1, 10, 2, 3], test_case)) {
+                    ut.pass(test_case);
+                  }
+                } catch (e) {
+                  ut.fail(e);
+                }
+                testEmitter.emit('next');
+              });
+            });
+          });
+        });
+      });
+    });
+  };
+
+  tester.Sort20 = function (errorCallback) {
+    var test_case = "SORT sorted set";
+    client.del('zset', function (err) {
+      if (err) {
+        errorCallback(error);
+      }
+      client.zadd('zset', 1, 'a', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', 5, 'b', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', 2, 'c', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', 10, 'd', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', 3, 'e', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.sort('zset', 'alpha', 'desc', function (err, res) {
+        if (err) {
+          errorCallback(err);
+        }
+        try {
+          if (!assert.deepEqual(g.buffers_to_strings(res), ['e', 'd', 'c', 'b', 'a'], test_case)) {
+            ut.pass(test_case);
+          }
+        } catch (e) {
+          ut.fail(e);
+        }
+        testEmitter.emit('next');
+      });
+    });
+  };
+
+  tester.Sort21 = function (errorCallback) {
+    var test_case = "SORT sorted set: +inf and -inf handling";
+    client.del('zset', function (err) {
+      if (err) {
+        errorCallback(error);
+      }
+      client.zadd('zset', -100, 'a', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', 200, 'b', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', -300, 'c', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', 1000000, 'd', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', '+inf', 'max', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', '-inf', 'min', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zrange('zset', 0, -1, function (err, res) {
+        if (err) {
+          errorCallback(err);
+        }
+        try {
+          if (!assert.deepEqual(g.buffers_to_strings(res), ['min', 'c', 'a', 'b', 'd', 'max'], test_case)) {
+            ut.pass(test_case);
+          }
+        } catch (e) {
+          ut.fail(e);
+        }
+        testEmitter.emit('next');
+      });
+    });
+  };
+
+  tester.Sort22 = function (errorCallback) {
+    var test_case = "SORT regression for issue #19, sorting floats";
+    client.flushdb();
+    var floats = new Array();
+    floats[0] = parseFloat('1.1');
+    floats[1] = parseFloat('5.10');
+    floats[2] = parseFloat('3.10');
+    floats[3] = parseFloat('7.44');
+    floats[4] = parseFloat('2.1');
+    floats[5] = parseFloat('5.75');
+    floats[6] = parseFloat('6.12');
+    floats[7] = parseFloat('0.25');
+    floats[8] = parseFloat('1.15');
+    floats.forEach(function (val, index, array) {
+      client.lpush('mylist', val);
+    });
+    var sf = floats.sort(ut.sortFunction);
+    client.sort('mylist', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.deepEqual(res, sf, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+    });
+  };
+
+  tester.Sort23 = function (errorCallback) {
+    var test_case = "SORT with STORE returns zero if result is empty (github isse 224)";
+    client.flushdb();
+    client.sort('foo', 'store', 'bar', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      try {
+        if (!assert.equal(res, 0, test_case)) {
+          ut.pass(test_case);
+        }
+      } catch (e) {
+        ut.fail(e);
+      }
+      testEmitter.emit('next');
+    });
+  };
+
+  tester.Sort24 = function (errorCallback) {
+    var test_case = "SORT with STORE does not create empty lists (github issue 224)";
+    client.flushdb();
+    client.lpush('foo', 'bar', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      client.sort('foo', 'alpha', 'limit', 10, 10, 'store', 'zap', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.exists('zap', function (err, res) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.equal(res, 0, test_case)) {
+              ut.pass(test_case);
+            }
+          } catch (e) {
+            ut.fail(e);
+          }
+          testEmitter.emit('next');
+        });
+      });
+    });
+  };
+
+  tester.Sort25 = function (errorCallback) {
+    var test_case = "SORT speed, 100 element list BY key, 1000 times";
+    var num = 100;
+    var flag = 0;
+    var error = null;
+    create_random_dataset(num, 'lpush', 'tosort', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      var start = new Date();
+      g.asyncFor(0, 1000, function (loop) {
+        client.sort('tosort', 'by', 'weight_*', 'LIMIT', 0, 10, function (err, res) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.ok(res, test_case)) {
+              flag++;
+              loop.next();
+            }
+          } catch (e) {
+            error = e;
+            loop.break();
+          }
+        });
+      }, function () {
+        if (error) {
+          ut.fail(error);
+          errorCallback(error)
+        } else {
+          var elapsed = new Date() - start;
+          if (flag == 1000) {
+            ut.pass(test_case + " with Time to sort: " + elapsed);
+            testEmitter.emit('next');
+          }
+        }
+      });
+    });
+  };
+
+  tester.Sort26 = function (errorCallback) {
+    var test_case = "SORT speed, 100 element list BY hash field, 1000 times";
+    var num = 100;
+    var flag = 0;
+    var error = null;
+    create_random_dataset(num, 'lpush', 'tosort', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      var start = new Date();
+      g.asyncFor(0, 1000, function (loop) {
+        client.sort('tosort', 'by', 'wobj_*->weight', 'LIMIT', 0, 10, function (err, res) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.ok(res, test_case)) {
+              flag++;
+              loop.next();
+            }
+          } catch (e) {
+            error = e;
+            loop.break();
+          }
+        });
+      }, function () {
+        if (error) {
+          ut.fail(error);
+          errorCallback(error)
+        } else {
+          var elapsed = new Date() - start;
+          if (flag == 1000) {
+            ut.pass(test_case + " with Time to sort: " + elapsed);
+            testEmitter.emit('next');
+          }
+        }
+      });
+    });
+  };
+
+  tester.Sort27 = function (errorCallback) {
+    var test_case = "SORT speed, 100 element list directly, 1000 times";
+    var num = 100;
+    var flag = 0;
+    var error = null;
+    create_random_dataset(num, 'lpush', 'tosort', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      var start = new Date();
+      g.asyncFor(0, 1000, function (loop) {
+        client.sort('tosort', 'LIMIT', 0, 10, function (err, res) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.ok(res, test_case)) {
+              flag++;
+              loop.next();
+            }
+          } catch (e) {
+            error = e;
+            loop.break();
+          }
+        });
+      }, function () {
+        if (error) {
+          ut.fail(error);
+          errorCallback(error)
+        } else {
+          var elapsed = new Date() - start;
+          if (flag == 1000) {
+            ut.pass(test_case + " with Time to sort: " + elapsed);
+            testEmitter.emit('next');
+          }
+        }
+      });
+    });
+  };
+
+  tester.Sort28 = function (errorCallback) {
+    var test_case = "SORT speed, 100 element list BY <const>, 1000 times";
+    var num = 100;
+    var flag = 0;
+    var error = null;
+    create_random_dataset(num, 'lpush', 'tosort', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      var start = new Date();
+      g.asyncFor(0, 1000, function (loop) {
+        client.sort('tosort', 'by', 'nokey', 'LIMIT', 0, 10, function (err, res) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.ok(res, test_case)) {
+              flag++;
+              loop.next();
+            }
+          } catch (e) {
+            error = e;
+            loop.break();
+          }
+        });
+      }, function () {
+        if (error) {
+          ut.fail(error);
+          errorCallback(error)
+        } else {
+          var elapsed = new Date() - start;
+          if (flag == 1000) {
+            ut.pass(test_case + " with Time to sort: " + elapsed);
+            testEmitter.emit('next');
+          }
+        }
+      });
+    });
+  };
+
+  // Redis-2.6 additions
+  tester.Sort29 = function (errorCallback) {
+    var test_case = "SORT sorted set BY nosort should retain ordering";
+    client.del('zset', function (err) {
+      if (err) {
+        errorCallback(error);
+      }
+      client.zadd('zset', 1, 'a', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', 5, 'b', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', 2, 'c', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', 10, 'd', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.zadd('zset', 3, 'e', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+      });
+      client.multi().sort('zset', 'by', 'nosort', 'asc').sort('zset', 'by', 'nosort', 'desc').exec(function (err, replies) {
+                        if (err) {
+                            errorCallback(err);
+                        }
+
+        try {
+          if (!assert.deepEqual(g.buffers_to_strings(replies), g.buffers_to_strings([['a', 'c', 'e', 'b', 'd'], ['d', 'b', 'e', 'c', 'a']]), test_case)) {
+            ut.pass(test_case);
+          }
+        } catch (e) {
+          ut.fail(e,true);
+        }
+        testEmitter.emit('next');
+      });
+    });
+  };
+
+  tester.Sort30 = function (errorCallback) {
+    var test_case = "SORT sorted set BY nosort + LIMIT";
+    var result_array = new Array();
+    client.del('zset', function (err) {
+        if (err) {
+            errorCallback(error);
+        }
+        client.zadd('zset', 1, 'a', function (err) {
+            if (err) {
+                errorCallback(err);
+            }
+        });
+        client.zadd('zset', 5, 'b', function (err) {
+            if (err) {
+                errorCallback(err);
+            }
+        });
+        client.zadd('zset', 2, 'c', function (err) {
+            if (err) {
+                errorCallback(err);
+            }
+        });
+        client.zadd('zset', 10, 'd', function (err) {
+            if (err) {
+                errorCallback(err);
+            }
+        });
+        client.zadd('zset', 3, 'e', function (err) {
+            if (err) {
+                errorCallback(err);
+            }
+        });
+        client.sort('zset', 'by', 'nosort', 'asc', 'limit', 0, 1, function (err, res) {
+            if (err) {
+                errorCallback(err);
+            }
+            result_array.push(res);
+            client.sort('zset', 'by', 'nosort', 'desc', 'limit', 0, 1, function (err, res) {
+                if (err) {
+                    errorCallback(err);
+                }
+                result_array.push(res);
+                client.sort('zset', 'by', 'nosort', 'asc', 'limit', 0, 2, function (err, res) {
+                    if (err) {
+                        errorCallback(err);
+                    }
+                    result_array.push(res);
+                    client.sort('zset', 'by', 'nosort', 'desc', 'limit', 0, 2, function (err, res) {
+                        if (err) {
+                            errorCallback(err);
+                        }
+                        result_array.push(res);
+                        client.sort('zset', 'by', 'nosort', 'limit', 5, 10, function (err, res) {
+                            if (err) {
+                                errorCallback(err);
+                            }
+                            result_array.push(res);
+                            client.sort('zset', 'by', 'nosort', 'limit', -10, 100, function (err, res) {
+                                if (err) {
+                                    errorCallback(err);
+                                }
+                                result_array.push(res);
+                                try {
+									//commented as multi-dimensional array is not implemented yet!!
+                                    //if (!assert.equal(result_array, ['a', 'd', ['a', 'c'], ['d', 'b'], '', ['a', 'c', 'e', 'b', 'd']], test_case)) { 
+                                    if (!assert.equal(result_array.toString(), ['a', 'd', ['a', 'c'], ['d', 'b'], '', ['a', 'c', 'e', 'b', 'd']].toString(), test_case)) {
+                                        ut.pass(test_case);
+                                    }
+                                } catch (e) {
+                                    ut.fail(e);
+                                }
+                                testEmitter.emit('next');
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+  };
+
+  tester.Sort31 = function (errorCallback) {
+    var test_case = "SORT with STORE removes key if result is empty (github issue 227)";
+    client.flushdb();
+    client.lpush('foo', 'bar', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      client.sort('emptylist', 'store', 'foo', function (err) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.exists('foo', function (err, res) {
+          if (err) {
+            errorCallback(err);
+          }
+          try {
+            if (!assert.equal(res, 0, test_case)) {
+              ut.pass(test_case);
+            }
+          } catch (e) {
+            ut.fail(e);
+          }
+          testEmitter.emit('next');
+        });
+      });
+    });
+  };
+
+  tester.Sort32 = function (errorCallback) {
+    var test_case = "SORT with BY <constant> and STORE should still order output";
+    client.del('myset', 'mylist', function (err, res) {
+        if (err) {
+            errorCallback(err);
+        }
+        client.sadd('myset', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z', 'aa', 'aaa', 'azz', function (err, res) {
+            if (err) {
+                callback(err, null);
+            }
+            client.sort('myset', 'alpha', 'by', '_', 'store', 'mylist', function (err) {
+                if (err) {
+                    errorCallback(err);
+                }
+                client.lrange('mylist', 0, -1, function (err, result) {
+                    if (err) {
+                        errorCallback(err);
+                    }
+                    try {
+                        if (!assert.equal(result, ['a', 'aa', 'aaa', 'azz', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z'], test_case)) {
+                            ut.pass(test_case);
+                        }
+                    } catch (e) {
+                        ut.fail(e);
+                    }
+                    testEmitter.emit('next');
+                });
+            });
+        });
+    });
+  };
+
+  tester.Sort32 = function (errorCallback) {
+    var test_case = "SORT will complain with numerical sorting and bad doubles (1)";
+    var error = "";
+    client.del('myset', function (err, res) {
+        if (err) {
+            errorCallback(err);
+        }
+        client.sadd('myset', 1, 2, 3, 4, 'not-a-double', function (err, res) {
+            if (err) {
+                callback(err, null);
+            }
+            client.sort('myset', function (err, res) {
+                error = err;
+                try {
+                    if (!assert.ok(ut.match("converted into double", error), test_case)) {
+                        ut.pass(test_case);
+                        testEmitter.emit('next');
+                    }
+                } catch (e) {
+                    ut.fail(e, true);
+                    testEmitter.emit('next');
+                }
+            });
+        });
+    });
+  };
+
+  tester.Sort33 = function (errorCallback) {
+    var test_case = "SORT will complain with numerical sorting and bad doubles (1)";
+    var error = "";
+    client.del('myset', function (err, res) {
+        if (err) {
+            errorCallback(err);
+        }
+        client.sadd('myset', 1, 2, 3, 4, 'not-a-double', function (err, res) {
+            if (err) {
+                callback(err, null);
+            }
+            client.sort('myset', function (err, res) {
+                error = err;
+                try {
+                    if (!assert.ok(ut.match("converted into double", error), test_case)) {
+                        ut.pass(test_case);
+                        testEmitter.emit('next');
+                    }
+                } catch (e) {
+                    ut.fail(e, true);
+                    testEmitter.emit('next');
+                }
+            });
+        });
+    });
+  };
+
+  tester.Sort34 = function (errorCallback) {
+    var test_case = "SORT will complain with numerical sorting and bad doubles (2)";
+    var error = "";
+    client.del('myset', function (err, res) {
+        if (err) {
+            errorCallback(err);
+        }
+        client.sadd('myset', 1, 2, 3, 4, function (err, res) {
+            if (err) {
+                callback(err, null);
+            }            
+            client.mset('score:1', 10, 'score:2', 20, 'score:3', 30, 'score:4', 'not-a-double', function (err, res) {
+            if (err) {
+                callback(err, null);
+            }
+            client.sort('myset', 'by', 'score:*', function (err, res) {
+                error = err;
+                try {
+                    if (!assert.ok(ut.match("converted into double", error), test_case)) {
+                        ut.pass(test_case);
+                        testEmitter.emit('next');
+                    }
+                } catch (e) {
+                    ut.fail(e, true);
+                    testEmitter.emit('next');
+                }
+            });
+          });
+        });
+    });
+  }; 
+
+//  tester.Sort35 = function (errorCallback) {
+//    var test_case = "SORT BY sub-sorts lexicographically if score is the same";
+//    var loop_array = new Array();
+//    client.del('myset', function (err, res) {
+//        if (err) {
+//            errorCallback(err);
+//        }
+//        client.sadd('myset', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z', 'aa', 'aaa', 'azz', function (err, res) {
+//            if (err) {
+//                callback(err, null);
+//            }                       
+//            loop_array = {'a', 'aa', 'aaa', 'azz', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z'};
+
+//            loop_array.forEach(function (val, index, array) {
+//         client.set('score:' + val, 100);
+//       
+//            client.sort('myset', 'by', 'score:*', function (err, sortedres) {
+//              if (err) {
+//                callback(err, null);
+//            } 
+//            try {
+//                        if (!assert.equal(sortedres, ['a', 'aa', 'aaa', 'azz', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z'], test_case)) {
+//                            ut.pass(test_case);
+//                        }
+//                    } catch (e) {
+//                        ut.fail(e);
+//                    }
+//                    testEmitter.emit('next');
+//            
+//            });
+//          });   });
+//          });   
+//  };
+
+
+
+  return sort;
 
 }());
