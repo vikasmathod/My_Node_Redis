@@ -1869,6 +1869,203 @@ exports.Set = (function () {
 		    });
 	    });
     };
+	tester.set32 = function (errorCallback) {
+	    var test_case = "SRANDMEMBER with <count> against non existing key";
+		client.srandmember('nonexisting_key',100,function(err, res){
+			if(err){
+				errorCallback(err);
+			}
+			try{
+				if(!assert.deepEqual(res, [], test_case)){
+					ut.pass(test_case);
+				}
+			}catch(e){
+				ut.fail(e,true);
+			}
+			testEmitter.emit('next');
+		});
+	};
+	
+	/* tester.set33 = function (errorCallback) {
+		var typeArray = {};
+		typeArray['hashtable'] = [1,5,10,50,125,50000,33959417,4775547,65434162
+		,12098459,427716,483706,2726473884,72615637475,
+		'MARY','PATRICIA','LINDA','BARBARA','ELIZABETH','JENNIFER','MARIA',
+		'SUSAN','MARGARET','DOROTHY','LISA','NANCY','KAREN','BETTY','HELEN',
+		'SANDRA','DONNA','CAROL','RUTH','SHARON','MICHELLE','LAURA','SARAH',
+		'KIMBERLY','DEBORAH','JESSICA','SHIRLEY','CYNTHIA','ANGELA','MELISSA',
+		'BRENDA','AMY','ANNA','REBECCA','VIRGINIA','KATHLEEN'];
+		typeArray['intset'] = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
+								,20,21,22,23,24,25,26,27,28,29
+								,30,31,32,33,34,35,36,37,38,39
+								,40,41,42,43,44,45,46,47,48,49];
+		
+			for(var key in typeArray){
+				var myset = {};
+				var test_case = "SRANDMEMBER with <count> - "+ key;
+				create_set('myset', typeArray[key], function (err, res) {
+					if(err){
+						errorCallback(err);
+					}
+					var cnt=0;
+						client.smembers('myset', function (err, res1) {
+							if (err) {
+								errorCallback(err);
+							}
+							try{
+								if (!assert.deepEqual(res1.sort(), typeArray[key].sort(), test_case)) {
+									ut.pass(test_case);
+								}
+							}catch(e){
+								ut.fail(e,true);
+							}
+						});
+					});
+				};
+				testEmitter.emit('next');
+			} */	
+	
+	tester.set33 = function (errorCallback) {
+		var test_case = "SRANDMEMBER with <count> - Hashtable";
+		var Hcontent = [1,5,10,50,125,50000,33959417,4775547,65434162,12098459,427716,483706,2726473884,72615637475,
+		'MARY','PATRICIA','LINDA','BARBARA','ELIZABETH','JENNIFER','MARIA','SUSAN','MARGARET','DOROTHY','LISA','NANCY',
+		'KAREN','BETTY','HELEN','SANDRA','DONNA','CAROL','RUTH','SHARON','MICHELLE','LAURA','SARAH','KIMBERLY',
+		'DEBORAH','JESSICA','SHIRLEY','CYNTHIA','ANGELA','MELISSA','BRENDA','AMY','ANNA','REBECCA','VIRGINIA','KATHLEEN'];
+		var myset = [];
+		create_set('myset', Hcontent, function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.smembers('myset', function (err, res1) {
+				if (err) {
+					errorCallback(err);
+				}
+				for(var i=0;i<res1.length;i++){
+					myset.push(res1[i]);
+				}
+				//Make sure that a count of 0 is handled correctly.
+				client.srandmember('myset',0,function(err, res2){
+					if (err) {
+						errorCallback(err);
+					}
+					/**
+					 * 	# We'll stress different parts of the code, see the implementation
+						# of SRANDMEMBER for more information, but basically there are
+						# four different code paths.
+						#
+						# PATH 1: Use negative count.
+						#
+						# 1) Check that it returns repeated elements.
+					*/
+					client.srandmember('myset',-100,function(err, res3){
+						if (err) {
+							errorCallback(err);
+						}
+						/**
+							# 2) Check that all the elements actually belong to the
+							# original set.
+						*/
+						var mySetLen = res3.length
+						var Exists = true;
+						for(var i=0;i<mySetLen;i++){
+							if(myset.indexOf(res3[i]) == -1) {
+								Exists = false;
+								break;
+							}
+						}
+						/* var iterations = 1000;
+						while(iterations!=0){
+							iterations--;
+							client.srandmember('myset',-10,function(err,replies){
+								console.log(replies.length + " replies:");
+							});
+						} */
+						try{
+							if (!assert.deepEqual(myset.sort(),Hcontent.sort(), test_case) &&
+								!assert.equal(res2,'',test_case) && !assert.equal(mySetLen,100,test_case)
+								&& !assert.equal(true,Exists,test_case)) {
+								ut.pass(test_case);
+							}
+						}catch(e){
+							ut.fail(e,true);						
+						}
+						testEmitter.emit('next');
+					});						
+				});
+			});
+		});
+	};
+	
+	tester.set34 = function (errorCallback) {
+		var test_case = "SRANDMEMBER with <count> - Intset";
+		var Icontent = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,
+						30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49];
+		var myset = [];
+		create_set('myset', Icontent, function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.smembers('myset', function (err, res1) {
+				if (err) {
+					errorCallback(err);
+				}
+				for(var i=0;i<res1.length;i++){
+					myset.push(res1[i]);
+				}
+				//Make sure that a count of 0 is handled correctly.
+				client.srandmember('myset',0,function(err, res2){
+					if (err) {
+						errorCallback(err);
+					}
+					/**
+					 * 	# We'll stress different parts of the code, see the implementation
+						# of SRANDMEMBER for more information, but basically there are
+						# four different code paths.
+						#
+						# PATH 1: Use negative count.
+						#
+						# 1) Check that it returns repeated elements.
+					 */
+					client.srandmember('myset',-100,function(err, res3){
+						if (err) {
+							errorCallback(err);
+						}
+						/**
+							# 2) Check that all the elements actually belong to the
+							# original set.
+						 */
+						var mySetLen = res3.length
+						var Exists = true;
+						for(var i=0;i<mySetLen;i++){
+							if(myset.indexOf(res3[i]) == -1) {
+								Exists = false;
+								break;
+							}
+						}
+						/* var iterations = 1000;
+							while(iterations!=0){
+							iterations--;
+							client.srandmember('myset',-10,function(err,replies){
+							console.log(replies.length + " replies:");
+							
+							
+							});
+						} */
+						try{
+							if (!assert.deepEqual(myset.sort(),Icontent.sort(), test_case) &&
+							!assert.equal(res2,'',test_case) && !assert.equal(mySetLen,100,test_case)
+							&& !assert.equal(true,Exists,test_case)) {
+								ut.pass(test_case);
+							}
+							}catch(e){
+							ut.fail(e,true);						
+						}
+						testEmitter.emit('next');
+					});						
+				});
+			});
+		});
+	};
   return set;
 
 }());

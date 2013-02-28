@@ -388,7 +388,7 @@ Utility.prototype.createComplexDataset = function (client, ops, useexpire, callb
                 case 4:
                   client.zadd(k, d, v, function (err, res) {
                     if (err) {
-                      callback(err, true);
+                      callback(err, null);
                     }
                   });
                   break;

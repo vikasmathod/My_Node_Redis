@@ -4,7 +4,7 @@ exports.Introspection = (function () {
   ut = new Utility(),
   server = new Server(), server2 = new Server(), server3 = new Server(), server4 = new Server(),
   server5 = new Server(), server6 = new Server(), server7_1 = new Server(), server7_2 = new Server(),
-  server8 = new Server(),
+  server8 = new Server(), server9 = new Server(), server10 = new Server(),
   intro = {},
   name = "Introspection",
   client = "", tester = {}, server_pid = "", client_pid = "", all_tests = {}, server_host = "", server_port = "";
@@ -85,8 +85,7 @@ exports.Introspection = (function () {
                     errorCallback(res);
                   }
                   try {
-                    if ((!assert.equal(result, 'OK', test_case)) && (!assert.ok(ut.match({}, err), test_case))) {
-                    //if ((!assert.equal(result, 'OK', test_case)) && (!assert.ok(ut.match('Redis connection gone from close event', err), test_case))) {
+                    if ((!assert.equal(result, 'OK', test_case)) && (!assert.ok(ut.match('Redis connection gone from end event', err), test_case))) {
                       ut.pass(test_case);
                       // client should be disconnected using kill command
                       if (intro.debug_mode) {
@@ -457,7 +456,7 @@ exports.Introspection = (function () {
                 errorCallback(err);
               }
               ut.waitForBgsave(master_cli, function (err, res) {
-                if (err) {console.log(err)
+                if (err) {
                   errorCallback(err);
                 }
                 try {

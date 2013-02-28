@@ -214,10 +214,9 @@ exports.Aof = (function () {
     //Test that redis-check-aof indeed sees this AOF is not valid
     var test_case = "Short read: Utility should be able to fix the AOF";
     var cmd = '.' + sep + 'redis' + sep + 'src' + sep + REDIS_CHECK_AOF + ' --fix ' + aof_path;
-    console.log(cmd);
-	var child_check = child.exec(cmd);
-    child_check.stdin.write('n');
-    child_check.stdout.on('data', function (data) { 
+    var child_check = child.exec(cmd);
+    child_check.stdin.write('y');
+    child_check.stdout.on('data', function (data) {
       try {
         if (!assert.ok(ut.match('Successfully truncated AOF', data), test_case)) {
           ut.pass(test_case);

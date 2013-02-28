@@ -471,6 +471,98 @@ exports.Expire = (function () {
     });
   };
 
+  tester.expire13 = function (errorCallback) {
+    var test_case = "5 keys in, 5 keys out";
+    var result_array = new Array();
+    client.flushdb(function (err, res) {
+        if (err) {
+            errorCallback(err);
+        }
+        client.set('a', 'c', function (err, res) {
+            if (err) {
+                errorCallback(err);
+            }
+            client.expire('a', 5, function (err, v3) {
+                if (err) {
+                    errorCallback(err);
+                }
+				result_array.push('a')
+                client.set('t', 'c', function (err, res) {
+                    if (err) {
+                        errorCallback(err);
+                    }
+                    result_array.push('t')
+                    client.set('e', 'c', function (err, res) {
+                        if (err) {
+                            errorCallback(err);
+                        }
+                        result_array.push('e')
+                        client.set('s', 'c', function (err, res) {
+                            if (err) {
+                                errorCallback(err);
+                            }
+                            result_array.push('s')
+                            client.set('foo', 'b', function (err, res) {
+                                if (err) {
+                                    errorCallback(err);
+                                }
+                                result_array.push('foo')
+                                //client.lsort(result_array, function (err, sortres) {
+                                    //if (err) {
+                                        //errorCallback(err);
+                                    //}
+                                    try {
+                                        if (!assert.deepEqual(result_array.sort(), ['a', 'e', 'foo', 's', 't'], test_case)) {
+                                            ut.pass(test_case);
+                                            testEmitter.emit('next');
+                                        }
+                                    } catch (e) {
+                                        ut.fail(e, true);
+                                        testEmitter.emit('next');
+                                    }
+                                //});
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+  };
+
+  tester.expire14 = function (errorCallback) {
+    var test_case = "PTTL returns millisecond time to live";
+    client.del('x', function (err, res) {
+        if (err) {
+            errorCallback(err);
+        }
+        client.setex('x', 1, 'somevalue', function (err, res) {
+            if (err) {
+                errorCallback(err);
+            }
+            client.pttl('x', function (err, res1) {
+                if (err) {
+                    errorCallback(err);
+                }
+                client.set('ttl', res1, function (err, res2) {
+                    if (err) {
+                        errorCallback(err);
+                    }
+                    try {
+                        if ((!assert(res1 > 900, test_case)) && (!assert(res1 <= 1000, test_case))) {
+                            ut.pass(test_case);
+                            testEmitter.emit('next');
+                        }
+                    } catch (e) {
+                        ut.fail(e, true);
+                        testEmitter.emit('next');
+                    }
+                });
+            });
+        });
+    });
+  };
+  
   return expire;
 
 }());

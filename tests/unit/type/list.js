@@ -299,7 +299,7 @@ exports.List = (function () {
         });
     }
 
-    /*tester.List1 = function (errorCallback) {
+    tester.List1 = function (errorCallback) {
         var test_case = "LPUSH, RPUSH, LLENGTH, LINDEX - ziplist";
         var result_array = new Array();
         // first lpush then rpush
@@ -4529,7 +4529,7 @@ exports.List = (function () {
                 });
             });
         });
-    };*/
+    };
 
     tester.List106 = function (errorCallback) {
         var test_case = "BRPOPLPUSH maintains order of elements after failure";
