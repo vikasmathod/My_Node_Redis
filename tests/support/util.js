@@ -655,5 +655,13 @@ Utility.prototype.sortFunction = function (a, b) {
     return (b === a) ? 0 : (a < b) ? 1 : -1;
   return (a < b) ? -1 : (a === b) ? 0 : 1;
 };
-
+Utility.prototype.compareArray = function (Arr1,Arr2) {
+	if(Arr1.length != Arr2.length)
+		return false;
+	for(var i=0;i<Arr1.length;i++)
+		if(Arr1[i] != Arr2[i])
+			return false;
+	
+	return true;
+};
 module.exports = Utility;
