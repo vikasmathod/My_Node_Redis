@@ -177,7 +177,7 @@ exports.Sort = (function () {
               ut.pass(test_case);
             }
           } catch (e) {
-            ut.fail(e);
+            ut.fail(e,true);
           }
           testEmitter.emit('next');
         });
@@ -187,42 +187,47 @@ exports.Sort = (function () {
 
   tester.Sort1_1 = function (errorCallback) {
     var test_case = "Ziplist: SORT BY key with limit";
-    client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5 , 5, function (err, res1) {
+	create_random_dataset(16, 'lpush', 'tosort', function (err, res) {
 		if (err) {
 			errorCallback(err);
 		}
-		local_result = res1;
-		client.lrange(res1, 5, 9, function (err, res2) {
+		local_result = res.splice(5,5);
+		client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5 , 5, function (err, res1) {
 			if (err) {
 				errorCallback(err);
 			}
 			try {
-				if (!assert.deepEqual(res2, local_result, test_case)) {
+				if (!assert.deepEqual(res1, local_result, test_case)) {
 				ut.pass(test_case);
 				}
 			} catch (e) {
 				ut.fail(e,true);
 			}
 			testEmitter.emit('next');
-		}); 
+		});		
     });
   };
 
   tester.Sort2 = function (errorCallback) {
     var test_case = "Ziplist: SORT BY hash field";
-    client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
-      if (err) {
-        errorCallback(err);
-      }
-      try {
-        if (!assert.deepEqual(sorted, local_result, test_case)) {
-          ut.pass(test_case);
-        }
-      } catch (e) {
-        ut.fail(e);
-      }
-      testEmitter.emit('next');
-    });
+	create_random_dataset(16, 'lpush', 'tosort', function (err, local_result) {
+		if (err) {
+			errorCallback(err);
+		}
+		client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
+		  if (err) {
+			errorCallback(err);
+		  }
+		  try {
+			if (!assert.deepEqual(sorted, local_result, test_case)) {
+			  ut.pass(test_case);
+			}
+		  } catch (e) {
+			ut.fail(e,true);
+		  }
+		  testEmitter.emit('next');
+		});
+	});
   };
 
   tester.Sort3 = function (errorCallback) {
@@ -246,7 +251,7 @@ exports.Sort = (function () {
               ut.pass(test_case);
             }
           } catch (e) {
-            ut.fail(e);
+            ut.fail(e,true);
           }
           testEmitter.emit('next');
         });
@@ -256,44 +261,49 @@ exports.Sort = (function () {
 
   tester.Sort3_1 = function (errorCallback) {
     var test_case = "Linked list: SORT BY key with limit";
-    client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5 , 5, function (err, res1) {
-      if (err) {
-        errorCallback(err);
-      }
-      local_result = res1;
-      client.lrange(res1, 5, 9, function (err, res2) {
-      if (err) {
-        errorCallback(err);
-      }
-      try {
-        if (!assert.deepEqual(res2, local_result, test_case)) {
-          ut.pass(test_case);
-        }
-      } catch (e) {
-        ut.fail(e);
-      }
-      testEmitter.emit('next');
-    });
-    });
+	create_random_dataset(1000, 'lpush', 'tosort', function (err, res) {
+		if (err) {
+			errorCallback(err);
+		}
+		local_result = res.splice(5,5);
+		client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5 , 5, function (err, exp_res) {
+			if (err) {
+				errorCallback(err);
+			}
+		
+			try {
+				if (!assert.deepEqual(exp_res, local_result, test_case)) {
+					ut.pass(test_case);
+				}
+			} catch (e) {
+				ut.fail(e,true);
+			}
+			testEmitter.emit('next');
+		});
+	});
   };
 
   tester.Sort4 = function (errorCallback) {
     var test_case = "Linked list: SORT BY hash field";
-    client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
-      if (err) {
-        errorCallback(err);
-      }
-      try {
-        if (!assert.deepEqual(sorted, local_result, test_case)) {
-          ut.pass(test_case);
-        }
-      } catch (e) {
-        ut.fail(e);
-      }
-      testEmitter.emit('next');
-    });
+	create_random_dataset(1000, 'lpush', 'tosort', function (err, local_result) {
+		if (err) {
+			errorCallback(err);
+		}
+		client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
+		  if (err) {
+			errorCallback(err);
+		  }
+		  try {
+			if (!assert.deepEqual(sorted, local_result, test_case)) {
+			  ut.pass(test_case);
+			}
+		  } catch (e) {
+			ut.fail(e,true);
+		  }
+		  testEmitter.emit('next');
+		});
+	});
   };
-
   tester.Sort5 = function (errorCallback) {
     var test_case = "Big Linked list: SORT BY key";
     local_result = [];
@@ -325,43 +335,48 @@ exports.Sort = (function () {
 
   tester.Sort5_1 = function (errorCallback) {
     var test_case = "Big Linked list: SORT BY key with limit";
-    client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5 , 5, function (err, res1) {
-      if (err) {
-        errorCallback(err);
-      }
-      local_result = res1;
-      client.lrange(res1, 5, 9, function (err, res2) {
-      if (err) {
-        errorCallback(err);
-      }
-      try {
-        if (!assert.deepEqual(res2, local_result, test_case)) {
-          ut.pass(test_case);
-        }
-      } catch (e) {
-        ut.fail(e);
-      }
-      testEmitter.emit('next');
-    });
-    });
+	create_random_dataset(10000, 'lpush', 'tosort', function (err, res) {
+		if (err) {
+			errorCallback(err);
+		}
+		local_result = res.splice(5, 5);
+		client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5, 5, function (err, res1) {
+			if (err) {
+				errorCallback(err);
+			}
+			try {
+				if (!assert.deepEqual(res1, local_result, test_case)) {
+					ut.pass(test_case);
+				}
+			} catch (e) {
+				ut.fail(e);
+			}
+			testEmitter.emit('next');
+		});
+	});
   };
 
 
   tester.Sort6 = function (errorCallback) {
     var test_case = "Big Linked list: SORT BY hash field";
-    client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
-      if (err) {
-        errorCallback(err);
-      }
-      try {
-        if (!assert.deepEqual(sorted, local_result, test_case)) {
-          ut.pass(test_case);
-        }
-      } catch (e) {
-        ut.fail(e);
-      }
-      testEmitter.emit('next');
-    });
+	create_random_dataset(10000, 'lpush', 'tosort', function (err, local_result) {
+		if (err) {
+			errorCallback(err);
+		}
+		client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
+		  if (err) {
+			errorCallback(err);
+		  }
+		  try {
+			if (!assert.deepEqual(sorted, local_result, test_case)) {
+			  ut.pass(test_case);
+			}
+		  } catch (e) {
+			ut.fail(e);
+		  }
+		  testEmitter.emit('next');
+		});
+	});
   };
 
   tester.Sort7 = function (errorCallback) {
@@ -1342,43 +1357,71 @@ exports.Sort = (function () {
         });
     });
   }; 
-
-//  tester.Sort35 = function (errorCallback) {
-//    var test_case = "SORT BY sub-sorts lexicographically if score is the same";
-//    var loop_array = new Array();
-//    client.del('myset', function (err, res) {
-//        if (err) {
-//            errorCallback(err);
-//        }
-//        client.sadd('myset', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z', 'aa', 'aaa', 'azz', function (err, res) {
-//            if (err) {
-//                callback(err, null);
-//            }                       
-//            loop_array = {'a', 'aa', 'aaa', 'azz', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z'};
-
-//            loop_array.forEach(function (val, index, array) {
-//         client.set('score:' + val, 100);
-//       
-//            client.sort('myset', 'by', 'score:*', function (err, sortedres) {
-//              if (err) {
-//                callback(err, null);
-//            } 
-//            try {
-//                        if (!assert.equal(sortedres, ['a', 'aa', 'aaa', 'azz', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z'], test_case)) {
-//                            ut.pass(test_case);
-//                        }
-//                    } catch (e) {
-//                        ut.fail(e);
-//                    }
-//                    testEmitter.emit('next');
-//            
-//            });
-//          });   });
-//          });   
-//  };
-
-
-
+ 
+  tester.Sort35 = function (errorCallback) {
+	var test_case = "SORT BY sub-sorts lexicographically if score is the same";
+    var loop_array = new Array();
+	client.del('myset', function (err, res) {
+		if (err) {
+           errorCallback(err);
+        }
+		client.sadd('myset', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z', 'aa', 'aaa', 'azz', function (err, res) {
+			if (err) {
+                callback(err, null);
+            }
+			loop_array = ['a', 'aa', 'aaa', 'azz', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z'];
+			for(var i=0;i<loop_array.length;i++)
+				client.set('score:' + loop_array[i], 100);
+			
+			client.sort('myset', 'by', 'score:*', function (err, sortedres) {
+				if (err) {
+					callback(err, null);
+				}
+				try{
+					if(!assert.equal(ut.compareArray(sortedres,loop_array),true,test_case)){
+						ut.pass(test_case);
+					}
+				}catch(e){
+					ut.fail(e,true)
+				}
+				testEmitter.emit('next');
+			});
+		});
+	});
+  };
+  
+  tester.Sort36 = function (errorCallback) {
+	var test_case="SORT GET with pattern ending with just -> does not get hash field"
+	client.del('mylist',function(err,res){
+		if(err){
+			errorCallback(err);
+		}
+		client.lpush('mylist','a',function(err,res){
+			if(err){
+				errorCallback(err);
+			}
+			client.set("x:a->",100,function(err,res){
+				if(err){
+					errorCallback(err);
+				}
+				client.sort('mylist','by', 'num','get', 'x:*->',function(err,res){
+					if(err){
+						errorCallback(err);
+					}
+					try{
+						if(!assert.equal(res,100,test_case)){
+							ut.pass(test_case);
+						}
+					}catch(e){
+							ut.pass(e,true);
+					}
+					testEmitter.emit('next');
+				});
+			});
+		});
+	});
+  }
+  
   return sort;
 
 }());
