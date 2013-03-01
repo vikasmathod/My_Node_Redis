@@ -2849,7 +2849,44 @@ exports.Zset = (function () {
       }
     });
   };
-
+// 2.6 addition
+  tester.zset5 = function (errorCallback) {
+    var test_case = "ZINTERSTORE #516 regression, mixed sets and ziplist zsets";
+    client.sadd('one', 100, 101,102,103, function (err, res) {
+		if (err) {
+			errorCallback(err);
+		}
+		client.sadd('two', 100,200, 201,202, function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.zadd('three', 1, 500 ,1 ,501, 1 ,502, 1, 503, 1, 100, function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				client.zinterstore('to_here', 3, 'one', 'two', 'three', 'WEIGHTS', 0, 0, 1, function (err, res) {
+					if (err) {
+						errorCallback(err);
+					}
+					client.zrange('to_here', 0, -1, function (err, res) {
+						if (err) {
+							errorCallback(err);
+						}
+						try {
+							if (!assert.deepEqual(res, [100], test_case)) {console.log("2")
+								ut.pass(test_case);
+								testEmitter.emit('next');
+							}
+							} catch (e) {
+							ut.fail(e, true);
+							testEmitter.emit('next');
+						}
+					});
+				});
+			});
+		});
+	});
+}
   return zset;
 
 }());

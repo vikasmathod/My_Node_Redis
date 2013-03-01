@@ -2042,15 +2042,27 @@ exports.Set = (function () {
 								break;
 							}
 						}
-						/* var iterations = 1000;
-							while(iterations!=0){
+						var set1 = [];
+						var iterations = 1000;
+							g.asyncFor(0,1000, function (innerloop){
+								client.srandmember('myset',-10,function(err,replies){
+									for(var i=0;i<replies.length;i++){
+										set1.push(replies[i]);
+									}
+								});
+								if(set1.length == myset.length){
+									innerloop.break();
+								}else{
+									innerloop.next();
+								}
+							});
+							/* while(iterations!=0){
 							iterations--;
 							client.srandmember('myset',-10,function(err,replies){
-							console.log(replies.length + " replies:");
-							
-							
+								console.log(replies.length + " replies:");
 							});
-						} */
+							console.log(replies.length + " replies:");
+							}  */
 						try{
 							if (!assert.deepEqual(myset.sort(),Icontent.sort(), test_case) &&
 							!assert.equal(res2,'',test_case) && !assert.equal(mySetLen,100,test_case)

@@ -122,7 +122,7 @@ exports.Other = (function () {
       });
     });
   };
-
+  
   tester.other2 = function (errorCallback) {
     var iterations = 1000;
     var fuzztype = new Array("binary", "alpha", "compr");
@@ -228,8 +228,162 @@ exports.Other = (function () {
     })
   };
 
+  tester.other5 = function(errorCallback){
+	var test_case = "EXPIRES after AOF reload (without rewrite)";
+	var test_pass = false;
+	client.flushdb(function(err,res){
+		client.config('set','appendonly','yes',function(err,res){
+			client.set('x','somevalue',function(err,res){
+				client.expire('x',1000,function(err,res){
+					client.setex('y',2000,'somevalue',function(err,res){
+						client.set('z','somevalue',function(err,res){
+							var epochz = (parseInt((new Date()).getTime() / 1000 )+3000);
+							client.expireat('z',epochz,function(err,res){
+								client.set('px','somevalue',function(err,res){
+									client.pexpire('px',1000000,function(err,res){
+										client.psetex('py',2000000,'somevalue',function(err,res){
+											client.set('pz','somevalue',function(err,res){
+												var epochpz = ((parseInt((new Date()).getTime() / 1000 )+3000)*1000);
+												client.pexpireat('pz',epochpz,function(err,res){
+													ut.waitForBgrewriteaof(client,function(err,res){
+														setTimeout(function(){
+															client.debug('loadaof',function(err,res){
+																client.ttl('x',function(err,ttl1){
+																	client.ttl('y',function(err,ttl2){
+																		client.ttl('z',function(err,ttl3){
+																			client.ttl('px',function(err,ttl4){
+																				client.ttl('py',function(err,ttl5){
+																					client.ttl('pz',function(err,ttl6){
+																						if((ttl1 > 900 && ttl1 <= 1000) && (ttl2 > 1900 && ttl2 <= 2000) && (ttl3 > 2900 && ttl3 <= 3000)
+																						  && (ttl4 > 900 && ttl4 <= 1000) && (ttl5 > 1900 && ttl5 <= 2000) && (ttl6 > 2900 && ttl6 <= 3000)){
+																							test_pass = true;
+																						}
+																						try{
+																							if(!assert.equal(test_pass,true,test_case)){
+																								ut.pass(test_case);
+																								client.config('set','appendonly','no');
+																							}
+																						}catch(e){
+																							ut.fail(e,true);
+																						}
+																						testEmitter.emit('next');
+																					});
+																				});
+																			});
+																		});
+																	});
+																});
+															});
+														},2000);
+													});
+												});
+											});
+										});
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	});
+};
+
+  tester.other6 = function (errorCallback) {
+	var test_case = "EXPIRES after a reload (snapshot + append only file rewrite)";
+	var res1 = 0, res2=0;
+	client.flushdb(function (err, res) {
+		if (err) {
+			errorCallback(err)
+		}
+		client.set('x',100,function(err,res){
+			if (err) {
+				errorCallback(err)
+			}
+			client.expire('x',1000,function(err,res){
+				if (err) {
+					errorCallback(err)
+				}
+				client.save(function(err,res){
+					if (err) {
+						errorCallback(err)
+					}
+					client.debug('reload',function(err,res){
+						if (err) {
+							errorCallback(err)
+						}
+						client.ttl('x',function(err,ttl){
+							if (err) {
+								errorCallback(err)
+							}
+							if(ttl >900 && ttl<=1000){
+								res1 = 1;
+							}
+							client.bgrewriteaof(function(err,res){
+								if (err) {
+									errorCallback(err)
+								}
+								ut.waitForBgrewriteaof(client,function(err,res){
+									if (err) {
+										errorCallback(err)
+									}
+									client.debug('reload',function(err,res){
+										if (err) {
+											errorCallback(err)
+										}
+										client.ttl('x',function(err,ttl){
+											if (err) {
+												errorCallback(err)
+											}
+											if(ttl >900 && ttl<=1000){
+												res2 = 1;
+											}
+											try{
+												if(!assert.equal(ut.compareArray([res1,res2],[1,1]),true,test_case)){
+													ut.pass(test_case);
+												}
+												}catch(e){
+												ut.fail(e,true);
+											}
+											testEmitter.emit('next');
+										});
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	});
+  };
+  
+  tester.other7 = function (errorCallback) {
+    var test_case = "Perform a final SAVE to leave a clean DB on disk";
+    ut.waitForBgsave(client, function (err, res) {
+		if (err) {
+			errorCallback(err)
+		}
+		client.save(function (err, res) {
+			if (err) {
+				errorCallback(err)
+			}
+			try {
+				if (!assert.equal(res, "OK", test_case)) {
+					ut.pass(test_case);
+					testEmitter.emit('next');
+				}
+				} catch (e) {
+				ut.fail(e, true);
+				testEmitter.emit('next');
+			}
+		});
+    });
+};
+  
   // consistency
-  tester.other5 = function (errorCallback) {
+  tester.other8 = function (errorCallback) {
     var test_case = "Check consistency of different data types after a reload";
     var numops = 1000;
     client.flushdb(function (err, res) {
@@ -287,7 +441,7 @@ exports.Other = (function () {
   };
 
   //consistency
-  tester.other6 = function (errorCallback) {
+  tester.other9 = function (errorCallback) {
     var test_case = "Same dataset digest if saving/reloading as AOF?";
     client.bgrewriteaof(function (err, res) {
       if (err) {
@@ -341,7 +495,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other7_1 = function (errorCallback) {
+  tester.other10_1 = function (errorCallback) {
     var test_case = "PIPELINING stresser (also a regression for the old epoll bug.) ";
     var error = "", flag = true;
     client.write(ut.formatCommand(['SELECT', '9']), function (err, res) {
@@ -381,7 +535,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other8 = function (errorCallback) {
+  tester.other11 = function (errorCallback) {
     var test_case = "MUTLI / EXEC basics";
     var v = new Array();
     client.del('mylist', function (err, res) {
@@ -438,7 +592,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other9 = function (errorCallback) {
+  tester.other12 = function (errorCallback) {
     var test_case = "DISCARD";
     var v = new Array();
     client.del('mylist', function (err, res) {
@@ -495,7 +649,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other10 = function (errorCallback) {
+  tester.other13 = function (errorCallback) {
     var test_case = "Nested MULTI are not allowed";
     var error = "";
     var multi = client.multi();
@@ -515,7 +669,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other11 = function (errorCallback) {
+  tester.other14 = function (errorCallback) {
     var list = new Array();
     var test_case = "MULTI where commands alter argc/argv";
     client.sadd('myset', 'a', function (err, res) {
@@ -548,7 +702,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other12 = function (errorCallback) {
+  tester.other15 = function (errorCallback) {
     var test_case = "WATCH inside MULTI is not allowed";
     var error = "";
     var multi = client.multi();
@@ -568,7 +722,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other13 = function (errorCallback) {
+  tester.other16 = function (errorCallback) {
     var test_case = "APPEND basics";
     var result = new Array();
     client.append('foo', 'bar', function (err, res) {
@@ -605,7 +759,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other14 = function (errorCallback) {
+  tester.other17 = function (errorCallback) {
     var test_case = "APPEND basics, integer encoded values";
     var result = new Array();
     client.del('foo', function (err, res) {
@@ -655,7 +809,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other15 = function (errorCallback) {
+  tester.other18 = function (errorCallback) {
     var test_case = "APPEND fuzzing";
     var error_array = new Array();
     var type = new Array("alpha", "binary", "compr");
@@ -699,9 +853,8 @@ exports.Other = (function () {
     });
   };
 
-
   //Leave the user with a clean DB before to exit
-  tester.other16 = function (errorCallback) {
+  tester.other19 = function (errorCallback) {
     var test_case = "FLUSHDB";
     var aux = new Array();
     client.select(9, function (err, res) {
@@ -747,37 +900,14 @@ exports.Other = (function () {
     });
   };
 
-  tester.other17 = function (errorCallback) {
-    var test_case = "Perform a final SAVE to leave a clean DB on disk";
-    ut.waitForBgsave(client, function (err, res) {
-      if (err) {
-        errorCallback(err)
-      }
-      client.save(function (err, res) {
-        if (err) {
-          errorCallback(err)
-        }
-        try {
-          if (!assert.equal(res, "OK", test_case)) {
-            ut.pass(test_case);
-            testEmitter.emit('next');
-          }
-        } catch (e) {
-          ut.fail(e, true);
-          testEmitter.emit('next');
-        }
-      });
-    });
-  };
-
-  tester.other18 = function (errorCallback) {
+  tester.other20 = function (errorCallback) {
     var test_case = "Config GET * returns all config parameters";
     client.config('get', '*', function (err, res) {
       if (err) {
         errorCallback(err)
       }
       try {
-        if (!assert.equal(res.length, 50, test_case)) {
+        if (!assert.equal(res.length, 92, test_case)) {
           ut.pass(test_case);
           testEmitter.emit('next');
         }
@@ -788,7 +918,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other19 = function (errorCallback) {
+  tester.other21 = function (errorCallback) {
     var test_case = "Config GET wrong number of parameters";
     client.config('get', 'param1', 'param2', function (err, res) {
       try {
@@ -803,7 +933,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other20 = function (errorCallback) {
+  tester.other22 = function (errorCallback) {
     var test_case = "Config GET parameter name.";
     client.config('get', 'dbfilename', function (err, res) {
       if (err) {
@@ -821,7 +951,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other21 = function (errorCallback) {
+  tester.other23 = function (errorCallback) {
     var test_case = "Config GET parameter with pattern";
     client.config('get', '*max-*-entries*', function (err, res) {
       if (err) {
@@ -839,19 +969,17 @@ exports.Other = (function () {
     });
   };
 
-  tester.other22 = function (errorCallback) {
+  tester.other24 = function (errorCallback) {
     var test_case = "Config SET & GET combinations";
     var error = null, count = 0, size = 0;
     var result = {}, input = {};
     input['dbfilename'] = 'temp-db.rdb';
-    input['masterauth'] = 'foobar';
+    input['masterauth'] = '';
     input['maxmemory-policy'] = 'noeviction';
     input['maxmemory-samples'] = 4;
     input['appendonly'] = 'no';
     input['appendfsync'] = 'no';
     input['timeout'] = 200;
-    input['hash-max-zipmap-entries'] = 32;
-    input['hash-max-zipmap-value'] = 256;
     input['list-max-ziplist-entries'] = 16;
     input['list-max-ziplist-value'] = 128;
     input['set-max-intset-entries'] = 32;
@@ -867,8 +995,6 @@ exports.Other = (function () {
     client.config('set', 'appendonly', input['appendonly']);
     client.config('set', 'appendfsync', input['appendfsync']);
     client.config('set', 'timeout', input['timeout']);
-    client.config('set', 'hash-max-zipmap-entries', input['hash-max-zipmap-entries']);
-    client.config('set', 'hash-max-zipmap-value', input['hash-max-zipmap-value']);
     client.config('set', 'list-max-ziplist-entries', input['list-max-ziplist-entries']);
     client.config('set', 'list-max-ziplist-value', input['list-max-ziplist-value']);
     client.config('set', 'set-max-intset-entries', input['set-max-intset-entries']);
@@ -904,14 +1030,6 @@ exports.Other = (function () {
     client.config('get', 'appendfsync', function (err, res) {
       if (err) { errorCallback(err) }
       result['appendfsync'] = res;
-    });
-    client.config('get', 'hash-max-zipmap-entries', function (err, res) {
-      if (err) { errorCallback(err) }
-      result['hash-max-zipmap-entries'] = res;
-    });
-    client.config('get', 'hash-max-zipmap-value', function (err, res) {
-      if (err) { errorCallback(err) }
-      result['hash-max-zipmap-value'] = res;
     });
     client.config('get', 'list-max-ziplist-entries', function (err, res) {
       if (err) { errorCallback(err) }
@@ -970,7 +1088,7 @@ exports.Other = (function () {
     }, 500);
   };
 
-  tester.other23 = function (errorCallback) {
+  tester.other25 = function (errorCallback) {
     var test_case = "Config RESETSTAT";
     client.config('resetstat', function (err, result) {
       if (err) {
@@ -993,7 +1111,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other24 = function (errorCallback) {
+  tester.other26 = function (errorCallback) {
     var test_case = "Config command other than GET, SET, RESETSTAT";
     client.config('fake_command', function (err, res) {
       try {
@@ -1008,7 +1126,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other25 = function (errorCallback) {
+  tester.other27 = function (errorCallback) {
     var test_case = "Lastsave";
     client.lastsave(function (err, res) {
       try {
@@ -1023,7 +1141,7 @@ exports.Other = (function () {
     });
   };
 
-  tester.other26 = function (errorCallback) {
+  tester.other28 = function (errorCallback) {
     var test_case = "ECHO";
     var str = "Hello World!!";
     client.echo(str, function (err, res) {
@@ -1035,31 +1153,31 @@ exports.Other = (function () {
           ut.pass(test_case);
         }
       } catch (e) {
-        ut.fail(e);
+        ut.fail(e,true);
       }
       testEmitter.emit('next');
     });
   };
 
-  tester.other27 = function (errorCallback) {
+  tester.other29 = function (errorCallback) {
     var test_case = "Redis Version Check";
     var cmd = '.' + sep + 'redis' + sep + 'src' + sep + REDIS_SERVER + ' --version ';
     var child_check = child.exec(cmd);
     child_check.stdout.on('data', function (data) {
       try {
-        if (!assert.ok(ut.match('Redis server version', data), test_case)) {
+        if (!assert.ok(ut.match('Redis server', data), test_case)) {
           ut.pass(test_case);
         }
       } catch (e) {
-        ut.fail(e);
+        ut.fail(e,true);
       }
       testEmitter.emit('next');
     });
   };
-
-  tester.other28 = function (errorCallback) {
+ 
+  tester.other30 = function (errorCallback) {
     var test_case = "Monitor", replies = [], m_client;
-    m_client = redis.createClient(server_port, server);
+    m_client = redis.createClient(server_port, server,{ no_ready_check: true });
     m_client.on('ready', function () {
       if (other.debug_mode) {
         log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
@@ -1076,21 +1194,21 @@ exports.Other = (function () {
             ut.pass(test_case);
           }
         } catch (e) {
-          ut.fail(e);
+          ut.fail(e,true);
         }
 
         m_client.quit();
         if (other.debug_mode) {
           log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
         }
-        testEmitter.emit('next');
       }
     });
     m_client.monitor(function (err, res) {
       client.dbsize();
       client.set("json", JSON.stringify({ name: "John", surname: "Doe" }));
-    });
-  };
+    }); 
+	testEmitter.emit('next');
+  }; 
 
   return other;
 
