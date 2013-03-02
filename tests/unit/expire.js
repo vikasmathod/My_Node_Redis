@@ -66,7 +66,7 @@ exports.Expire = (function () {
     return (value >= start && value <= end) ? true : false;
   };
 
- /* tester.expire1 = function (errorCallback) {
+  tester.expire1 = function (errorCallback) {
     var test_case = "EXPIRE - set timeouts multiple times";
     var result_array = new Array();
     client.set('x', 'foobar', function (err, res) {
@@ -93,7 +93,7 @@ exports.Expire = (function () {
                 errorCallback(err);
               }
               result_array.push(v4);
-              client.expire('x', 4, function (err, res) {
+              client.expire('x', 2, function (err, res) {
                 if (err) {
                   errorCallback(err);
                 }
@@ -317,7 +317,7 @@ exports.Expire = (function () {
           testEmitter.emit('next');
         }
       });
-    }, 3000);
+    }, 1100);
   };
 
   tester.expire9_1 = function (errorCallback) {
@@ -470,8 +470,8 @@ exports.Expire = (function () {
       });
     });
   };
-
-  */ 
+ 
+ 
  tester.expire13 = function (errorCallback) {
     var test_case = "5 keys in, 5 keys out";
     var result_array = new Array();
@@ -487,41 +487,36 @@ exports.Expire = (function () {
                 if (err) {
                     errorCallback(err);
                 }
-				result_array.push('a')
+				result_array.push('a');
                 client.set('t', 'c', function (err, res) {
                     if (err) {
                         errorCallback(err);
                     }
-                    result_array.push('t')
+                    result_array.push('t');
                     client.set('e', 'c', function (err, res) {
                         if (err) {
                             errorCallback(err);
                         }
-                        result_array.push('e')
+                        result_array.push('e');
                         client.set('s', 'c', function (err, res) {
                             if (err) {
                                 errorCallback(err);
                             }
-                            result_array.push('s')
+                            result_array.push('s');
                             client.set('foo', 'b', function (err, res) {
                                 if (err) {
                                     errorCallback(err);
                                 }
-                                result_array.push('foo')
-                                //client.lsort(result_array, function (err, sortres) {
-                                    //if (err) {
-                                        //errorCallback(err);
-                                    //}
-                                    try {
-                                        if (!assert.deepEqual(result_array.sort(), ['a', 'e', 'foo', 's', 't'], test_case)) {
-                                            ut.pass(test_case);
-                                            testEmitter.emit('next');
-                                        }
-                                    } catch (e) {
-                                        ut.fail(e, true);
-                                        testEmitter.emit('next');
-                                    }
-                                //});
+                                result_array.push('foo');
+								try {
+									if (!assert.deepEqual(result_array.sort(), ['a', 'e', 'foo', 's', 't'], test_case)) {
+										ut.pass(test_case);
+										testEmitter.emit('next');
+									}
+								} catch (e) {
+									ut.fail(e, true);
+									testEmitter.emit('next');
+								}
                             });
                         });
                     });
@@ -530,7 +525,7 @@ exports.Expire = (function () {
         });
     });
   };
-
+ 
   tester.expire14 = function (errorCallback) {  
     var test_case = "PTTL returns millisecond time to live";
     client.del('x', function (err, res) {
@@ -564,66 +559,43 @@ exports.Expire = (function () {
     });
   };
  
- tester.expire15 = function (errorCallback) {
-    var test_case = "EXPIRE precision is now the millisecond";
-    /*  This test is very likely to do a false positive if the
-    server is under pressure, so if it does not work give it a few more
-    chances. */
-    for (var j = 0; j < 10; j++) {
-        client.del('x', function (err, res) {
-            if (err) {
-                errorCallback(err);
-            }
-            client.setex('x', 1, 'somevalue', function (err, res) {
-                if (err) {
-                    errorCallback(err);
-                }
-                setTimeout(function () {
-                    client.get(x, function (err, res1) {
-                        if (err) {
-                            errorCallback(err);
-                        }
-                        client.set('a', res1, function (err, res) {
-                            if (err) {
-                                errorCallback(err);
-                            }
-                        });
-                    });
-                }, 900)
-                setTimeout(function () {
-                    client.get('x', function (err, res2) {
-                        if (err) {
-                            errorCallback(err);
-                        }
-                        client.set('b', res2, function (err, res) {
-                            if (err) {
-                                errorCallback(err);
-                            }
-                        });
-                    });
-                }, 1100)
-            });
-        });
-        if ((!assert.equal('a', 'somevalue', test_case)) && (!assert.equal('b', {}, test_case))) {
-            break;
-        }
-    };
-    client.list('a', 'b', function (err, res) {
-        if (err) {
-            errorCallback(err);
-        }
-        try {
-            if (!assert.equal(res, ['somevalue', {}], test_case)) {
-                ut.pass(test_case);
-                testEmitter.emit('next');
-            }
-        } catch (e) {
-            ut.fail(e, true);
-            testEmitter.emit('next');
-        }
-    });
-  };
-  
+ 
+ tester.expire15 = function(errorCallback){
+	var test_case = "EXPIRE precision is now the millisecond";
+	//This test is very likely to do a false positive if the
+    //server is under pressure, so if it does not work give it a few more
+    //chances. 
+	var Resa = "",Resb = "";
+	g.asyncFor(0,9,function(loop){
+		client.del('x');
+		client.setex('x',1,'somevalue');
+		
+		setTimeout(function(){
+			client.get('x',function(err,res){
+				Resa = res;	
+			});
+			
+			setTimeout(function(){
+				client.get('x',function(err,res){
+					Resb = res;					
+				});
+			},1100);
+			if(Resa == 'somevalue' && Resb=='')
+				loop.break();
+			loop.next();
+		},900);
+		
+	},function(){
+		try{
+			if(!assert.deepEqual([Resa,Resb],['somevalue',''],test_case))
+				ut.pass(test_case);
+		}catch(e){
+			ut.fail(e,true);
+		}
+		testEmitter.emit('next');
+	});
+ }
+ 
  tester.expire16 = function (errorCallback) {
  	var test_case = "Redis should actively expire keys incrementally";
 	var res1 = "1",res2 = "";
@@ -639,7 +611,7 @@ exports.Expire = (function () {
  			if (err) {
  				errorCallback(err);
  			}
- 			client.psetex('key3', 500, 'a', function (err, res) {console.log(1)
+ 			client.psetex('key3', 500, 'a', function (err, res) {
  				if (err) {
  					errorCallback(err);
  				}
@@ -657,9 +629,9 @@ exports.Expire = (function () {
  			});
  		});
  	});
- 	/* Redis expires random keys ten times every second so we are
- 	fairly sure that all the three keys should be evicted after
- 	one second.*/
+ 	//Redis expires random keys ten times every second so we are
+ 	//fairly sure that all the three keys should be evicted after
+ 	//one second.
 
  	setTimeout(function () {
  		client.dbsize(function (err, size2) {
@@ -668,14 +640,14 @@ exports.Expire = (function () {
  			}
 			res2 = size2
  		});
- 		/* client.set('size2', res, function (err, res) {
- 			if (err) {
- 				errorCallback(err);
- 			}
- 		}); */
+ 		 //client.set('size2', res, function (err, res) {
+ 		//	if (err) {
+ 		//		errorCallback(err);
+ 		//	}
+ 		//}); 
  	}, 1000);
  	try {
- 		if ((!assert.equal(res1, 3, test_case)) && (!assert.equal(res2, 0, test_case))) {
+ 		if ((!assert.equal(res1, 1, test_case)) && (!assert.equal(res2, 0, test_case))) {
  				ut.pass(test_case);
  				testEmitter.emit('next');
  			}
@@ -684,139 +656,67 @@ exports.Expire = (function () {
  			testEmitter.emit('next');
  		}
  	};
-  /* tester.expire15 = function (errorCallback) {
+  
+  tester.expire17 = function (errorCallback) {
 	var test_case = "PEXPIRE/PSETEX/PEXPIREAT can set sub-second expires";
-	/* This test is very likely to do a false positive if the
-		server is under pressure, so if it does not work give it a few more
-	chances*//*
-	for (var j = 0; j < 10; j++) {
-		client.del('x', 'y', 'z', function (err, res) {
-			if (err) {
-				errorCallback(err);
-			}
-			client.psetex('x', 100, 'somevalue', function (err, res) {
-				if (err) {
-					errorCallback(err);
-				}
-				setTimeout(function () {
-					client.get('x', function (err, res1) {
-						if (err) {
-							errorCallback(err);
-						}
-						client.set('a', res1, function (err, res) {
-							if (err) {
-								errorCallback(err);
-							}
-						});
-					});
-				}, 80)
-				setTimeout(function () {
-					client.get('x', function (err, res2) {
-						if (err) {
-							errorCallback(err);
-						}
-						client.set('b', res2, function (err, res) {
-							if (err) {
-								errorCallback(err);
-							}
-						});
-					});
-				}, 120)
-				
-				client.set('x', 'somevalue', function (err, res) {
-					if (err) {
-						errorCallback(err);
-					}
-					client.pexpire('x', 100, function (err, res) {
-						if (err) {
-							errorCallback(err);
-						}
-						setTimeout(function () {
-							client.get('x', function (err, res1) {
-								if (err) {
-									errorCallback(err);
-								}
-								client.set('c', res1, function (err, res) {
-									if (err) {
-										errorCallback(err);
-									}
-								});
-							});
-						}, 80)
-						setTimeout(function () {
-							client.get('x', function (err, res2) {
-								if (err) {
-									errorCallback(err);
-								}
-								client.set('d', res2, function (err, res) {
-									if (err) {
-										errorCallback(err);
-									}
-								});
-							});
-						}, 120)
-						client.set('x', 'somevalue', function (err, res) {
-							if (err) {
-								errorCallback(err);
-							}
-							client.pexpireat('x', [], function (err, res) {
-								if (err) {
-									errorCallback(err);
-								}
-								setTimeout(function () {
-									client.get('x', function (err, res1) {
-										if (err) {
-											errorCallback(err);
-										}
-										client.set('e', res1, function (err, res) {
-											if (err) {
-												errorCallback(err);
-											}
-										});
-									});
-								}, 80)
-								setTimeout(function () {
-									client.get('x', function (err, res2) {
-										if (err) {
-											errorCallback(err);
-										}
-										client.set('f', res2, function (err, res) {
-											if (err) {
-												errorCallback(err);
-											}
-										});
-									});
-								}, 120)
-							});
-						});
-					});
-				});
-			});
-		});
-		 if ((!assert.equal('a', 'somevalue', test_case)) && (!assert.equal('b', {}, test_case)) &&
-		(!assert.equal('c', 'somevalue', test_case)) && (!assert.equal('d', {}, test_case)) &&
-		(!assert.equal('e', 'somevalue', test_case)) && (!assert.equal('f', {}, test_case))) {
-			break;
-		} 
-	};
-	client.list('a', 'b', function (err, res) {
-		if (err) {
-			errorCallback(err);
-		}
-		try {
-			if (!assert.equal(res, ['somevalue', {}
+	//This test is very likely to do a false positive if the
+	//server is under pressure, so if it does not work give it a few more
+	//chances
+	var ResA = "",ResB = "",ResC = "",ResD = "",ResE = "",ResF = "";
+	g.asyncFor(0,9,function(loop){
+		client.del('x','y','z');
+		client.psetex('x',100,'somevalue');
+		setTimeout(function(){
+			client.get('x',function(err,res){
+				ResA = res;
+			});			
 			
-			], test_case)) {
+		},80);
+		setTimeout(function(){
+			client.get('x',function(err,res){
+				ResB = res;
+			});
+		},120);
+		client.set('x','somevalue');
+		client.pexpire('x',100);
+		setTimeout(function(){
+			client.get('x',function(err,res){
+				ResC = res;
+			});
+		},80);
+		setTimeout(function(){
+			client.get('x',function(err,res){
+				ResD = res;
+			});
+		},120);
+		client.set('x','somevalue');
+		client.pexpireat('x',((new Date()).getTime()+100));
+		setTimeout(function(){
+			client.get('x',function(err,res){
+				ResE = res;
+			});
+		},80);
+		setTimeout(function(){
+			client.get('x',function(err,res){
+				ResF = res;
+			});
+			if(ResA == 'somevalue' && ResC == 'somevalue' && ResD == 'somevalue' &&
+				ResB == '' && ResD == '' && ResF == '')
+				loop.break();
+			loop.next();
+		},120);
+	},function(){
+		try{
+			if(!assert.deepEqual([ResA,ResB],['somevalue',null],test_case))
 				ut.pass(test_case);
-				testEmitter.emit('next');
-			}
-			} catch (e) {
-			ut.fail(e, true);
-			testEmitter.emit('next');
+		}catch(e){
+			ut.fail(e,true);
 		}
-	});
-};
-   */
-  return expire;
+		testEmitter.emit('next');
+	})
+ }; 
+ 
+ 
+ return expire;
 
 }());
