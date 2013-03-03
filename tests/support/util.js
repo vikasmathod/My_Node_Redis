@@ -292,6 +292,13 @@ Utility.prototype.findKeyWithType = function (client, type, callback) {
     callback(null, result);
   });
 };
+Utility.prototype.randomInt = function (max) {
+	return Math.random()*max;
+}
+Utility.prototype.randomSignedInt = function (max) {
+    var i = this.randomInt(max);
+    return (Math.random() > 0.5 ? -i : i);
+}
 Utility.prototype.createComplexDataset = function (client, ops, useexpire, callback) {
   var that = this;
   g.asyncFor(0, ops, function (loop) {
