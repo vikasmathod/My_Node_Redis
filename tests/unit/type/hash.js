@@ -93,7 +93,7 @@ exports.Hash = (function () {
     });
   }
 
-  tester.Hash1 = function (errorCallback) {
+ tester.Hash1 = function (errorCallback) {
     var test_case = "HSET/HLEN - Small hash creation";
     g.asyncFor(0, 8, function (loop) {
       var key = ut.randstring(0, 8, 'alpha');
@@ -185,7 +185,7 @@ exports.Hash = (function () {
   };
 
   tester.Hash4 = function (errorCallback) {
-    var test_case = "Is the big hash encoded with a hashtable?";
+    var test_case = "Is the big hash encoded with a ziplist?";
     assert_encoding('hashtable', 'bighash', function (err, res) {
       try {
         if (!assert.ok(res, test_case)) {
@@ -952,7 +952,7 @@ exports.Hash = (function () {
     });
   };
   tester.Hash30 = function (errorCallback) {
-    var test_case = "Is a zipmap encoded Hash promoted on big payload?";
+    var test_case = "Is a ziplist encoded Hash promoted on big payload?";
     var str = g.fillString(1024, 'a');
     client.hset('smallhash', 'foo', str, function (err, res) {
       if (err) {
@@ -1182,12 +1182,12 @@ exports.Hash = (function () {
     });
   };
   tester.Hash37 = function (errorCallback) {
-    var test_case = "HINCRBY fails against hash value with spaces";
-    client.hset('smallhash', 'str', '    11    ', function (err, res) {
+    var test_case = "HINCRBY fails against hash value with spaces (left)";
+    client.hset('smallhash', 'str', ' 11', function (err, res) {
       if (err) {
         errorCallback(err);
       }
-      client.hset('bighash', 'str', '    11    ', function (err, res) {
+      client.hset('bighash', 'str', ' 11', function (err, res) {
         if (err) {
           errorCallback(err);
         }
@@ -1230,7 +1230,7 @@ exports.Hash = (function () {
     });
   };
   tester.Hash39 = function (errorCallback) {
-    var test_case = "Hash zipmap regression test for large keys";
+    var test_case = "Hash ziplist regression test for large keys";
     var str = g.fillString(336, 'k');
     client.hset('hash', str, 'a', function (err, res) {
       if (err) {
@@ -1253,6 +1253,442 @@ exports.Hash = (function () {
       });
     });
   };
-
+  tester.Hash40 = function (errorCallback) {
+    var test_case = "HINCRBY fails against hash value with spaces (right)";
+    client.hset('smallhash', 'str', '11 ', function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      client.hset('bighash', 'str', '11 ', function (err, res) {
+        if (err) {
+          errorCallback(err);
+        }
+        client.hincrby('smallhash', 'str', 1, function (smallerr, res) {
+          client.hincrby('bighash', 'str', 1, function (bigerr, res) {
+            try {
+              if ((!assert.ok(ut.match('not an integer', smallerr), test_case)) && (!assert.ok(ut.match('not an integer', bigerr), test_case))) {
+                ut.pass(test_case);
+              }
+            } catch (e) {
+              ut.fail(e, true);
+            }
+            testEmitter.emit('next');
+          });
+        });
+      });
+    });
+  };
+  
+  tester.Hash41 = function(errorCallback){
+	var test_case = "HINCRBYFLOAT against non existing database key";
+	client.del('htest');
+	client.hincrbyfloat('htest','foo',2.5,function(err,res){
+		if(err){
+			errorCallback(err);
+		}
+		try{
+			if(!assert.equal(res,2.5,test_case))
+				ut.pass(test_case);
+		}
+		catch(e){
+			ut.fail(e,true);
+		}
+		testEmitter.emit('next');
+	});
+  }
+  
+  tester.Hash42 = function(errorCallback){
+	var test_case = "HINCRBYFLOAT against non existing hash key"
+	var array = [];
+	client.hdel('smallhash','tmp');
+	client.hdel('bighash','tmp');
+	client.hincrbyfloat('smallhash','tmp',2.5,function(err,res){
+		if(err){
+			errorCallback(err);
+		}
+		array.push(res);
+		client.hget('smallhash','tmp',function(err,res){
+			if(err){
+				errorCallback(err);
+			}	
+			array.push(res);
+			client.hincrbyfloat('bighash','tmp',2.5,function(err,res){
+				if(err){
+					errorCallback(err);
+				}
+				array.push(res);
+				client.hget('smallhash','tmp',function(err,res){
+					if(err){
+						errorCallback(err);
+					}	
+					array.push(res);
+					try{
+						if(!assert.deepEqual(array,[2.5,2.5,2.5,2.5],test_case))
+							ut.pass(test_case);
+					}catch(e){
+						ut.pass(e,true);
+					}
+					testEmitter.emit('next');
+				});
+			});
+		});
+	});
+  };
+  
+  tester.Hash43 = function(errorCallback){
+	var test_case = "HINCRBYFLOAT against hash key created by hincrby itself"
+	var array = [];
+	client.hincrbyfloat('smallhash','tmp',3.5,function(err,res){
+		if(err){
+			errorCallback(err);
+		}
+		array.push(res);
+		client.hget('smallhash','tmp',function(err,res){
+			if(err){
+				errorCallback(err);
+			}	
+			array.push(res);
+			client.hincrbyfloat('bighash','tmp',3.5,function(err,res){
+				if(err){
+					errorCallback(err);
+				}
+				array.push(res);
+				client.hget('smallhash','tmp',function(err,res){
+					if(err){
+						errorCallback(err);
+					}	
+					array.push(res);
+					try{
+						if(!assert.deepEqual(array,[6,6,6,6],test_case))
+							ut.pass(test_case);
+					}catch(e){
+						ut.pass(e,true);
+					}
+					testEmitter.emit('next');
+				});
+			});
+		});
+	});
+  };
+  
+  tester.Hash44 = function(errorCallback){
+	var test_case = "HINCRBYFLOAT against hash key originally set with HSET"
+	var array = [];
+	client.hset('smallhash','tmp',100);
+	client.hset('bighash','tmp',100);
+	client.hincrbyfloat('smallhash','tmp',2.5,function(err,res){
+		if(err){
+			errorCallback(err);
+		}
+		array.push(res);	
+		client.hincrbyfloat('bighash','tmp',2.5,function(err,res){
+			if(err){
+				errorCallback(err);
+			}
+			array.push(res);
+			try{
+				if(!assert.deepEqual(array,[102.5,102.5],test_case))
+					ut.pass(test_case);
+			}catch(e){
+				ut.pass(e,true);
+			}
+			testEmitter.emit('next');
+		});
+	});
+  };
+ 
+  tester.Hash45 = function(errorCallback){
+	var test_case = "HINCRBYFLOAT over 32bit value"
+	var array = [];
+	client.hset('smallhash','tmp',17179869184);
+	client.hset('bighash','tmp',17179869184);
+	client.hincrbyfloat('smallhash','tmp',1,function(err,res){
+		if(err){
+			errorCallback(err);
+		}
+		array.push(res);	
+		client.hincrbyfloat('bighash','tmp',1,function(err,res){
+			if(err){
+				errorCallback(err);
+			}
+			array.push(res);
+			try{
+				if(!assert.deepEqual(array,[17179869185,17179869185],test_case))
+					ut.pass(test_case);
+			}catch(e){
+				ut.pass(e,true);
+			}
+			testEmitter.emit('next');
+		});
+	});
+  };
+  
+  tester.Hash46 = function(errorCallback){
+	var test_case = "HINCRBYFLOAT over 32bit value with over 32bit increment"
+	var array = [];
+	client.hset('smallhash','tmp',17179869184);
+	client.hset('bighash','tmp',17179869184);
+	client.hincrbyfloat('smallhash','tmp',17179869184,function(err,res){
+		if(err){
+			errorCallback(err);
+		}
+		array.push(res);	
+		client.hincrbyfloat('bighash','tmp',17179869184,function(err,res){
+			if(err){
+				errorCallback(err);
+			}
+			array.push(res);
+			try{
+				if(!assert.deepEqual(array,[34359738368,34359738368],test_case))
+					ut.pass(test_case);
+			}catch(e){
+				ut.pass(e,true);
+			}
+			testEmitter.emit('next');
+		});
+	});
+  };
+  
+  tester.Hash47 = function(errorCallback){
+	var test_case = "HINCRBYFLOAT fails against hash value with spaces (left)"
+	var array = [];
+	client.hset('smallhash','str'," 11");
+	client.hset('bighash','str'," 11");
+	client.hincrbyfloat('smallhash','str',1,function(smallErr,res){	
+		client.hincrbyfloat('bighash','str',1,function(bigErr,res){
+			try{
+				if(!assert.equal(ut.match('not a valid float', smallErr),true,test_case) &&
+					!assert.equal(ut.match('not a valid float', bigErr),true,test_case))
+					ut.pass(test_case);
+			}catch(e){
+				ut.pass(e,true);
+			}
+			testEmitter.emit('next');
+		});
+	});
+  };
+  
+  tester.Hash48 = function(errorCallback){
+	var test_case = "HINCRBYFLOAT fails against hash value with spaces (right)"
+	var array = [];
+	client.hset('smallhash','str',"11 ");
+	client.hset('bighash','str'," 11 ");
+	client.hincrbyfloat('smallhash','str',1,function(smallErr,res){	
+		client.hincrbyfloat('bighash','str',1,function(bigErr,res){
+			try{
+				if(!assert.equal(ut.match('not a valid float', smallErr),true,test_case) &&
+					!assert.equal(ut.match('not a valid float', bigErr),true,test_case))
+					ut.pass(test_case);
+			}catch(e){
+				ut.pass(e,true);
+			}
+			testEmitter.emit('next');
+		});
+	});
+  };
+  
+  tester.Hash49 = function(errorCallback){
+	  var size = [10,512],index=0,test_case="",tcPassFlg = true;
+	  var hashField = [],hashVal = [],Randfield="",RandVal="",i=0;	
+	  g.asyncFor(0,size.length,function(loop){
+			index = loop.iteration();
+			test_case = "Hash fuzzing #1 - "+size[index]+" fields";
+			g.asyncFor(0,9,function(innerLoop){
+				client.del('hash',function(err,res){
+					if(err){
+						errorCallback(err)
+					}
+					hashField = [],hashVal = [];
+					g.asyncFor(0,size[index],function(secLoop){
+						Randfield=Math.random()*100;
+						RandVal=Math.random()*100;
+						client.hset("hash", Randfield, RandVal,function(err,res){
+							hashField.push(Randfield);
+							hashVal.push(RandVal);
+							secLoop.next();
+						});					
+					},function(){
+						var VerifyFlg = true;
+						g.asyncFor(0,hashField.length,function(checkLoop){
+							i = checkLoop.iteration()
+							client.hget('hash',hashField[i],function(err,res){
+								if(hashVal[i] == res){
+									checkLoop.next();
+								}else{
+									VerifyFlg = false;
+									checkLoop.break();
+								}
+							});
+						},function(){
+							if(VerifyFlg && tcPassFlg){
+								client.hlen('hash',function(err,len){
+									if(err){
+										errorCallback(err)
+									}
+									if(len != hashField.length)
+										tcPassFlg = false;								
+								});							
+							}else
+								ut.fail("Hashtable Verification Failed",true);						
+							innerLoop.next();
+						});
+					});
+				});
+			},function(){
+				if(tcPassFlg){
+					ut.pass(test_case);
+					loop.next();
+				}else{
+					ut.fail("Testcase Failed",true);
+					loop.break();
+				}
+				
+			});
+	  },function(){
+		testEmitter.emit('next');
+	  });
+  };
+  
+  tester.Hash50 = function(errorCallback){
+	  var size = [10,512],index=0,test_case="",tcPassFlg = true;
+	  var hashField = [],hashVal = [],Randfield="",RandVal="",i=0;	
+	  g.asyncFor(0,size.length,function(loop){
+			index = loop.iteration();
+			test_case = "Hash fuzzing #2 - "+size[index]+" fields";
+			g.asyncFor(0,9,function(innerLoop){
+				client.del('hash',function(err,res){
+					if(err){
+						errorCallback(err)
+					}
+					hashField = [],hashVal = [];
+					g.asyncFor(0,size[index],function(secLoop){
+						var ch = ut.randpath(new Array(1, 2, 3));
+						switch (ch) {
+								case 1:{
+									Randfield=Math.random()*100;
+									RandVal=Math.random()*100;
+									client.hset("hash", Randfield, RandVal,function(err,res){
+										hashField.push(Randfield);
+										hashVal.push(RandVal);
+										secLoop.next();
+									});
+									break;
+								}
+								case 2:{
+									Randfield=ut.randomSignedInt(512);
+									RandVal=ut.randomSignedInt(512);
+									client.hset("hash", Randfield, RandVal,function(err,res){
+										hashField.push(Randfield);
+										hashVal.push(RandVal);
+										secLoop.next();
+									});
+									break;
+								}
+								case3:{
+									var ch_a = ut.randpath(new Array(1, 2));
+									switch(ch_a){
+										case 1:{
+											Randfield=Math.random()*100;
+											break;
+										}
+										case 2:{
+											Randfield=ut.randomSignedInt(512);
+										}
+										client.hdel('hash',Randfield,function(err,res){
+											if(err){
+												errorCallback(err)
+											}
+											hashVal.pop(hashVal[hashField.indexOf(Randfield)]);
+											hashField.pop(Randfield);							
+										});
+									}
+									break;
+								}
+							}
+							secLoop.next();
+					},function(){
+						var VerifyFlg = true;
+						g.asyncFor(0,hashField.length,function(checkLoop){
+							i = checkLoop.iteration()
+							client.hget('hash',hashField[i],function(err,res){
+								if(hashVal[i] == res){
+									checkLoop.next();
+								}else{
+									VerifyFlg = false;
+									checkLoop.break();
+								}
+							});
+						},function(){
+							if(VerifyFlg && tcPassFlg){
+								client.hlen('hash',function(err,len){
+									if(err){
+										errorCallback(err)
+									}
+									if(len != hashField.length)
+										tcPassFlg = false;								
+								});							
+							}else
+								ut.fail("Hashtable Verification Failed",true);						
+							innerLoop.next();
+						});
+					});
+				});
+			},function(){
+				if(tcPassFlg){
+					ut.pass(test_case);
+					loop.next();
+				}else{
+					ut.fail("Testcase Failed",true);
+					loop.break();
+				}				
+			});
+	  },function(){
+		testEmitter.emit('next');
+	  });
+  };
+  
+  tester.Hash51 = function(errorCallback){
+	var test_case="Stress test the hash ziplist -> hashtable encoding conversion"
+	var tcPassFlg = true;error = "";
+	client.config('set','hash-max-ziplist-entries',32,function(err,res){
+		g.asyncFor(0,100,function(loop){
+			client.del('myhash',function(err,res){
+				if(err){
+					errorCallback();
+				}
+				g.asyncFor(0,64,function(Innerloop){
+					client.hset('myhash',Math.random()*100,Math.random()*100,function(){
+						if(err){
+							errorCallback();
+						}
+						Innerloop.next();
+					});
+				},function(){
+					client.object('encoding','myhash',function(err,res){
+						if(tcPassFlg){
+							try{
+								if(!assert.ok(res,'hashtable',test_case)){
+									loop.next();
+								}
+							}
+							catch(e){
+								tcPassFlg = false;
+								error = e;
+								loop.break();
+							}
+						}
+					});					
+				});
+			});
+		},function(){
+			if(tcPassFlg){
+				ut.pass(test_case);
+			}else{
+				ut.fail(error,true)
+			}
+			testEmitter.emit('next');
+		});		
+	});
+  }
   return hash;
 }());
