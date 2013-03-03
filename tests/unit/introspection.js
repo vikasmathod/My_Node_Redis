@@ -490,7 +490,8 @@ exports.Introspection = (function () {
       });
     });
   };
-
+ 
+  
   tester.introspection8 = function (errorCallback) {
     var test_case = "AOF Foreground rewrite";
     var tags = "introspection8";
@@ -561,7 +562,54 @@ exports.Introspection = (function () {
       });
     });
   };
-
+ 
+  tester.introspection9 = function (errorCallback) {
+  var test_case = "MONITOR can log executed commands"
+	var tags = "introspection8";
+    var overrides = {};
+	var responses = [];
+    var args = {};
+    args['name'] = name;
+    args['tags'] = tags;
+    args['overrides'] = overrides;
+	server9.start_server(client_pid, args, function (err, res) {
+      if (err) {
+        errorCallback(err);
+      }
+      server_pid = res;
+	  server_port = g.srv[client_pid][server_pid]['port'];
+      server_host = g.srv[client_pid][server_pid]['host'];
+      client = g.srv[client_pid][server_pid]['client'];
+	  monitor_client = redis.createClient(server_port, server_host);
+		monitor_client.on("monitor", function (time, args) {
+			responses.push(args);			
+		});
+		monitor_client.on("end", function (err, res) {
+			server9.kill_server(client_pid, server_pid, function (err, res) {
+				if (err) {
+				  errorCallback(err);
+				}
+			});
+			testEmitter.emit('next');	
+		});	 
+		monitor_client.monitor(function (err, res) {
+			client.set('foo', 'bar',function(err,res){
+			monitor_client.emit('monitor');
+				client.get('foo',function(err,res1){
+					monitor_client.emit('monitor');
+					monitor_client.emit('end');					
+				});			
+			});			
+		});			
+		try{
+			if(!assert.equal(ut.match(responses.toString(),"set foo bar"),true,test_case))
+				ut.pass(test_case);
+		}catch(e){
+			ut.fail(e,true);
+		}		
+	  });
+  };
+ 
   return intro;
 
 }());
