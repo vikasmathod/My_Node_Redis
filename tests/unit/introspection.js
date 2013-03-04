@@ -562,10 +562,10 @@ exports.Introspection = (function () {
       });
     });
   };
- 
-  tester.introspection9 = function (errorCallback) {
+
+ tester.introspection9 = function (errorCallback) {
   var test_case = "MONITOR can log executed commands"
-	var tags = "introspection8";
+	var tags = "introspection9";
     var overrides = {};
 	var responses = [];
     var args = {};
@@ -584,13 +584,25 @@ exports.Introspection = (function () {
 		monitor_client.on("monitor", function (time, args) {
 			responses.push(args);			
 		});
-		monitor_client.on("end", function (err, res) {
+		monitor_client.on("end", function (err, res) {	
+			try{
+				if(!assert.equal(ut.match("set,foo,bar",responses.toString()),true,test_case))
+				ut.pass(test_case);
+				}catch(e){
+				ut.fail(e,true);
+			}
+			if (intro.debug_mode) {
+				log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+			}
+			testEmitter.emit('next');
+			monitor_client.end();
+			
 			server9.kill_server(client_pid, server_pid, function (err, res) {
+				client.end();
 				if (err) {
-				  errorCallback(err);
-				}
+					errorCallback(err);
+				}				
 			});
-			testEmitter.emit('next');	
 		});	 
 		monitor_client.monitor(function (err, res) {
 			client.set('foo', 'bar',function(err,res){
@@ -601,15 +613,61 @@ exports.Introspection = (function () {
 				});			
 			});			
 		});			
-		try{
-			if(!assert.equal(ut.match(responses.toString(),"set foo bar"),true,test_case))
-				ut.pass(test_case);
-		}catch(e){
-			ut.fail(e,true);
-		}		
 	  });
-  };
+  }; 
  
+ tester.introspection10 = function (errorCallback) {
+	var test_case = "MONITOR can log commands issued by the scripting engine"
+	var tags = "introspection10";
+    var overrides = {};
+	var responses = [];
+    var args = {};
+    args['name'] = name;
+    args['tags'] = tags;
+    args['overrides'] = overrides;
+	server10.start_server(client_pid, args, function (err, res) {
+		if (err) {
+			errorCallback(err);
+		}
+		server_pid = res;
+		server_port = g.srv[client_pid][server_pid]['port'];
+		server_host = g.srv[client_pid][server_pid]['host'];
+		client = g.srv[client_pid][server_pid]['client'];
+		monitor_client = redis.createClient(server_port, server_host);
+		monitor_client.on("monitor", function (time, args) {
+			responses.push(args);
+		});
+		monitor_client.on("end", function (err, res) {
+			try{
+				if(responses[0][0] == 'eval' && !assert.equal(ut.match("foo,bar",responses.toString()),true,test_case)){
+					ut.pass(test_case);
+				}
+			}catch(e){
+				ut.fail(e,true);
+			}
+			testEmitter.emit('next');
+			monitor_client.end();
+			server10.kill_server(client_pid, server_pid, function (err, res) {					
+				if (err) {
+					errorCallback(err);
+				}
+				client.end();					
+			});			
+		});
+		monitor_client.monitor(function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.eval("redis.call('set',KEYS[1],ARGV[1])",1,"foo","bar",function(err,res){
+				monitor_client.emit('monitor');
+				monitor_client.emit('end');
+			});
+		});
+		
+	});
+ };
+
+
   return intro;
 
 }());
