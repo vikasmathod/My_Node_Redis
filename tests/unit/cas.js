@@ -63,7 +63,7 @@ exports.Cas = (function () {
 
   //private methods
 
-  tester.cas1 = function (errorCallback) {
+ tester.cas1 = function (errorCallback) {
     var test_case = "EXEC works on WATCHed key not modified";
     client.watch('x', 'y', 'z', function (err, res) {
       if (err) {
@@ -240,7 +240,7 @@ exports.Cas = (function () {
       });
     });
   };
-
+  
   tester.cas5 = function (errorCallback) {
     var test_case = "After failed EXEC key is no longer watched";
     client.set('x', 30, function (err, res) {
@@ -304,7 +304,7 @@ exports.Cas = (function () {
       });
     });
   };
-
+ 
   tester.cas6 = function (errorCallback) {
     var test_case = "It is possible to UNWATCH";
     client.set('x', 30, function (err, res) {
@@ -350,7 +350,7 @@ exports.Cas = (function () {
       });
     });
   };
-
+ 
   tester.cas7 = function (errorCallback) {
     var test_case = "UNWATCH when there is nothing watched works as expected";
     client.unwatch(function (err, res) {
@@ -836,7 +836,7 @@ exports.Cas = (function () {
       })
     })
   };
-
+ 
   return cas;
 
 }());
