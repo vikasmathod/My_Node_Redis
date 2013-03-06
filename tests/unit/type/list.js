@@ -1156,7 +1156,7 @@ exports.List = (function () {
                     }
                     result_array.push(res);
                     try {
-                        if (!assert.deepEqual(result_array, ['foo', ['foo']], test_case)) {
+                        if (!assert.deepEqual(result_array, [['foo']], test_case)) {
                             ut.pass(test_case);
                         }
                     } catch (e) {
