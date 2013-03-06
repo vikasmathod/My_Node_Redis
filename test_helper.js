@@ -92,7 +92,19 @@ var Test_helper = function () {
       console.log("Test units: " + test_list[i]);
     }
   }
-
+ /* With the parallel test running multiple Redis instances at the same time
+	 we need a fast enough computer, otherwise a lot of tests may generate
+	 false positives.
+	 If the computer is too slow we revert the sequetial test without any
+ parallelism, that is, clients == 1.*/
+	function is_a_slow_computer() {
+		var start  = new Date().getTime();
+		var elapsed = "";
+		for(var i=0;i<1000000;j++){
+			i=i;
+		}
+		return (new Date().getTime() - start) > 200;
+	}
   //parse arguments
   for (var index = 2; index < process.argv.length ; index++) {
     var option = process.argv[index];

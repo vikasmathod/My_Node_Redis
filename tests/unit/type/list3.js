@@ -135,7 +135,7 @@ exports.List3 = (function () {
             case 4:
               data = g.randomInt(18446744073709551616);
               break;
-  		case 5:
+			case 5:
               data = -(g.randomInt(65536));
               break;
 			case 6:
