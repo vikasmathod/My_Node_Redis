@@ -3,7 +3,10 @@ Utility.test_pass = 0;
 Utility.test_fail = 0;
 Utility.fail_list = {};
 
+// keeping local copy of includes for calls
+// made to them from outside of test_helper;s scope
 var g = require('./global.js');
+var async = require('async');
 
 function Utility() { }
 
@@ -75,9 +78,8 @@ Utility.prototype.console_log = function (event, msg) {
   }
 };
 Utility.prototype.match = function (patt, str) {
-  var pattern = new RegExp(patt);
-  if (pattern.test(str)) return true;
-  else return false;
+  var pattern = new RegExp(patt, 'g');;
+  return pattern.test(str);
 };
 Utility.prototype.randpath = function (args) {
   var rand = Math.floor((Math.random() * (args.length)) + 1);
@@ -89,29 +91,24 @@ Utility.prototype.randomValue = function () {
   switch (that.randpath(new Array(1, 2, 3, 4))) {
     case 1:
       //Small enough to likely collide
-      data = g.randomInt(1000);
+      data = that.randomSignedInt(1000);
       break;
     case 2:
       //32 bit compressible signed/unsigned
       var ch = that.randpath(new Array(1, 2));
-      if (ch == 1)
-        data = g.randomInt(2000000000);
-      else
-        data = g.randomInt(4000000000);
+      if (ch == 1) data = that.randomSignedInt(2000000000);
+	  else data = that.randomSignedInt(4000000000);       
       break;
     case 3:
       //64 bit
-      data = g.randomInt(1000000000000);
+      data = that.randomSignedInt(1000000000000);
       break;
     case 4:
       // Random string
       var ch = that.randpath(new Array(1, 2, 3));
-      if (ch == 1)
-        data = that.randstring(0, 256, 'alpha');
-      else if (ch == 2)
-        data = that.randstring(0, 256, 'compr');
-      else
-        data = that.randstring(0, 256, 'binary');
+      if (ch == 1) data = that.randstring(0, 256, 'alpha');
+	  else if (ch == 2) data = that.randstring(0, 256, 'compr');
+	  else data = that.randstring(0, 256, 'binary');
       break;
   }
   return data;
@@ -127,10 +124,8 @@ Utility.prototype.randomKey = function () {
     case 2:
       //32 bit compressible signed/unsigned
       var ch = that.randpath(new Array(1, 2));
-      if (ch == 1)
-        key = g.randomInt(2000000000);
-      else
-        key = g.randomInt(4000000000);
+      if (ch == 1) key = g.randomInt(2000000000);
+	  else key = g.randomInt(4000000000);
       break;
     case 3:
       //64 bit
@@ -139,10 +134,8 @@ Utility.prototype.randomKey = function () {
     case 4:
       // Random string
       var ch = that.randpath(new Array(1, 2));
-      if (ch == 1)
-        key = that.randstring(0, 256, 'alpha');
-      else
-        key = that.randstring(0, 256, 'compr');
+      if (ch == 1) key = that.randstring(0, 256, 'alpha');
+	  else key = that.randstring(0, 256, 'compr');	
       break;
   }
   return key;
@@ -553,19 +546,25 @@ Utility.prototype.csvdump = function (client, callback) {
           });
         } else if (type === 'list') {
           client.lrange(keys[i], 0, -1, function (err, res) {
-            o.push(res.map(function (val) { return that.csvstring(val); }));
-            o.push('\n');
-          });
+            o.push(res.map(function (val) {
+				return that.csvstring(val);
+			}));
+			o.push('\n');
+		});
 
         } else if (type === 'set') {
           client.smembers(keys[i], function (err, res) {
             res.sort(that.sortFunction);
-            o.push(res.map(function (val) { return that.csvstring(val); }));
+			o.push(res.map(function (val) {
+				return that.csvstring(val);
+			}));
             o.push('\n');
           });
         } else if (type === 'zset') {
           client.zrange(keys[i], 0, -1, 'withscores', function (err, res) {
-            o.push(res.map(function (val) { return that.csvstring(val); }));
+			o.push(res.map(function (val) {
+				return that.csvstring(val);
+			}));
             o.push('\n');
           });
         } else if (type === 'hash') {
@@ -595,6 +594,10 @@ Utility.prototype.csvdump = function (client, callback) {
 };
 Utility.prototype.csvstring = function (s) {
   return ("\"" + s + "\"");
+};
+Utility.prototype.roundFloat = function (flt) {
+	var Num = new Number(flt);
+	return Num.toFixed(2);
 };
 Utility.prototype.formatCommand = function (args) {
   var cmd = "*" + args.length + "\r\n";
@@ -649,17 +652,14 @@ Utility.prototype.removeDuplicates = function (args) {
   return out;
 };
 Utility.prototype.zlistAlikeSort = function (a, b) {
-  if (a[0] > b[0])
-    return 1
-  else if (a[0] < b[0])
-    return -1
+ if (a[0] > b[0]) return 1
+ else if (a[0] < b[0]) return -1
 
   return (a[1].localeCompare(b[1]))
 
 };
 Utility.prototype.sortFunction = function (a, b) {
-  if (a === '0' || b === '0')
-    return (b === a) ? 0 : (a < b) ? 1 : -1;
+  if (a === '0' || b === '0') return (b === a) ? 0 : (a < b) ? 1 : -1;
   return (a < b) ? -1 : (a === b) ? 0 : 1;
 };
 Utility.prototype.compareArray = function (Arr1,Arr2) {
@@ -670,5 +670,29 @@ Utility.prototype.compareArray = function (Arr1,Arr2) {
 			return false;
 	
 	return true;
+};
+// Wait for the specified condition to be true, with the specified number of
+// max retries and delay between retries. Otherwise the 'elsescript' is
+// executed.
+
+Utility.prototype.wait_for_condition = function (m, d, func, cbt, cbf) {
+  g.asyncFor(0, -1, function (loop) {
+    if (m >= 0) {
+      func(function (r) {
+        if (r) {
+          loop.break ();
+        } else {
+          setTimeout(function () {
+            --m;
+            loop.next();
+          }, d);
+        }
+      });
+    } else {
+      cbf();
+    }
+  }, function () {
+    cbt();
+  });
 };
 module.exports = Utility;
