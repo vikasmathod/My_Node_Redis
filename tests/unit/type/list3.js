@@ -135,6 +135,15 @@ exports.List3 = (function () {
             case 4:
               data = g.randomInt(18446744073709551616);
               break;
+  		case 5:
+              data = -(g.randomInt(65536));
+              break;
+			case 6:
+              data = -(g.randomInt(4294967296));
+              break;
+			case 7:
+              data = -(g.randomInt(18446744073709551616));
+              break;
           }
           lis.push(data);
           client.rpush('lis', data, function (err, res) {
