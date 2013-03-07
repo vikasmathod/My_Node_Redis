@@ -1426,62 +1426,6 @@ exports.Sort = (function () {
 			});
 	}
 
-	tester.Sort37 = function(errorCallback) {
-		var test_case = "SORT sorted set BY nosort works as expected from scripts";
-		var Res_array = [];
-		client.del('zset',function(err,res){
-			if(err){
-				errorCallback(err);	
-			}
-			client.zadd('zset',1,'a',function(err,res){
-				if(err){
-					errorCallback(err);	
-				}
-				client.zadd('zset',5,'b',function(err,res){
-					if(err){
-						errorCallback(err);	
-					}
-					client.zadd('zset',2,'c',function(err,res){
-						if(err){
-							errorCallback(err);	
-						}
-						client.zadd('zset',10,'d',function(err,res){
-							if(err){
-								errorCallback(err);	
-							}
-							client.zadd('zset',3,'e',function(err,res){
-								if(err){
-									errorCallback(err);	
-								}								
-								client.eval("return redis.call('sort','zset','by','nosort','asc')",0, function (err, res) {
-									if(err){
-										errorCallback(err);	
-									}
-									Res_array.push(res);
-									client.eval("return redis.call('sort','zset','by','nosort','desc')",0, function (err, res) {
-										if(err){
-											errorCallback(err);	
-										}
-										Res_array.push(res);
-										try{
-											if(!assert.equal(ut.compareArray(Res_array[0],['a','c','e','b','d']),true,test_case) &&
-											   !assert.equal(ut.compareArray(Res_array[1],['d','b','e','c','a']),true,test_case)){
-													ut.pass(test_case);	
-											   }
-										}
-										catch(e){
-											ut.fail(e,true);
-										}
-										testEmitter.emit('next');
-									});
-								});
-							});
-						});
-					});
-				});
-			});
-		});
-	};
 	return sort;
 
 }

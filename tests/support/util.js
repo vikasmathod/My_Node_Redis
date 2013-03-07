@@ -8,667 +8,677 @@ Utility.fail_list = {};
 var g = require('./global.js');
 var async = require('async');
 
-function Utility() { }
+function Utility() {}
 
 Utility.prototype.pass = function (msg, debug, logging) {
-  if (debug === undefined) {
-    debug = false;
-  }
-  if (logging === undefined) {
-    logging = true;
-  }
-  Utility.test_pass += 1;
-  if (debug) {
-    console.log(msg);
-  }
-  if (logging) {
-    log.info(msg);
-  }
-  this.console_log('pass', msg);
+	if (debug === undefined) {
+		debug = false;
+	}
+	if (logging === undefined) {
+		logging = true;
+	}
+	Utility.test_pass += 1;
+	if (debug) {
+		console.log(msg);
+	}
+	if (logging) {
+		log.info(msg);
+	}
+	this.console_log('pass', msg);
 
 };
 Utility.prototype.fail = function (msg, debug, logging) {
-  if (debug === undefined) {
-    debug = false;
-  }
-  if (logging === undefined) {
-    logging = true;
-  }
-  Utility.test_fail += 1;
-  if (debug) {
-    console.log(msg);
-  }
-  if (msg.message === undefined) {
-    if (logging) {
-      var timestamp = new Date().getTime();
-      var hrt = process.hrtime()[1];
-      log.error(msg);
-      Utility.fail_list[hrt] = msg;
-    }
-    this.console_log('fail', msg);
-  } else {
-    if (logging) {
-      var timestamp = new Date().getTime();
-      var hrt = process.hrtime()[1];
-      msg = " Message:" + msg.message + "\n\tName:" + msg.name + "\n\tActual:" + msg.actual + "\n\tExpected:" + msg.expected + "\n\tOperator:" + msg.operator;
-      log.error(msg);
-      Utility.fail_list[hrt] = msg;
-    }
-    this.console_log('fail', msg.message);
-  }
+	if (debug === undefined) {
+		debug = false;
+	}
+	if (logging === undefined) {
+		logging = true;
+	}
+	Utility.test_fail += 1;
+	if (debug) {
+		console.log(msg);
+	}
+	if (msg.message === undefined) {
+		if (logging) {
+			var timestamp = new Date().getTime();
+			var hrt = process.hrtime()[1];
+			log.error(msg);
+			Utility.fail_list[hrt] = msg;
+		}
+		this.console_log('fail', msg);
+	} else {
+		if (logging) {
+			var timestamp = new Date().getTime();
+			var hrt = process.hrtime()[1];
+			msg = " Message:" + msg.message + "\n\tName:" + msg.name + "\n\tActual:" + msg.actual + "\n\tExpected:" + msg.expected + "\n\tOperator:" + msg.operator;
+			log.error(msg);
+			Utility.fail_list[hrt] = msg;
+		}
+		this.console_log('fail', msg.message);
+	}
 
 };
 Utility.prototype.log_error = function (msg) {
-  this.console_log('fail', msg.message);
+	this.console_log('fail', msg.message);
 };
 Utility.prototype.getPassTests = function () {
-  return Utility.test_pass;
+	return Utility.test_pass;
 };
 Utility.prototype.getFailTests = function () {
-  return Utility.test_fail;
+	return Utility.test_fail;
 };
 Utility.prototype.getFailList = function () {
-  return Utility.fail_list;
+	return Utility.fail_list;
 };
 Utility.prototype.console_log = function (event, msg) {
-  if (event == 'pass') {
-    console.log("\x1b[32m [Pass] \x1b[0m- " + msg + "\n");
-  } else {
-    console.log("\x1b[31m [Fail] \x1b[0m- " + msg + "\n");
-  }
+	if (event == 'pass') {
+		console.log("\x1b[32m [Pass] \x1b[0m- " + msg + "\n");
+	} else {
+		console.log("\x1b[31m [Fail] \x1b[0m- " + msg + "\n");
+	}
 };
 Utility.prototype.match = function (patt, str) {
-  var pattern = new RegExp(patt, 'g');;
-  return pattern.test(str);
+	var pattern = new RegExp(patt, 'g'); ;
+	return pattern.test(str);
 };
 Utility.prototype.randpath = function (args) {
-  var rand = Math.floor((Math.random() * (args.length)) + 1);
-  return args[rand - 1];
+	var rand = Math.floor((Math.random() * (args.length)) + 1);
+	return args[rand - 1];
 }
 Utility.prototype.randomValue = function () {
-  var data = 0;
-  var that = this;
-  switch (that.randpath(new Array(1, 2, 3, 4))) {
-    case 1:
-      //Small enough to likely collide
-      data = that.randomSignedInt(1000);
-      break;
-    case 2:
-      //32 bit compressible signed/unsigned
-      var ch = that.randpath(new Array(1, 2));
-      if (ch == 1) data = that.randomSignedInt(2000000000);
-	  else data = that.randomSignedInt(4000000000);       
-      break;
-    case 3:
-      //64 bit
-      data = that.randomSignedInt(1000000000000);
-      break;
-    case 4:
-      // Random string
-      var ch = that.randpath(new Array(1, 2, 3));
-      if (ch == 1) data = that.randstring(0, 256, 'alpha');
-	  else if (ch == 2) data = that.randstring(0, 256, 'compr');
-	  else data = that.randstring(0, 256, 'binary');
-      break;
-  }
-  return data;
+	var data = 0;
+	var that = this;
+	switch (that.randpath(new Array(1, 2, 3, 4))) {
+	case 1:
+		//Small enough to likely collide
+		data = g.randomInt(1000);
+		break;
+	case 2:
+		//32 bit compressible signed/unsigned
+		var ch = that.randpath(new Array(1, 2));
+		if (ch == 1)
+			data = g.randomInt(2000000000);
+		else
+			data = g.randomInt(4000000000);
+		break;
+	case 3:
+		//64 bit
+		data = g.randomInt(1000000000000);
+		break;
+	case 4:
+		// Random string
+		var ch = that.randpath(new Array(1, 2, 3));
+		if (ch == 1)
+			data = that.randstring(0, 256, 'alpha');
+		else if (ch == 2)
+			data = that.randstring(0, 256, 'compr');
+		else
+			data = that.randstring(0, 256, 'binary');
+		break;
+	}
+	return data;
 }
 Utility.prototype.randomKey = function () {
-  var key = 0;
-  var that = this;
-  switch (that.randpath(new Array(1, 2, 3, 4))) {
-    case 1:
-      //Small enough to likely collide
-      key = g.randomInt(1000);
-      break;
-    case 2:
-      //32 bit compressible signed/unsigned
-      var ch = that.randpath(new Array(1, 2));
-      if (ch == 1) key = g.randomInt(2000000000);
-	  else key = g.randomInt(4000000000);
-      break;
-    case 3:
-      //64 bit
-      key = g.randomInt(1000000000000);
-      break;
-    case 4:
-      // Random string
-      var ch = that.randpath(new Array(1, 2));
-      if (ch == 1) key = that.randstring(0, 256, 'alpha');
-	  else key = that.randstring(0, 256, 'compr');	
-      break;
-  }
-  return key;
+	var key = 0;
+	var that = this;
+	switch (that.randpath(new Array(1, 2, 3, 4))) {
+	case 1:
+		//Small enough to likely collide
+		key = g.randomInt(1000);
+		break;
+	case 2:
+		//32 bit compressible signed/unsigned
+		var ch = that.randpath(new Array(1, 2));
+		if (ch == 1)
+			key = g.randomInt(2000000000);
+		else
+			key = g.randomInt(4000000000);
+		break;
+	case 3:
+		//64 bit
+		key = g.randomInt(1000000000000);
+		break;
+	case 4:
+		// Random string
+		var ch = that.randpath(new Array(1, 2));
+		if (ch == 1)
+			key = that.randstring(0, 256, 'alpha');
+		else
+			key = that.randstring(0, 256, 'compr');
+		break;
+	}
+	return key;
 }
 Utility.prototype.randstring = function (min, max, type) {
-  var minval = 0,
-      maxval = 0;
-  var len = (Math.floor((Math.random() * (max - min + 1)) + 1) + min);
-  var output = "";
-  if (type === 'binary') {
-    minval = 0;
-    maxval = 255;
-  } else if (type === 'alpha') {
-    minval = 48;
-    maxval = 122;
-  } else if (type === 'compr') {
-    minval = 28;
-    maxval = 52;
-  }
-  while (len >= 0) {
-    var cc = (Math.floor(Math.random() * (maxval - minval + 1)) + minval);
-    output = output + (String.fromCharCode(cc));
-    len -= 1;
-  }
-  return output.toString();
+	var minval = 0,
+	maxval = 0;
+	var len = (Math.floor((Math.random() * (max - min + 1)) + 1) + min);
+	var output = "";
+	if (type === 'binary') {
+		minval = 0;
+		maxval = 255;
+	} else if (type === 'alpha') {
+		minval = 48;
+		maxval = 122;
+	} else if (type === 'compr') {
+		minval = 28;
+		maxval = 52;
+	}
+	while (len >= 0) {
+		var cc = (Math.floor(Math.random() * (maxval - minval + 1)) + minval);
+		output = output + (String.fromCharCode(cc));
+		len -= 1;
+	}
+	return output.toString();
 }
 Utility.prototype.shift = function (obj, places) {
-  var object = {};
-  var keys = new Array();
-  var vals = new Array();
-  for (key in obj) {
-    keys.push([key]);
-    vals.push([obj[key]]);
-  }
-  for (var i = places; i < keys.length; i++) {
-    object[keys[i]] = vals[i];
-  }
-  return object;
+	var object = {};
+	var keys = new Array();
+	var vals = new Array();
+	for (key in obj) {
+		keys.push([key]);
+		vals.push([obj[key]]);
+	}
+	for (var i = places; i < keys.length; i++) {
+		object[keys[i]] = vals[i];
+	}
+	return object;
 }
 Utility.prototype.serverInfo = function (client, para, callback) {
-  var result = null;
-  client.info(function (err, res) {
-    if (err) {
-      callback(err, null)
-    }
-    var info = res.split('\r\n');
-    for (line in info) {
-      var data = info[line].split(":");
-      if (data[0] === para) {
-        result = data[1];
-        break;
-      }
-    }
-    if (result != null) callback(null, result);
-    else callback(new Error(para + " is not seen in INFO."), null);
-  });
+	var result = null;
+	client.info(function (err, res) {
+		if (err) {
+			callback(err, null)
+		}
+		var info = res.split('\r\n');
+		for (line in info) {
+			var data = info[line].split(":");
+			if (data[0] === para) {
+				result = data[1];
+				break;
+			}
+		}
+		if (result != null)
+			callback(null, result);
+		else
+			callback(new Error(para + " is not seen in INFO."), null);
+	});
 }
 Utility.prototype.getserverInfo = function (client, callback) {
-  client.info(function (err, res) {
-    if (err) {
-      callback(err, null)
-    }
-    return callback(null, res);
-  });
+	client.info(function (err, res) {
+		if (err) {
+			callback(err, null)
+		}
+		return callback(null, res);
+	});
 }
 Utility.prototype.waitForBgsave = function (client, callback) {
-  var that = this;
-  g.asyncFor(0, -1, function (loop) {
-    that.serverInfo(client, 'rdb_bgsave_in_progress', function (err, result) {
-      if (err) {
-        callback(err, null);
-      }
-      if (result == 1) {
-        setTimeout(function () {
-          loop.next();
-        }, 1000);
-      } else {
-        loop.break();
-      }
-    });
-  }, function () {
-    callback(null, true);
-  });
+	var that = this;
+	g.asyncFor(0, -1, function (loop) {
+		that.serverInfo(client, 'rdb_bgsave_in_progress', function (err, result) {
+			if (err) {
+				callback(err, null);
+			}
+			if (result == 1) {
+				setTimeout(function () {
+					loop.next();
+				}, 1000);
+			} else {
+				loop.break();
+			}
+		});
+	}, function () {
+		callback(null, true);
+	});
 };
 Utility.prototype.waitForBgrewriteaof = function (client, callback) {
-  var that = this;
-  g.asyncFor(0, -1, function (loop) {
-    that.serverInfo(client, 'aof_rewrite_in_progress', function (err, result) {
-      if (err) {
-        callback(err, null);
-      }
-      if (result === 1) {
-        setTimeout(function () {
-          loop.next();
-        }, 1000);
-      } else {
-        loop.break();
-      }
-    });
-  }, function () {
-    callback(null, true);
-  });
+	var that = this;
+	g.asyncFor(0, -1, function (loop) {
+		that.serverInfo(client, 'aof_rewrite_in_progress', function (err, result) {
+			if (err) {
+				callback(err, null);
+			}
+			if (result === 1) {
+				setTimeout(function () {
+					loop.next();
+				}, 1000);
+			} else {
+				loop.break();
+			}
+		});
+	}, function () {
+		callback(null, true);
+	});
 };
 Utility.prototype.wait_for_sync = function (client, callback) {
-  var that = this;
-  g.asyncFor(0, -1, function (loop) {
-    that.serverInfo(client, 'master_link_status', function (err, result) {
-      if (err) {
-        callback(err, null);
-      }
-      if (result === 'down') {
-        setTimeout(function () {
-          loop.next();
-        }, 10);
-      } else {
-        loop.break();
-      }
-    });
-  }, function () {
-    callback(null, true);
-  });
+	var that = this;
+	g.asyncFor(0, -1, function (loop) {
+		that.serverInfo(client, 'master_link_status', function (err, result) {
+			if (err) {
+				callback(err, null);
+			}
+			if (result === 'down') {
+				setTimeout(function () {
+					loop.next();
+				}, 10);
+			} else {
+				loop.break();
+			}
+		});
+	}, function () {
+		callback(null, true);
+	});
 };
 Utility.prototype.findKeyWithType = function (client, type, callback) {
-  var that = this;
-  var result = "";
-  g.asyncFor(0, 20, function (loop) {
-    client.randomkey(function (err, k) {
-      if (err) {
-        callback(err, null);
-      }
-      if (k != null || k != "") {
-        client.type(k, function (err, res) {
-          if (err) {
-            callback(err, null);
-          }
-          if (res === type) {
-            result = k;
-            loop.break();
-          }
-          loop.next();
-        });
-      } else {
-        loop.next();
-      }
-    });
-  }, function () {
-    callback(null, result);
-  });
+	var that = this;
+	var result = "";
+	g.asyncFor(0, 20, function (loop) {
+		client.randomkey(function (err, k) {
+			if (err) {
+				callback(err, null);
+			}
+			if (k != null || k != "") {
+				client.type(k, function (err, res) {
+					if (err) {
+						callback(err, null);
+					}
+					if (res === type) {
+						result = k;
+						loop.break();
+					}
+					loop.next();
+				});
+			} else {
+				loop.next();
+			}
+		});
+	}, function () {
+		callback(null, result);
+	});
 };
 Utility.prototype.randomInt = function (max) {
-	return Math.random()*max;
+	return Math.random() * max;
 }
 Utility.prototype.randomSignedInt = function (max) {
-    var i = this.randomInt(max);
-    return (Math.random() > 0.5 ? -i : i);
+	var i = this.randomInt(max);
+	return (Math.random() > 0.5 ? -i : i);
 }
 Utility.prototype.createComplexDataset = function (client, ops, useexpire, callback) {
-  var that = this;
-  g.asyncFor(0, ops, function (loop) {
-    var k = that.randomKey();
-    var k2 = that.randomKey();
-    var f = that.randomValue();
-    var v = that.randomValue();
-    var d = "", t = "";
-    async.series({
-      zero: function (async_cb) {
-        if (useexpire != undefined && useexpire == 'useexpire') {
-          if (Math.random() < 0.1) {
-            client.expire(that.randomKey(), g.randomInt(2), function (err, res) {
-              if (err) {
-                callback(err, null);
-              }
-            });
-          }
-        }
-        async_cb(null);
-      },
-      one: function (async_cb) {
+	var that = this;
+	g.asyncFor(0, ops, function (loop) {
+		var k = that.randomKey();
+		var k2 = that.randomKey();
+		var f = that.randomValue();
+		var v = that.randomValue();
+		var d = "",
+		t = "";
+		async.series({
+			zero : function (async_cb) {
+				if (useexpire != undefined && useexpire == 'useexpire') {
+					if (Math.random() < 0.1) {
+						client.expire(that.randomKey(), g.randomInt(2), function (err, res) {
+							if (err) {
+								callback(err, null);
+							}
+						});
+					}
+				}
+				async_cb(null);
+			},
+			one : function (async_cb) {
 
-        switch (that.randpath(new Array(1, 2, 3, 4, 5, 6))) {
-          case 1:
-            d = Math.random();
-            break;
-          case 2:
-            d = Math.random();
-            break;
-          case 3:
-            d = Math.random();
-            break;
-          case 4:
-            d = Math.random();
-            break;
-          case 5:
-            d = Math.random();
-            break;
-          case 6:
-            //{set d +inf} {set d -inf} in TCL +inf -inf are very large values that can't represented. in JS the notion of Infinity if given by the below expressions.
-            // d = 1.7976931348623157E+10308;
-            // d = 1/0;
-            // d = +inf/-inf
-            // they, give Infinity as result, but when using the Redis zadd fails with Err - value is not a double;
-            // So we tend to use less than Infinity and under permissible range.
-            switch (that.randpath(new Array(1, 2))) {
-              case 1:
-                d = 1.7976931348623157E+300;
-                break;
-              case 2:
-                d = -1.7976931348623157E+300;
-                break;
-            }
-            break;
-        }
-        async_cb(null);
-      },
-      two: function (async_cb) {
-        client.type(k, function (err, res) {
-          if (err) {
-            callback(err, null);
-          }
-          t = res;
-          async_cb(null);
-        });
-      },
-      three: function (async_cb) {
-        if (t == 'none') {
-          async.series({
-            one: function (callback_inner) {
-              switch (that.randpath(new Array(1, 2, 3, 4, 5, 6))) {
-                case 1:
-                  client.set(k, v, function (err, res) {
-                    if (err) {
-                      callback(err, null);
-                    }
-                  });
-                  break;
-                case 2:
-                  client.lpush(k, v, function (err, res) {
-                    if (err) {
-                      callback(err, null);
-                    }
-                  });
-                  break;
-                case 3:
-                  client.sadd(k, v, function (err, res) {
-                    if (err) {
-                      callback(err, null);
-                    }
-                  });
-                  break;
-                case 4:
-                  client.zadd(k, d, v, function (err, res) {
-                    if (err) {
-                      callback(err, null);
-                    }
-                  });
-                  break;
-                case 5:
-                  client.hset(k, f, v, function (err, res) {
-                    if (err) {
-                      callback(err, null);
-                    }
-                  });
-                  break;
-                case 6:
-                  client.del(k, function (err, res) {
-                    if (err) {
-                      callback(err, null);
-                    }
-                  });
-                  break;
-              }
-              callback_inner(null);
-            },
-            two: function (callback_inner) {
-              client.type(k, function (err, res) {
-                if (err) {
-                  callback(err, null);
-                }
-                t = res;
-                callback_inner(null);
-              });
-            },
-          }, function (err, results) {
-            async_cb(null);
-          });
-        } else {
-          //incase t is ne null
-          async_cb(null);
-        }
-      },
-      four: function (async_cb) {
-        switch (t) {
-          case "string":
-            //nothing to do
-            break;
-          case 'list':
-            switch (that.randpath(new Array(1, 2, 3, 4, 5))) {
-              case 1:
-                client.lpush(k, v);
-                break;
-              case 2:
-                client.rpush(k, v);
-                break;
-              case 3:
-                client.lrem(k, 0, v);
-                break;
-              case 4:
-                client.rpop(k);
-                break;
-              case 5:
-                client.lpop(k);
-                break;
-            }
-            break;
-          case 'set':
-            var c = that.randpath(new Array(1, 2, 3));
-            if (c == 1) {
-              client.sadd(k, v);
-            } else if (c == 2) {
-              client.srem(k, v);
-            } else if (c == 3) {
-              that.findKeyWithType(client, 'set', function (err, res) {
-                if (err) {
-                  callback(err, null);
-                }
-                if (res != null || res != "") {
-                  var ch = that.randpath(new Array(1, 2, 3));
-                  if (ch == 1) {
-                    client.sunionstore(k2, k, res);
-                  } else if (ch == 2) {
-                    client.sinterstore(k2, k, res);
-                  } else if (ch == 3) {
-                    client.sdiffstore(k2, k, res);
-                  }
-                }
-              });
-            }
-            break;
-          case 'zset':
-            var c = that.randpath(new Array(1, 2, 3));
-            if (c == 1) {
-              client.zadd(k, d, v);
-            } else if (c == 2) {
-              client.zrem(k, v);
-            } else if (c == 3) {
-              that.findKeyWithType(client, 'zset', function (err, res) {
-                if (err) {
-                  callback(err, null);
-                }
-                if (res != null || res != "") {
-                  var ch = that.randpath(new Array(1, 2));
-                  if (ch == 1) {
-                    client.zunionstore(k2, 2, k, res);
-                  } else if (ch == 2) {
-                    client.zinterstore(k2, 2, k, res);
-                  }
-                }
-              });
-            }
-            break;
-          case 'hash':
-            var c = that.randpath(new Array(1, 2));
-            if (c == 1) {
-              client.hset(k, f, v);
-            } else if (c == 2) {
-              client.hdel(k, f, v);
-            }
-            break;
-        }
-        async_cb(null);
-      },
+				switch (that.randpath(new Array(1, 2, 3, 4, 5, 6))) {
+				case 1:
+					d = Math.random();
+					break;
+				case 2:
+					d = Math.random();
+					break;
+				case 3:
+					d = Math.random();
+					break;
+				case 4:
+					d = Math.random();
+					break;
+				case 5:
+					d = Math.random();
+					break;
+				case 6:
+					//{set d +inf} {set d -inf} in TCL +inf -inf are very large values that can't represented. in JS the notion of Infinity if given by the below expressions.
+					// d = 1.7976931348623157E+10308;
+					// d = 1/0;
+					// d = +inf/-inf
+					// they, give Infinity as result, but when using the Redis zadd fails with Err - value is not a double;
+					// So we tend to use less than Infinity and under permissible range.
+					switch (that.randpath(new Array(1, 2))) {
+					case 1:
+						d = 1.7976931348623157E+300;
+						break;
+					case 2:
+						d = -1.7976931348623157E+300;
+						break;
+					}
+					break;
+				}
+				async_cb(null);
+			},
+			two : function (async_cb) {
+				client.type(k, function (err, res) {
+					if (err) {
+						callback(err, null);
+					}
+					t = res;
+					async_cb(null);
+				});
+			},
+			three : function (async_cb) {
+				if (t == 'none') {
+					async.series({
+						one : function (callback_inner) {
+							switch (that.randpath(new Array(1, 2, 3, 4, 5, 6))) {
+							case 1:
+								client.set(k, v, function (err, res) {
+									if (err) {
+										callback(err, null);
+									}
+								});
+								break;
+							case 2:
+								client.lpush(k, v, function (err, res) {
+									if (err) {
+										callback(err, null);
+									}
+								});
+								break;
+							case 3:
+								client.sadd(k, v, function (err, res) {
+									if (err) {
+										callback(err, null);
+									}
+								});
+								break;
+							case 4:
+								client.zadd(k, d, v, function (err, res) {
+									if (err) {
+										callback(err, null);
+									}
+								});
+								break;
+							case 5:
+								client.hset(k, f, v, function (err, res) {
+									if (err) {
+										callback(err, null);
+									}
+								});
+								break;
+							case 6:
+								client.del(k, function (err, res) {
+									if (err) {
+										callback(err, null);
+									}
+								});
+								break;
+							}
+							callback_inner(null);
+						},
+						two : function (callback_inner) {
+							client.type(k, function (err, res) {
+								if (err) {
+									callback(err, null);
+								}
+								t = res;
+								callback_inner(null);
+							});
+						},
+					}, function (err, results) {
+						async_cb(null);
+					});
+				} else {
+					//incase t is ne null
+					async_cb(null);
+				}
+			},
+			four : function (async_cb) {
+				switch (t) {
+				case "string":
+					//nothing to do
+					break;
+				case 'list':
+					switch (that.randpath(new Array(1, 2, 3, 4, 5))) {
+					case 1:
+						client.lpush(k, v);
+						break;
+					case 2:
+						client.rpush(k, v);
+						break;
+					case 3:
+						client.lrem(k, 0, v);
+						break;
+					case 4:
+						client.rpop(k);
+						break;
+					case 5:
+						client.lpop(k);
+						break;
+					}
+					break;
+				case 'set':
+					var c = that.randpath(new Array(1, 2, 3));
+					if (c == 1) {
+						client.sadd(k, v);
+					} else if (c == 2) {
+						client.srem(k, v);
+					} else if (c == 3) {
+						that.findKeyWithType(client, 'set', function (err, res) {
+							if (err) {
+								callback(err, null);
+							}
+							if (res != null || res != "") {
+								var ch = that.randpath(new Array(1, 2, 3));
+								if (ch == 1) {
+									client.sunionstore(k2, k, res);
+								} else if (ch == 2) {
+									client.sinterstore(k2, k, res);
+								} else if (ch == 3) {
+									client.sdiffstore(k2, k, res);
+								}
+							}
+						});
+					}
+					break;
+				case 'zset':
+					var c = that.randpath(new Array(1, 2, 3));
+					if (c == 1) {
+						client.zadd(k, d, v);
+					} else if (c == 2) {
+						client.zrem(k, v);
+					} else if (c == 3) {
+						that.findKeyWithType(client, 'zset', function (err, res) {
+							if (err) {
+								callback(err, null);
+							}
+							if (res != null || res != "") {
+								var ch = that.randpath(new Array(1, 2));
+								if (ch == 1) {
+									client.zunionstore(k2, 2, k, res);
+								} else if (ch == 2) {
+									client.zinterstore(k2, 2, k, res);
+								}
+							}
+						});
+					}
+					break;
+				case 'hash':
+					var c = that.randpath(new Array(1, 2));
+					if (c == 1) {
+						client.hset(k, f, v);
+					} else if (c == 2) {
+						client.hdel(k, f, v);
+					}
+					break;
+				}
+				async_cb(null);
+			},
 
-    }, function (err, results) {
-      if (err) {
-        callback(err);
-      }
-      loop.next();
-    });
+		}, function (err, results) {
+			if (err) {
+				callback(err);
+			}
+			loop.next();
+		});
 
-  }, function () {
-    callback(null, true);
-  });
+	}, function () {
+		callback(null, true);
+	});
 };
 
 Utility.prototype.csvdump = function (client, callback) {
-  var that = this;
-  var o = new Array();
-  client.keys('*', function (err, keys) {
-    if (err) {
-      callback(err, null);
-    }
-    keys.sort(that.sortFunction);
-    g.asyncFor(0, keys.length, function (loop) {
-      var i = loop.iteration();
-      client.type(keys[i], function (err, type) {
-        if (err) {
-          callback(err, null);
-        }
-        o.push(that.csvstring(keys[i]));
-        o.push(that.csvstring(type));
-        if (type === 'string') {
-          client.get(keys[i], function (err, res) {
-            if (err) {
-              callback(err, null);
-            }
-            o.push(that.csvstring(res));
-            o.push("\n");
-          });
-        } else if (type === 'list') {
-          client.lrange(keys[i], 0, -1, function (err, res) {
-            o.push(res.map(function (val) {
-				return that.csvstring(val);
-			}));
-			o.push('\n');
+	var that = this;
+	var o = new Array();
+	client.keys('*', function (err, keys) {
+		if (err) {
+			callback(err, null);
+		}
+		keys.sort(that.sortFunction);
+		g.asyncFor(0, keys.length, function (loop) {
+			var i = loop.iteration();
+			client.type(keys[i], function (err, type) {
+				if (err) {
+					callback(err, null);
+				}
+				o.push(that.csvstring(keys[i]));
+				o.push(that.csvstring(type));
+				if (type === 'string') {
+					client.get(keys[i], function (err, res) {
+						if (err) {
+							callback(err, null);
+						}
+						o.push(that.csvstring(res));
+						o.push("\n");
+					});
+				} else if (type === 'list') {
+					client.lrange(keys[i], 0, -1, function (err, res) {
+						o.push(res.map(function (val) {
+								return that.csvstring(val);
+							}));
+						o.push('\n');
+					});
+
+				} else if (type === 'set') {
+					client.smembers(keys[i], function (err, res) {
+						res.sort(that.sortFunction);
+						o.push(res.map(function (val) {
+								return that.csvstring(val);
+							}));
+						o.push('\n');
+					});
+				} else if (type === 'zset') {
+					client.zrange(keys[i], 0, -1, 'withscores', function (err, res) {
+						o.push(res.map(function (val) {
+								return that.csvstring(val);
+							}));
+						o.push('\n');
+					});
+				} else if (type === 'hash') {
+					client.hgetall(keys[i], function (err, fields) {
+						if (err) {
+							callback(err, null);
+						}
+						var newfields = new Array();
+						for (k in fields) {
+							newfields[k] = fields[k];
+						}
+						fields = newfields.sort(that.sortFunction);
+						for (kv in fields) {
+							o.push(that.csvstring(kv[0]));
+							o.push(that.csvstring(kv[1]));
+						}
+						o.push('\n');
+					});
+				}
+				loop.next();
+			});
+
+		}, function () {
+			callback(null, o);
 		});
-
-        } else if (type === 'set') {
-          client.smembers(keys[i], function (err, res) {
-            res.sort(that.sortFunction);
-			o.push(res.map(function (val) {
-				return that.csvstring(val);
-			}));
-            o.push('\n');
-          });
-        } else if (type === 'zset') {
-          client.zrange(keys[i], 0, -1, 'withscores', function (err, res) {
-			o.push(res.map(function (val) {
-				return that.csvstring(val);
-			}));
-            o.push('\n');
-          });
-        } else if (type === 'hash') {
-          client.hgetall(keys[i], function (err, fields) {
-            if (err) {
-              callback(err, null);
-            }
-            var newfields = new Array();
-            for (k in fields) {
-              newfields[k] = fields[k];
-            }
-            fields = newfields.sort(that.sortFunction);
-            for (kv in fields) {
-              o.push(that.csvstring(kv[0]));
-              o.push(that.csvstring(kv[1]));
-            }
-            o.push('\n');
-          });
-        }
-        loop.next();
-      });
-
-    }, function () {
-      callback(null, o);
-    });
-  });
+	});
 };
 Utility.prototype.csvstring = function (s) {
-  return ("\"" + s + "\"");
-};
-Utility.prototype.roundFloat = function (flt) {
-	var Num = new Number(flt);
-	return Num.toFixed(2);
+	return ("\"" + s + "\"");
 };
 Utility.prototype.formatCommand = function (args) {
-  var cmd = "*" + args.length + "\r\n";
-  for (var i = 0; i < args.length ; i++) {
-    cmd += "$" + Buffer.byteLength(args[i]) + "\r\n" + args[i] + "\r\n";
-  }
-  return cmd;
+	var cmd = "*" + args.length + "\r\n";
+	for (var i = 0; i < args.length; i++) {
+		cmd += "$" + Buffer.byteLength(args[i]) + "\r\n" + args[i] + "\r\n";
+	}
+	return cmd;
 };
 Utility.prototype.expand = function (args) {
-  var str = g.buffers_to_strings(args);
-  return str;
+	var str = g.buffers_to_strings(args);
+	return str;
 };
 Utility.prototype.print_srv = function () {
-  // go over all keys and values in our dictionary
-  for (key in g.srv) {
-    if (g.srv.hasOwnProperty(key)) {
-      for (k in g.srv[key]) {
-        if (g.srv[key].hasOwnProperty(k)) {
-          for (k1 in g.srv[key][k]) {
-            if (g.srv[key][k].hasOwnProperty(k1)) {
-              console.log(k1 + " = " + g.srv[key][k][k1]);
-            }
-          }
-        }
-      }
-    }
-  }
+	// go over all keys and values in our dictionary
+	for (key in g.srv) {
+		if (g.srv.hasOwnProperty(key)) {
+			for (k in g.srv[key]) {
+				if (g.srv[key].hasOwnProperty(k)) {
+					for (k1 in g.srv[key][k]) {
+						if (g.srv[key][k].hasOwnProperty(k1)) {
+							console.log(k1 + " = " + g.srv[key][k][k1]);
+						}
+					}
+				}
+			}
+		}
+	}
 };
 Utility.prototype.reconnect = function (r, c, s, callback) {
-  try {
-    var client = r.createClient(g.srv[c][s]['port'], g.srv[c][s]['host']);
-    client.on('ready', function () {
-      g.srv[c][s]['client'] = client;
-      callback(null, client);
-    });
-  } catch (e) {
-    callback(e, null);
-  }
+	try {
+		var client = r.createClient(g.srv[c][s]['port'], g.srv[c][s]['host']);
+		client.on('ready', function () {
+			g.srv[c][s]['client'] = client;
+			callback(null, client);
+		});
+	} catch (e) {
+		callback(e, null);
+	}
 
 };
 Utility.prototype.removeDuplicates = function (args) {
-  var i,
+	var i,
 	len = args.length,
 	out = [],
 	obj = {};
-  for (i = 0; i < len; i++) {
-    obj[args[i]] = 0;
-  }
-  for (i in obj) {
-    out.push(i);
-  }
-  return out;
+	for (i = 0; i < len; i++) {
+		obj[args[i]] = 0;
+	}
+	for (i in obj) {
+		out.push(i);
+	}
+	return out;
 };
 Utility.prototype.zlistAlikeSort = function (a, b) {
- if (a[0] > b[0]) return 1
- else if (a[0] < b[0]) return -1
-
-  return (a[1].localeCompare(b[1]))
+	if (a[0] > b[0])
+		return 1;
+	else if (a[0] < b[0])
+		return -1;
+	return (a[1].localeCompare(b[1]));
 
 };
 Utility.prototype.sortFunction = function (a, b) {
-  if (a === '0' || b === '0') return (b === a) ? 0 : (a < b) ? 1 : -1;
-  return (a < b) ? -1 : (a === b) ? 0 : 1;
+	if (a === '0' || b === '0')
+		return (b === a) ? 0 : (a < b) ? 1 : -1;
+	return (a < b) ? -1 : (a === b) ? 0 : 1;
 };
-Utility.prototype.compareArray = function (Arr1,Arr2) {
-	if(Arr1.length != Arr2.length)
+Utility.prototype.compareArray = function (Arr1, Arr2) {
+	if (Arr1.length != Arr2.length)
 		return false;
-	for(var i=0;i<Arr1.length;i++)
-		if(Arr1[i] != Arr2[i])
+	for (var i = 0; i < Arr1.length; i++)
+		if (Arr1[i] != Arr2[i])
 			return false;
-	
+
 	return true;
 };
 // Wait for the specified condition to be true, with the specified number of
@@ -676,23 +686,23 @@ Utility.prototype.compareArray = function (Arr1,Arr2) {
 // executed.
 
 Utility.prototype.wait_for_condition = function (m, d, func, cbt, cbf) {
-  g.asyncFor(0, -1, function (loop) {
-    if (m >= 0) {
-      func(function (r) {
-        if (r) {
-          loop.break ();
-        } else {
-          setTimeout(function () {
-            --m;
-            loop.next();
-          }, d);
-        }
-      });
-    } else {
-      cbf();
-    }
-  }, function () {
-    cbt();
-  });
+	g.asyncFor(0, -1, function (loop) {
+		if (m >= 0) {
+			func(function (r) {
+				if (r) {
+					loop.break();
+				} else {
+					setTimeout(function () {
+						--m;
+						loop.next();
+					}, d);
+				}
+			});
+		} else {
+			cbf();
+		}
+	}, function () {
+		cbt();
+	});
 };
 module.exports = Utility;
