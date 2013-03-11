@@ -3,6 +3,7 @@ exports.Protocol = (function () {
 	var testEmitter = new events.EventEmitter(),
 	ut = new Utility(),
 	server = new Server(),
+	server1 = new Server(),
 	protocol = {},
 	name = "Protocol",
 	client = "",
@@ -388,6 +389,67 @@ exports.Protocol = (function () {
 			});
 		}, function () {
 			testEmitter.emit('next');
+		});
+	};
+
+	tester.Proto11 = function (errorCallback) {
+		var test_case = "Regression for a crash with blocking ops and pipelining";
+		var tags = "regression";
+		var overrides = {};
+		var args = {};
+		args['name'] = name;
+		args['tags'] = tags;
+		args['overrides'] = overrides;
+		var server_port1 = "";
+		var server_host1 = "";
+
+		//create a stream and write BLPOP command in that stream
+		var stream = net.createConnection(server_port, server_host);
+		stream.on('connect', function () {
+			if (protocol.debug_mode) {
+				log.notice(name + ":Client connected  and listening on socket: " + server_port + ":" + server_host);
+			}
+		});
+		stream.on('error', function (err) {
+			errorCallback(err);
+		});
+		//flush
+		stream.on('drain', function (err) {
+			stream.end();
+		});
+		stream.write("*3\r\n\$5\r\nBLPOP\r\n\$6\r\nnolist\r\n\$1\r\n0\r\n*3\r\n\$5\r\nBLPOP\r\n\$6\r\nnolist\r\n\$1\r\n0\r\n");
+
+		server1.start_server(client_pid, args, function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			server_pid1 = res;
+			client_pid1 = client_pid;
+			server_port1 = g.srv[client_pid1][server_pid1]['port'];
+			server_host1 = g.srv[client_pid1][server_pid1]['host'];
+
+			client1 = redis.createClient(server_port, server_host);
+			client1.on('ready', function () {
+				if (protocol.debug_mode) {
+					log.notice(name + ":Client connected  and listening on socket: " + server_host1 + ":" + server_port1);
+				}
+				client1.rpush('nolist', 'a', function (err, res) {
+					if (err) {
+						errorCallback(err);
+					} else if (res) {
+						client1.rpush('nolist', 'a', function (err, res) {
+							if (err) {
+								errorCallback(err);
+							} else if (res) {
+								server1.kill_server(client_pid1, server_pid1, function (err, res) {
+									ut.pass(test_case);
+									testEmitter.emit('next');
+								});
+							}
+						});
+					}
+				});
+			});
 		});
 	};
 
