@@ -65,6 +65,7 @@ var Test_helper = function () {
      "unit/type/hash",
      "unit/sort",
      "unit/expire",
+     "unit/aofrw",
      "unit/other",
      "unit/cas",
      "unit/quit",
