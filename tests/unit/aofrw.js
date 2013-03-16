@@ -1,6 +1,5 @@
 exports.Aofrw = (function () {
 	// private properties
-	var async = require('async');
 	var testEmitter = new events.EventEmitter(),
 	ut = new Utility(),
 	server = new Server(),
@@ -392,8 +391,22 @@ exports.Aofrw = (function () {
 				client.multi().bgrewriteaof().bgrewriteaof().exec(function (err, res) {
 					try {
 						if (!assert.equal(ut.match("already in progress", res.toString()), true, test_case)) {
+							/* g.asyncFor(0,-1,function(loop){
+								client.info('persistence', function (err, res) {console.log(res)
+									for(var i=0;i<res.length;i++){
+										if(ut.match("aof_rewrite_scheduled:1",res[i])){
+											loop.break();
+										}else
+											setTimeout(function(){loop.next();},100);
+									}
+								});
+							},function(){
+								ut.pass(test_case);
+								testEmitter.emit('next');
+							});	 */							
 							ut.pass(test_case);
 						}
+						
 					} catch (e) {
 						ut.fail(e, true);
 					}
