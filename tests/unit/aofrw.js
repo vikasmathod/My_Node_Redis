@@ -387,17 +387,11 @@ exports.Aofrw = (function () {
 
 	tester.Aofrw7 = function (errorCallback) {
 		var test_case = "BGREWRITEAOF is refused if already in progress";
-		var Str = "";
-		var Str1 = "";
-		var res = "";
 		client.multi().bgrewriteaof().exec(function(err,res){
 			setTimeout(function () {
 				client.multi().bgrewriteaof().bgrewriteaof().exec(function (err, res) {
 					try {
 						if (!assert.equal(ut.match("already in progress", res.toString()), true, test_case)) {
-							client.info('persistence', function (err, res) {
-								Str = res;
-							});
 							ut.pass(test_case);
 						}
 					} catch (e) {
