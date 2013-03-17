@@ -64,7 +64,7 @@ exports.Bitops = (function () {
 		testEmitter.emit('start');
 	}
 	
-	function fourDigitNum(n){
+	function fourDgtBinNum(n){
 		if(n == 0)
 			return "0000";
 		if(n>0 && n<10)
@@ -75,14 +75,44 @@ exports.Bitops = (function () {
 			return "0" + n;	
 	}
 	
+	function decimalToHex(num)
+	{
+		if (num < 0)
+			num = 0xFFFFFFFF + num + 1;
+		return num.toString(16).toUpperCase();
+	}
+			
 	function count_bits(str){
 		var Bin = "",HexASCII = "";
 		for(var iStr = 0;iStr<str.length;iStr++){
 			val = str[iStr].charCodeAt(0);
-			HexASCII = parseInt(val/16)*10;
-			HexASCII += val%16;
-			for(var i=0;i<HexASCII.toString().length;i++)
-				Bin += fourDigitNum(parseInt(HexASCII.toString()[i]).toString(2));
+			HexASCII = decimalToHex(val);
+			for(var i=0;i<HexASCII.toString().length;i++){
+				switch(HexASCII.toString()[i]){
+						case "A":
+							Bin += fourDgtBinNum(parseInt(10).toString(2));
+						break;
+						case "B":
+							Bin += fourDgtBinNum(parseInt(11).toString(2));
+						break;
+						case "C":
+							Bin += fourDgtBinNum(parseInt(12).toString(2));
+						break;
+						case "D":
+							Bin += fourDgtBinNum(parseInt(13).toString(2));
+						break;
+						case "E":
+							Bin += fourDgtBinNum(parseInt(14).toString(2));
+						break;
+						case "F":
+							Bin += fourDgtBinNum(parseInt(15).toString(2));
+						break;
+						default:
+							Bin += fourDgtBinNum(parseInt(HexASCII.toString()[i]).toString(2));
+						break;
+				
+				}
+			}
 		}
 		return Bin.split(/1/g).length-1;
 	}
