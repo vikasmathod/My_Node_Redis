@@ -163,10 +163,7 @@ Utility.prototype.randstring = function (min, max, type) {
 	} else if (type === 'compr') {
 		minval = 28;
 		maxval = 52;
-	} else {
-		minval = min;
-		maxval = max;
-	}
+	} 
 	while (len >= 0) {
 		var cc = (Math.floor(Math.random() * (maxval - minval + 1)) + minval);
 		output = output + (String.fromCharCode(cc));
