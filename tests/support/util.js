@@ -4,7 +4,7 @@ Utility.test_fail = 0;
 Utility.fail_list = {};
 
 // keeping local copy of includes for calls
-// made to them from outside of test_helper;s scope
+// made to them from outside of test_helper's scope
 var g = require('./global.js');
 var async = require('async');
 
@@ -606,6 +606,9 @@ Utility.prototype.csvdump = function (client, callback) {
 };
 Utility.prototype.csvstring = function (s) {
 	return ("\"" + s + "\"");
+};
+Utility.prototype.roundFloat = function (f) {
+	return sprintf("%.10f",parseFloat(f));
 };
 Utility.prototype.formatCommand = function (args) {
 	var cmd = "*" + args.length + "\r\n";

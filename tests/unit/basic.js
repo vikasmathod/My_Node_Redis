@@ -242,7 +242,7 @@ exports.Basic = (function () {
 					errorCallback(err);
 				}
 				try {
-					if (!assert.deepEqual(res.sort(), ['foo_a', 'foo_b', 'foo_c'], test_case)) {
+					if (!assert.deepEqual(res.sort(ut.sortFunction), ['foo_a', 'foo_b', 'foo_c'], test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {
@@ -262,7 +262,7 @@ exports.Basic = (function () {
 				return a - b
 			});
 			try {
-				if (!assert.deepEqual(res.sort(), ['foo_a', 'foo_b', 'foo_c', 'key_x', 'key_y', 'key_z'], test_case)) {
+				if (!assert.deepEqual(res.sort(ut.sortFunction), ['foo_a', 'foo_b', 'foo_c', 'key_x', 'key_y', 'key_z'], test_case)) {
 					ut.pass(test_case);
 				}
 			} catch (e) {
@@ -590,13 +590,13 @@ exports.Basic = (function () {
 			});
 		});
 	};
-	tester.Basic17 = function (errorCallback) {
-		var test_case = "INCR fails against key with spaces (no integer encoded)";
-		client.set('nokey', '  11  ', function (err, res) {
+	tester.Basic17_1 = function (errorCallback) {
+		var test_case = "INCR fails against key with spaces (left)";
+		client.set('novar', '  11', function (err, res) {
 			if (err) {
 				errorCallback(err);
 			}
-			client.incr('nokey', function (err, res) {
+			client.incr('novar', function (err, res) {
 				try {
 					// error should be observed.
 					if (!assert.ok(err, test_case)) {
@@ -610,6 +610,46 @@ exports.Basic = (function () {
 		});
 	};
 
+	tester.Basic17_2 = function (errorCallback) {
+		var test_case = "INCR fails against key with spaces (right)";
+		client.set('novar', '11  ', function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incr('novar', function (err, res) {
+				try {
+					// error should be observed.
+					if (!assert.ok(err, test_case)) {
+						ut.pass(test_case);
+					}
+					} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	};
+	
+	tester.Basic17_3 = function (errorCallback) {
+		var test_case = "INCR fails against key with spaces (both)";
+		client.set('novar', '  11  ', function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incr('novar', function (err, res) {
+				try {
+					// error should be observed.
+					if (!assert.ok(err, test_case)) {
+						ut.pass(test_case);
+					}
+				} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	};
+	
 	tester.Basic18 = function (errorCallback) {
 		var test_case = "INCR fails against a key holding a list";
 		client.rpush('mylist', 45, function (err, res) {
@@ -635,6 +675,7 @@ exports.Basic = (function () {
 			});
 		});
 	};
+	
 	tester.Basic19 = function (errorCallback) {
 		var test_case = "DECRBY over 32bit value with over 32bit increment, negative res";
 		client.set('nokey', 17179869184, function (err, res) {
@@ -647,6 +688,249 @@ exports.Basic = (function () {
 				}
 				try {
 					if (!assert.equal(res, -1, test_case)) {
+						ut.pass(test_case);
+					}
+				} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	};
+	
+	tester.Basic19_1 = function (errorCallback) {
+		var test_case = "INCRBYFLOAT against non existing key";
+		var arr = [];
+		client.del('novar', function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incrbyfloat('novar', 1, function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				arr.push(ut.roundFloat(res));
+				client.get('novar', function (err, res) {
+					if (err) {
+						errorCallback(err);
+					}
+					arr.push(ut.roundFloat(res));
+					client.incrbyfloat('novar', 0.25, function (err, res) {
+						if (err) {
+							errorCallback(err);
+						}
+						arr.push(ut.roundFloat(res));
+						client.get('novar', function (err, res) {
+							if (err) {
+								errorCallback(err);
+							}
+							arr.push(ut.roundFloat(res));
+							try {
+								if (!assert.deepEqual(arr, [1, 1, 1.25, 1.25], test_case)) {
+									ut.pass(test_case);
+								}
+							} catch (e) {
+								ut.fail(e);
+							}
+							testEmitter.emit('next');
+						});
+					});
+				});
+			});
+		});
+	};
+
+	tester.Basic19_2 = function (errorCallback) {
+		var test_case = "INCRBYFLOAT against key originally set with SET";
+		client.set('novar', 1.5, function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incrbyfloat('novar', 1.5, function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				try {
+					if (!assert.equal(ut.roundFloat(res), 3, test_case)) {
+						ut.pass(test_case);
+					}
+				} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	};
+
+	tester.Basic19_3 = function (errorCallback) {
+		var test_case = "INCRBYFLOAT over 32bit value";
+		client.set('novar', 17179869184, function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incrbyfloat('novar', 1.5, function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				try {
+					if (!assert.equal(ut.roundFloat(res), 17179869185.5, test_case)) {
+						ut.pass(test_case);
+					}
+				} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	};
+
+	tester.Basic19_4 = function (errorCallback) {
+		var test_case = "INCRBYFLOAT over 32bit value with over 32bit increment";
+		client.set('novar', 17179869184, function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incrbyfloat('novar', 17179869184, function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				try {
+					if (!assert.equal(ut.roundFloat(res), 34359738368, test_case)) {
+						ut.pass(test_case);
+					}
+				} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	};
+
+	tester.Basic19_5 = function (errorCallback) {
+		var test_case = "INCRBYFLOAT fails against key with spaces (left)";
+		client.set('novar', '  11', function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incrbyfloat('novar', 1.0, function (err, res) {
+				try {
+					// error should be observed.
+					if (!assert.ok(ut.match("not a valid", err), test_case)) {
+						ut.pass(test_case);
+					}
+				} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	};
+
+	tester.Basic19_6 = function (errorCallback) {
+		var test_case = "INCRBYFLOAT fails against key with spaces (right)";
+		client.set('novar', '11  ', function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incrbyfloat('novar', 1.0, function (err, res) {
+				try {
+					// error should be observed.
+					if (!assert.ok(ut.match("not a valid", err), test_case)) {
+						ut.pass(test_case);
+					}
+				} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	};
+
+	tester.Basic19_7 = function (errorCallback) {
+		var test_case = "INCRBYFLOAT fails against key with spaces (both)";
+		client.set('novar', '  11  ', function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incrbyfloat('novar', 1.0, function (err, res) {
+				try {
+					// error should be observed.
+					if (!assert.ok(ut.match("not a valid", err), test_case)) {
+						ut.pass(test_case);
+					}
+				} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	};
+
+	tester.Basic19_8 = function (errorCallback) {
+		var test_case = "INCRBYFLOAT fails against a key holding a list";
+		client.del('mylist', function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.rpush('mylist', 1, function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				client.incrbyfloat('mylist', 1.0, function (err, res) {
+					try {
+						// error should be observed.
+						if (!assert.ok(ut.match("wrong kind", err), test_case)) {
+							ut.pass(test_case);
+						}
+					} catch (e) {
+						ut.fail(e);
+					}
+					client.del('mylist', function (err, res) {
+						if (err) {
+							errorCallback(err);
+						}
+						testEmitter.emit('next');
+					});
+				});
+			});
+		});
+	};
+
+	tester.Basic19_9 = function (errorCallback) {
+		var test_case = "INCRBYFLOAT does not allow NaN or Infinity";
+		client.set('foo', 0, function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incrbyfloat('foo', '+inf', function (err, res) {
+				//p.s. no way I can force NaN to test it from the API because
+				//there is no way to increment / decrement by infinity nor to
+				//perform divisions.
+				try {
+					// error should be observed.
+					if (!assert.ok(ut.match("would produce", err), test_case)) {
+						ut.pass(test_case);
+					}
+				} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	};
+
+	tester.Basic19_10 = function (errorCallback) {
+		var test_case = "INCRBYFLOAT decrement";
+		client.set('foo', 1, function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.incrbyfloat('foo', -1.1, function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				try {
+					if (!assert.equal(ut.roundFloat(res), -0.1, test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {

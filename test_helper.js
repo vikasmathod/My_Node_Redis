@@ -12,6 +12,7 @@ redis.log_to_file = false;
 async = require('async');
 rimraf = require('rimraf');
 Log = require('log');
+sprintf = require('sprintf').sprintf;
 buffertools = require('buffertools');
 Buffer = require('buffer').Buffer;
 g = require('./tests/support/global.js');
@@ -75,7 +76,8 @@ var Test_helper = function () {
      "unit/quit",
      "integration/replication",
      "integration/replication-2",
-     "integration/replication-3",
+	 "integration/replication-3",
+	 "integration/replication-4",
      "integration/aof",
      "unit/pubsub",
      "unit/slowlog",
