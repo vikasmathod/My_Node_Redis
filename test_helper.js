@@ -71,6 +71,7 @@ var Test_helper = function () {
 	 "unit/dump",
 	 "unit/limits",
 	 "unit/multi",
+	 "unit/scripting",
      "unit/other",
      "unit/cas",
      "unit/quit",
