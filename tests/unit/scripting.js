@@ -5,6 +5,7 @@ exports.Scripting = (function () {
 	server = new Server(),
 	server1 = new Server(),
 	server2 = new Server(),
+	server3 = new Server(),
 	scripting = {},
 	name = "Scripting",
 	client = "",
@@ -660,14 +661,14 @@ exports.Scripting = (function () {
 	tester.scripting40 = function (errorCallback) {
 		var test_case = "Test an example script DECR_IF_GT";
 		var script = '\
-														local current \
-														current = redis.call("get",KEYS[1]) \
-														if not current then return nil end \
-														if current > ARGV[1] then \
-															return redis.call("decr",KEYS[1]) \
-														else \
-															return redis.call("get",KEYS[1]) \
-														end';
+																	local current \
+																	current = redis.call("get",KEYS[1]) \
+																	if not current then return nil end \
+																	if current > ARGV[1] then \
+																		return redis.call("decr",KEYS[1]) \
+																	else \
+																		return redis.call("get",KEYS[1]) \
+																	end';
 		client.set('foo', 5);
 		var result = "";
 		client.eval(script, 1, 'foo', 2, function (err, res) {
@@ -756,7 +757,7 @@ exports.Scripting = (function () {
 			});
 		});
 
-	} 
+	}
 
 	tester.scripting43 = function (errorCallback) {
 		var test_case = "Scripting engine PRNG can be seeded correctly";
@@ -785,23 +786,175 @@ exports.Scripting = (function () {
 
 	}
 
-	tester.scripting45 = function (errorCallback) {
-		//Test that the server can be started using the truncated AOF.
+	tester.scripting44 = function (errorCallback) {
+		var tags = "scripting-repl";
+		var overrides = {};
 		var args = {};
 		args['name'] = name;
-		args['tags'] = 'scripting-repl';
-		args['overrides'] = {};
-		var server_host2 = '',
-		server_port2 = '',
-		server_pid2 = '';
+		args['tags'] = tags;
 		server2.start_server(client_pid, args, function (err, res) {
 			if (err) {
 				errorCallback(err, null);
 			}
-			server_pid2 = res;
-			client2 = g.srv[client_pid][server_pid2]['client'];
-			server_host2 = g.srv[client_pid][server_pid2]['host'];
-			server_port2 = g.srv[client_pid][server_pid2]['port'];
+			server_pid1 = res;
+			// nesting calls to start_server
+			setTimeout(function () { // to give some time for the master to start.
+				master_cli = g.srv[client_pid][server_pid1]['client'];
+				master_host = g.srv[client_pid][server_pid1]['host'];
+				master_port = g.srv[client_pid][server_pid1]['port'];
+
+				var tags = "";
+				var overrides = {};
+				var args = {};
+				args['tags'] = tags;
+				args['name'] = name;
+				args['overrides'] = overrides;
+				server3.start_server(client_pid, args, function (err, res) {
+					if (err) {
+						errorCallback(err, null);
+					}
+					server_pid2 = res;
+					slave_cli = g.srv[client_pid][server_pid2]['client'];
+					start_actual_test(function (err, res) {
+						if (err) {
+							errorCallback(err);
+						}
+						slave_cli.end();
+						master_cli.end();
+
+						kill_server(function (err, res) {
+							if (err) {
+								errorCallback(err)
+							}
+							testEmitter.emit('next');
+						});
+					});
+				});
+			}, 100);
+		});
+		function kill_server(callback) {
+			server2.kill_server(client_pid, server_pid1, function (err, res) {
+				if (err) {
+					callback(err, null);
+				} else {
+					server3.kill_server(client_pid, server_pid2, function (err, res) {
+						if (err) {
+							callback(err, null);
+						} else if (res) {
+							callback(null, true);
+						}
+					});
+				}
+			});
+		};
+		function start_actual_test(callback) {
+			async.series({
+				one : function (cb) {
+					var test_case = "Before the slave connects we issue two EVAL commands";
+					slave_cli.eval("redis.call('incr','x'); redis.call('nonexisting')", 0, function (err, res) {
+						slave_cli.eval("return redis.call('incr','x')", 0, function (err, res) {
+							try {
+								if (!assert.equal(res, 2, test_case))
+									ut.pass(test_case);
+							} catch (e) {
+								ut.fail(e, true);
+							}
+							cb(null, true);
+						});
+					});
+				},
+				two : function (cb) {
+					var test_case = "Now use EVALSHA against the master, with both SHAs";
+					slave_cli.evalsha("6e8bd6bdccbe78899e3cc06b31b6dbf4324c2e56", 0, function (err, res) {
+
+						slave_cli.evalsha('ae3477e27be955de7e1bc9adfdca626b478d3cb2', 0, function (err, res) {
+							if (err) {
+								cb(err);
+							}
+							try {
+								if (!assert.equal(res, 4, test_case))
+									ut.pass(test_case);
+							} catch (e) {
+								ut.fail(e, true);
+							}
+							cb(null, true);
+						});
+
+					});
+				},
+				three : function (cb) {
+					var test_case = "If EVALSHA was replicated as EVAL, 'x' should be '4'";
+					ut.wait_for_condition(50, 100, function (cb) {
+						slave_cli.get('x', function (err, res) {
+							try {
+								if (!assert.equal(res, 4, test_case)) {
+									ut.pass(test_case);
+									cb(true);
+								}
+							} catch (e) {
+								ut.fail(e, true);
+								cb(false);
+							}
+
+						});
+					}, function () {
+						cb(null, null);
+					}, function () {
+						ut.fail("Expected 4 in x, but value is '[r -1 get x]'", true);
+						cb(null, true);
+					});
+				},
+				four : function (cb) {
+					var test_case = "Connect a slave to the main instance";
+					slave_cli.slaveof(master_host, master_port, function (err, res) {
+						if (err) {
+							cb(err)
+						}
+						ut.wait_for_condition(50, 100, function (cb) {
+							ut.getserverInfo(slave_cli, function (err, res) {
+								if (err) {
+									cb(err);
+								}
+								if (ut.match("role:slave", res) && ut.match("master_link_status:up", res)) {
+									ut.pass(test_case);
+									cb(true);
+								} else {
+									cb(false);
+								}
+							});
+						}, function () {
+							cb(null, null);
+						}, function () {
+							cb(new Error("Can't turn the instance into a slave"), null);
+						});
+					});
+				},
+			}, function (err, rep) {
+				if (err) {
+					callback(err, null);
+				}
+				callback(null, true);
+			});
+		};
+	};
+
+	tester.scripting44 = function (errorCallback) {
+		//Test that the server can be started using the truncated AOF.
+		var args = {};
+		args['name'] = name;
+		args['tags'] = 'scripting';
+		args['overrides'] = {};
+		var server_host1 = '',
+		server_port1 = '',
+		server_pid1 = '';
+		server1.start_server(client_pid, args, function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			server_pid1 = res;
+			client1 = g.srv[client_pid][server_pid1]['client'];
+			server_host1 = g.srv[client_pid][server_pid1]['host'];
+			server_port1 = g.srv[client_pid][server_pid1]['port'];
 			start_actual_test(function (err, res) {
 				if (err) {
 					errorCallback(err);
@@ -810,234 +963,152 @@ exports.Scripting = (function () {
 					if (err) {
 						errorCallback(err)
 					}
-					testEmitter.emit('next');
 				});
 			});
 		});
 		function kill_server(callback) {
-			server2.kill_server(client_pid, server_pid2, function (err, res) {
+			server1.kill_server(client_pid, server_pid1, function (err, res) {
 				if (err) {
 					callback(err, null);
-				} 
-			});
-		};
-		function start_actual_test(callback){
-			async.series({
-				one:function(){
-					var test_case = "Before the slave connects we issue two EVAL commands";
-					client2.eval("redis.call('incr','x'); redis.call('nonexisting')",0,function(err,res){
-						client2.eval("return redis.call('incr','x')",0,function(err,res){
-							try{
-								if(!assert.equal(res,2,test_case))
-								ut.pass(test_case);
-								}catch(e){
-								ut.fail(e,true);
-							}
-							callback(null,false);
-						});
-					});
-				},
-				two:function(){
-					var test_case = "Connect a slave to the main instance";
-					
-					client2.slaveof(server_host2, server_port2,function(err,res){
-						ut.serverInfo(client2, 'role', function (err, res) {
-							console.log(res);
-							ut.pass(test_case);
-							//testEmitter.emit('next');
-							callback(null,false);
-						});
-						/* ut.wait_for_condition(500, 100, function (cb) {
-							server2.role(function(err,res){
-								console.log(res)
-							})
-						},function(){
-							
-							callback(null,true);
-						}); */
-					}); 
-				},
-			},function(err,res){
-				callback(null,false);
-				testEmitter.emit('next');
-			});
-			
-			
-		}
-	}
-	
-    tester.scripting44 = function (errorCallback) {
-	//Test that the server can be started using the truncated AOF.
-	var args = {};
-	args['name'] = name;
-	args['tags'] = 'scripting';
-	args['overrides'] = {};
-	var server_host1 = '',
-	server_port1 = '',
-	server_pid1 = '';
-	server1.start_server(client_pid, args, function (err, res) {
-		if (err) {
-			errorCallback(err, null);
-		}
-		server_pid1 = res;
-		client1 = g.srv[client_pid][server_pid1]['client'];
-		server_host1 = g.srv[client_pid][server_pid1]['host'];
-		server_port1 = g.srv[client_pid][server_pid1]['port'];
-		start_actual_test(function (err, res) {
-			if (err) {
-				errorCallback(err);
-			}
-			kill_server(function (err, res) {
-				if (err) {
-					errorCallback(err)
 				}
 			});
-		});
-	});
-	function kill_server(callback) {
-		server1.kill_server(client_pid, server_pid1, function (err, res) {
-			if (err) {
-				callback(err, null);
-			} 
-		});
-	};
-	function start_actual_test(callback) {
-		async.series({
-			one : function (async_cb) {
-				var test_case = "Timedout read-only scripts can be killed by SCRIPT KILL"
-				var newClient = redis.createClient(server_port1, server_host1);
-				client1.config('set', 'lua-time-limit', 10);
-				newClient.eval('while true do end', 0,function(err,res){});
-				setTimeout(function () {
-					client1.ping(function (err, res) {
-						try{
-							if(!assert.ok(ut.match("BUSY",err)),test_case){		
-								client1.script("kill",function (err, res) {
-									if(err){
-										callback(err);
-									}
-									client1.ping(function(err, res) {
-										try{
-											if(!assert.equal(res,"PONG",test_case))
-											ut.pass(test_case)
-											}catch(e){
-											ut.fail(e,true)
+		};
+		function start_actual_test(callback) {
+			async.series({
+				one : function (async_cb) {
+					var test_case = "Timedout read-only scripts can be killed by SCRIPT KILL"
+						var newClient = redis.createClient(server_port1, server_host1);
+					client1.config('set', 'lua-time-limit', 10);
+					newClient.eval('while true do end', 0, function (err, res) {});
+					setTimeout(function () {
+						client1.ping(function (err, res) {
+							try {
+								if (!assert.ok(ut.match("BUSY", err)), test_case) {
+									client1.script("kill", function (err, res) {
+										if (err) {
+											callback(err);
 										}
-										newClient.end();
-										async_cb(null, false);
-									});											
-								});
-							}									
-							}catch(e){
-							ut.fail(e,true);
-							newClient.end();
-							async_cb(null, true);
-						}
-					});
-				}, 200); 				
-			},
-			two : function (async_cb) {
-				var test_case = "Timedout script link is still usable after Lua returns";
-				client1.config('set', 'lua-time-limit', 10);
-				client1.eval("for i=1,100000 do redis.call('ping') end return 'ok'",0,function(err,res){
-					client1.ping(function(err,res){
-						try{
-							if(!assert.equal(res,"PONG",test_case))
-							ut.pass(test_case);
-							}catch(e){
-							ut.fail(e,true);
-						}
-						async_cb(null, true);
-					});
-				});
-			},
-			three : function (async_cb) {
-				var test_case = "Timedout scripts that modified data can't be killed by SCRIPT KILL";
-				var newClient = redis.createClient(server_port1, server_host1);
-				newClient.eval("redis.call('set','x','y'); while true do end",0);
-				setTimeout(function () {
-					client1.ping(function(err,res){
-						try{
-							if(!assert.ok(ut.match("BUSY",err)),test_case){							
-								client1.script('kill',function (err, res) {	
-									try{
-										if(!assert.ok(ut.match("UNKILLABLE",err)),test_case){
-											client1.ping(function(err,res){
-												async.series({
-													a:function(async_cb){
-														try{
-															if(!assert.ok(ut.match("BUSY",err)),test_case){
-																ut.pass(test_case);
-															}
-														}
-														catch(e){
-															ut.fail(e,true);
-														}
-														async_cb(null,false);
-													},
-													b:function(){
-														var test_case = "SHUTDOWN NOSAVE can kill a timedout script anyway";
-														client1.ping(function(err,res){
-															try{
-																if(!assert.ok(ut.match("BUSY",err)),test_case){
-																	client1.shutdown('nosave',function(err,res){
-																		try{
-																			newClient1 = redis.createClient(server_port1, server_host1);
-																			newClient1.on("error", function (msg) {
-																				try{
-																					if(!assert.ok(ut.match("connect ECONNREFUSED",msg)),test_case)
-																					ut.pass(test_case);
-																					}catch(e){
-																					ut.fail(e,true);
-																				}
-																				newClient.end();
-																				async_cb(null, false);
-																			});
-																			}catch(e){
-																			ut.fail(e,true);
-																			newClient.end();
-																			async_cb(null, true);
-																		}
-																	});
-																}
-																}catch(e){
-																ut.fail(e,true);
-																newClient.end();
-																async_cb(null, true);
-															}
-														});
-													},
-													},function(){
-													async_cb(null, true);
-												});														
-											});
-										}
-										}catch(e){
-										ut.fail(e,true);
-										newClient.end();
-										async_cb(null, true);
-									}
-								});
+										client1.ping(function (err, res) {
+											try {
+												if (!assert.equal(res, "PONG", test_case))
+													ut.pass(test_case)
+											} catch (e) {
+												ut.fail(e, true)
+											}
+											newClient.end();
+											async_cb(null, false);
+										});
+									});
+								}
+							} catch (e) {
+								ut.fail(e, true);
+								newClient.end();
+								async_cb(null, true);
 							}
-							}catch(e){
-							ut.fail(e,true);
-							newClient.end();								
+						});
+					}, 200);
+				},
+				two : function (async_cb) {
+					var test_case = "Timedout script link is still usable after Lua returns";
+					client1.config('set', 'lua-time-limit', 10);
+					client1.eval("for i=1,100000 do redis.call('ping') end return 'ok'", 0, function (err, res) {
+						client1.ping(function (err, res) {
+							try {
+								if (!assert.equal(res, "PONG", test_case))
+									ut.pass(test_case);
+							} catch (e) {
+								ut.fail(e, true);
+							}
 							async_cb(null, true);
-						}
+						});
 					});
-				},200);
-			},   
-			
+				},
+				three : function (async_cb) {
+					var test_case = "Timedout scripts that modified data can't be killed by SCRIPT KILL";
+					var newClient = redis.createClient(server_port1, server_host1);
+					newClient.eval("redis.call('set','x','y'); while true do end", 0);
+					setTimeout(function () {
+						client1.ping(function (err, res) {
+							try {
+								if (!assert.ok(ut.match("BUSY", err)), test_case) {
+									client1.script('kill', function (err, res) {
+										try {
+											if (!assert.ok(ut.match("UNKILLABLE", err)), test_case) {
+												client1.ping(function (err, res) {
+													async.series({
+														a : function (async_cb) {
+															try {
+																if (!assert.ok(ut.match("BUSY", err)), test_case) {
+																	ut.pass(test_case);
+																}
+															} catch (e) {
+																ut.fail(e, true);
+															}
+															async_cb(null, false);
+														},
+														b : function () {
+															var test_case = "SHUTDOWN NOSAVE can kill a timedout script anyway";
+															client1.ping(function (err, res) {
+																try {
+																	if (!assert.ok(ut.match("BUSY", err)), test_case) {
+																		client1.shutdown('nosave', function (err, res) {
+																			try {
+																				newClient1 = redis.createClient(server_port1, server_host1);
+																				newClient1.on("error", function (msg) {
+																					try {
+																						if (!assert.ok(ut.match("connect ECONNREFUSED", msg)), test_case)
+																							ut.pass(test_case);
+																					} catch (e) {
+																						ut.fail(e, true);
+																					}
+																					newClient.end();
+																					async_cb(null, false);
+																				});
+																			} catch (e) {
+																				ut.fail(e, true);
+																				newClient.end();
+																				async_cb(null, true);
+																			}
+																		});
+																	}
+																} catch (e) {
+																	ut.fail(e, true);
+																	newClient.end();
+																	async_cb(null, true);
+																}
+															});
+														},
+													}, function () {
+														async_cb(null, true);
+													});
+												});
+											}
+										} catch (e) {
+											ut.fail(e, true);
+											newClient.end();
+											async_cb(null, true);
+										}
+									});
+								}
+							} catch (e) {
+								ut.fail(e, true);
+								newClient.end();
+								async_cb(null, true);
+							}
+						});
+					}, 200);
+				},
+
 			}, function (err, rep) {
-			if (err) {
-				callback(err, null);
-			}
-			callback(null, true);
-			testEmitter.emit('next');
-		});
-		
+				if (err) {
+					callback(err, null);
+				}
+				callback(null, true);
+				testEmitter.emit('next');
+			});
+
+		}
 	}
-}
 
 	return scripting;
 }
