@@ -96,7 +96,9 @@ exports.Aofrw = (function () {
 						} else {
 							ut.fail("Can't find 'Killing AOF child' into recent logs");
 						}
-						testEmitter.emit('next');
+						setTimeout(function () {
+							testEmitter.emit('next');
+						}, 500);
 					});
 				}, function () {});
 			});
@@ -165,7 +167,9 @@ exports.Aofrw = (function () {
 				dTypeloop.next();
 			});
 		}, function () {
-			testEmitter.emit('next');
+			setTimeout(function () {
+				testEmitter.emit('next');
+			}, 500);
 		});
 	};
 
@@ -234,7 +238,9 @@ exports.Aofrw = (function () {
 				dTypeloop.next();
 			});
 		}, function () {
-			testEmitter.emit('next');
+			setTimeout(function () {
+				testEmitter.emit('next');
+			}, 500);
 		});
 	};
 
@@ -251,7 +257,7 @@ exports.Aofrw = (function () {
 			g.asyncFor(0, dataObjs.length, function (dObjloop) {
 				iDataObj = dObjloop.iteration();
 				test_case = "AOF rewrite of hash with " + dataObjs[iDataObj] + " encoding, " + dataTypes[iDtype] + " data";
-				client.flushall(function (err, res) {
+				client.multi([['flushall']]).exec(function (err, res) {
 					if (err) {
 						errorCallback(err);
 					}
@@ -300,7 +306,9 @@ exports.Aofrw = (function () {
 			});
 
 		}, function () {
-			testEmitter.emit('next');
+			setTimeout(function () {
+				testEmitter.emit('next');
+			}, 500);
 		});
 
 	};
@@ -318,46 +326,43 @@ exports.Aofrw = (function () {
 			g.asyncFor(0, dataObjs.length, function (dObjloop) {
 				iDataObj = dObjloop.iteration();
 				test_case = "AOF rewrite of zset with " + dataObjs[iDataObj] + " encoding, " + dataTypes[iDtype] + " data";
-				client.flushall(function (err, res) {
-					if (err) {
-						errorCallback(err);
-					}
-					len = (dataObjs[iDataObj] == 'ziplist') ? 10 : 1000;
-					g.asyncFor(0, len, function (loop) {
-						data = (dataTypes[iDtype] == 'string') ? ut.randstring(0, 16, 'alpha') : g.randomInt(4000000000);
-						client.zadd('key', Math.random(), data, function (err, res) {
-							loop.next();
-						});
-					}, function () {
-						client.object('encoding', 'key', function (err, ObjType) {
-							try {
-								if (!assert.equal(ObjType, dataObjs[iDataObj], test_case)) {
-									client.debug('digest', function (err, d1) {
-										client.bgrewriteaof();
-										ut.waitForBgrewriteaof(client, function (err, res) {
-											client.debug('digest', function (err, d2) {
-												if (d1 != d2) {
-													ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
-													dObjloop.break();
-													dTypeloop.break();
-												} else {
-													ut.pass(test_case);
-													setTimeout(function () {
-														dObjloop.next();
-													}, 80);
-												}
-											});
+				client.flushall();
+				len = (dataObjs[iDataObj] == 'ziplist') ? 10 : 1000;
+				g.asyncFor(0, len, function (loop) {
+					data = (dataTypes[iDtype] == 'string') ? ut.randstring(0, 16, 'alpha') : g.randomInt(4000000000);
+					client.zadd('key', Math.random(), data, function (err, res) {
+						loop.next();
+					});
+				}, function () {
+					client.object('encoding', 'key', function (err, ObjType) {
+						try {
+							if (!assert.equal(ObjType, dataObjs[iDataObj], test_case)) {
+								client.debug('digest', function (err, d1) {
+									client.bgrewriteaof();
+									ut.waitForBgrewriteaof(client, function (err, res) {
+										client.debug('digest', function (err, d2) {
+											if (d1 != d2) {
+												ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
+												dObjloop.break();
+												dTypeloop.break();
+											} else {
+												ut.pass(test_case);
+												setTimeout(function () {
+													dObjloop.next();
+												}, 80);
+											}
 										});
 									});
-								}
-							} catch (e) {
-								ut.fail(e, true);
-								dObjloop.break();
-								dTypeloop.break();
+								});
 							}
-						});
+						} catch (e) {
+							ut.fail(e, true);
+							dObjloop.break();
+							dTypeloop.break();
+						}
 					});
 				});
+
 			}, function () {
 				dTypeloop.next();
 			});
@@ -386,33 +391,31 @@ exports.Aofrw = (function () {
 
 	tester.Aofrw7 = function (errorCallback) {
 		var test_case = "BGREWRITEAOF is refused if already in progress";
-		client.multi().bgrewriteaof().exec(function(err,res){
+		client.multi().bgrewriteaof().exec(function (err, res) {
 			setTimeout(function () {
 				client.multi().bgrewriteaof().bgrewriteaof().exec(function (err, res) {
 					try {
 						if (!assert.equal(ut.match("already in progress", res.toString()), true, test_case)) {
-							/* g.asyncFor(0,-1,function(loop){
-								client.info('persistence', function (err, res) {console.log(res)
-									for(var i=0;i<res.length;i++){
-										if(ut.match("aof_rewrite_scheduled:1",res[i])){
-											loop.break();
-										}else
-											setTimeout(function(){loop.next();},100);
-									}
+							g.asyncFor(0, -1, function (loop) {
+								client.info('persistence', function (err, res) {
+									if (!ut.match("aof_rewrite_scheduled:1", res.split("\r")[10])) {
+										loop.break();
+									} else
+										setTimeout(function () {
+											loop.next();
+										}, 100);
 								});
-							},function(){
+							}, function () {
 								ut.pass(test_case);
 								testEmitter.emit('next');
-							});	 */							
-							ut.pass(test_case);
+							});
 						}
-						
 					} catch (e) {
 						ut.fail(e, true);
+						testEmitter.emit('next');
 					}
-					testEmitter.emit('next');
 				});
-			}, 50);
+			}, 100);
 		});
 	};
 
