@@ -67,11 +67,18 @@ exports.Bitops = (function () {
 				}
 			}
 		}
-		return Bin;
+		return Bin.split("").reverse().join("");
 	}
 
 	function convBin_string(binNum) {
-		return String.fromCharCode(parseInt(binNum, 2).toString(10));
+		var charSet = "";
+		var Singchar = ""
+			binNum = binNum.split("").reverse().join("")
+			for (var i = 0; i < binNum.length; i = i + 8) {
+				Singchar = binNum.substring(i, i + 8);
+				charSet += String.fromCharCode(parseInt(Singchar, 2).toString(10));
+			}
+			return charSet;
 	}
 
 	function count_bits(str) {
@@ -102,12 +109,12 @@ exports.Bitops = (function () {
 		bit = "",
 		bit2 = "";
 		for (var x = 0; x < maxlen; x++) {
-			bit = bArray[0].toString().substr(x, x + 1);
+			bit = bArray[0].toString().substring(x, x + 1);
 			if (op == 'not') {
 				bit = (bit == "1") ? 0 : 1;
 			}
 			for (var j = 1; j < count; j++) {
-				bit2 = parseInt(bArray[j].toString().substr(x, x + 1));
+				bit2 = parseInt(bArray[j].toString().substring(x, x + 1));
 				switch (op) {
 				case 'and':
 					bit = bit & bit2;
@@ -530,80 +537,99 @@ exports.Bitops = (function () {
 		});
 	};
 
-	/* tester.Bitops13 = function(errorCallback){
-	var testArray = ['and','or','xor'];
-	var test_case = "";
-	var iLoopindx = 0,ivecLoopindx = 0;
-	var vec = [],veckeys = [],str="",numvec=0;
-	g.asyncFor(0,testArray.length,function(loop){
-	iLoopindx = loop.iteration();
-	test_case = "BITOP " + testArray[iLoopindx] + " fuzzing";
-	g.asyncFor(0,10,function(innerloop){
-	client.flushall();
-	vec = veckeys = [];
-	numvec = g.randomInt(10)+1;
-	g.asyncFor(0,numvec,function(vecloop){
-	ivecLoopindx = vecloop.iteration();
-	str = ut.randstring(0,1000,'alpha');
-	vec.push(str);
-	veckeys.push("vector_"+ivecLoopindx);
-	client.set("vector_"+ivecLoopindx,str,function(err,res){
-	vecloop.next();
-	});
-	},function(){
-	client.bitop(testArray[iLoopindx],'target',veckeys,function(err,res){
-	var test = simulate_bit_op(testArray[iLoopindx],vec);
-	client.get('target',function(err,res){
-	if(test == res)
-	console.log(res);
-	else{
-	//console.log(test);
-	console.log(res);
-	}
-	innerloop.next();
-	});
-	});
+	tester.Bitops13 = function (errorCallback) {
+		var testArray = ['and', 'or', 'xor'];
+		var test_case = "",
+		ErrorMsg = "";
+		var iLoopindx = 0,
+		ivecLoopindx = 0;
+		var vec = [],
+		veckeys = [],
+		str = "",
+		numvec = 0;
+		g.asyncFor(0, testArray.length, function (loop) {
+			iLoopindx = loop.iteration();
+			test_case = "BITOP " + testArray[iLoopindx] + " fuzzing";
+			g.asyncFor(0, 10, function (innerloop) {
+				client.flushall();
+				vec = veckeys = [];
+				numvec = g.randomInt(10) + 1;
+				g.asyncFor(0, numvec, function (vecloop) {
+					ivecLoopindx = vecloop.iteration();
+					str = ut.randstring(0, 1000, 'alpha');
+					vec.push(str);
+					veckeys.push("vector_" + ivecLoopindx);
+					client.set("vector_" + ivecLoopindx, str, function (err, res) {
+						vecloop.next();
+					});
+				}, function () {
+					client.bitop(testArray[iLoopindx], 'target', veckeys, function (err, res) {
+						if (err) {
+							errorCallback(err);
+						}
+						var test = simulate_bit_op(testArray[iLoopindx], vec);
+						client.get('target', function (err, res) {
+							if (err) {
+								errorCallback(err);
+							}
+							try {
+								if (!assert.equal(res, test, test_case))
+									innerloop.next();
+							} catch (e) {
+								ErrorMsg = e;
+								innerloop.break();
+							}
+						});
+					});
 
-	});
-	},function(){
-	loop.next();
-	});
-	},function(){
-	testEmitter.emit('next');
-	});
-	}; */
+				});
+			}, function () {
+				if (ErrorMsg == "")
+					loop.next();
+				else
+					loop.break();
+			});
+		}, function () {
+			if (ErrorMsg == "")
+				ut.pass(test_case);
+			else
+				ut.fail(ErrorMsg, true);
+			testEmitter.emit('next');
+		});
+	};
 
-	/* tester.Bitops14 = function(errorCallback){
-	var test_case = "BITOP NOT fuzzing";
-	var str = "",result = "";
-	g.asyncFor(0,10,function(loop){
-	client.flushall();
-	str = ut.randstring(0,1000,'alpha');
-	client.set('str',str,function(err,res){
-	if(err){
-	errorCallback(err);
-	}
-	client.bitop('not','target','str',function(err,res){
-	if(err){
-	errorCallback(err);
-	}
-	client.get('target',function(err,res){
-	result = simulate_bit_op('not',str);
-	try{
-	if(!assert.equal(res,result,test_case))
-	ut.pass(tes_case);
-	loop.next();
-	}catch(e){
-	ut.fail(e,true);
-	loop.break();
-	}
-	});
-	});
-	})
-	},function(){
-	testEmitter.emit('next');
-	});
-	}; */
+	tester.Bitops14 = function (errorCallback) {
+		var test_case = "BITOP NOT fuzzing";
+		var str = "",
+		result = "";
+		g.asyncFor(0, 10, function (loop) {
+			client.flushall();
+			str = ut.randstring(0, 1000, 'alpha');
+			client.set('str', str, function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				client.bitop('not', 'target', 'str', function (err, res) {
+					if (err) {
+						errorCallback(err);
+					}
+					client.get('target', function (err, res) {
+						result = simulate_bit_op('not', [str]);
+						try {
+							if (!assert.equal(res, result, test_case))
+								ut.pass(tes_case);
+							loop.next();
+						} catch (e) {
+							ut.fail(e, true);
+							loop.break();
+						}
+					});
+				});
+			})
+		}, function () {
+			testEmitter.emit('next');
+		});
+	};
 
 	tester.Bitops15 = function (errorCallback) {
 		var test_case = "BITOP with integer encoded source objects";
