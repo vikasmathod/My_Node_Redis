@@ -1,11 +1,6 @@
 # Prerequisites
-<<<<<<< HEAD
 * Node v0.7.6x or higher
 * Redis Binaries from [Github][1]
-=======
-* [Node v0.7.6x][0] or higher
-* Redis Binaries 2.6 aplha from [Github][1]
->>>>>>> Tweak for multi word commands
 * [Git for Windows][2]
 
 ## Steps to Run the Tests
@@ -37,11 +32,6 @@
 - The code for returning number of test case pass/fails seems to have a bug. Will fix this asap.
 
 #### Note
-<<<<<<< HEAD
-=======
-- Test suites are unstable as migration to 2.6 is still under progress 
-- Test suite makes use of a [modified version of node_redis][6].
->>>>>>> Tweak for multi word commands
 - currently logs are are <pre><code>\tests\logs\results.log</code></pre>
 - logging of all commands/data in and out or redis is encorporated, to enable , in test_helper.js set <pre><code>redis.log_to_file = true</code></pre>
 - the debug log for above would be found at <pre><code>\tests\logs\redis-debug.log</code></pre>
