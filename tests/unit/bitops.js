@@ -601,8 +601,8 @@ exports.Bitops = (function () {
 	tester.Bitops14 = function (errorCallback) {
 		var test_case = "BITOP NOT fuzzing";
 		var str = "",
-		result = "";
-		g.asyncFor(0, 10, function (loop) {
+		result = "",strBit = "",iLoopIndex = 0,iLen=0,errormsg = "";
+		g.asyncFor(0, 5, function (loop) {
 			client.flushall();
 			str = ut.randstring(0, 1000, 'alpha');
 			client.set('str', str, function (err, res) {
@@ -613,20 +613,32 @@ exports.Bitops = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					client.get('target', function (err, res) {
-						result = simulate_bit_op('not', [str]);
+					result = simulate_bit_op('not', [str]);
+					iLen = conv_bits(result).toString().length;
+					strBit = "",iLoopIndex = 0;
+					g.asyncFor(0,iLen,function(iloop){
+						iLoopIndex = iloop.iteration();
+						client.getbit('target',(iLen - iLoopIndex-1),function(err,res){
+							strBit += res.toString();
+							iloop.next();
+						});
+					},function(){
 						try {
-							if (!assert.equal(res, result, test_case))
-								ut.pass(tes_case);
-							loop.next();
+							if (!assert.equal(convBin_string(strBit), result, test_case))	
+								loop.next();
 						} catch (e) {
-							ut.fail(e, true);
+							errormsg = e;
 							loop.break();
 						}
-					});
+
+					});					
 				});
 			})
 		}, function () {
+			if(errormsg == "")
+				ut.pass(test_case);
+			else
+				ut.fail(errormsg, true);
 			testEmitter.emit('next');
 		});
 	};
