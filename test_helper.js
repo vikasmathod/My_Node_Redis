@@ -81,6 +81,7 @@ var Test_helper = function () {
 	 "integration/replication-4",
      "integration/aof",
 	 "integration/rdb",
+	 "integration/convert-zipmap-hash-on-load",
      "unit/pubsub",
      "unit/slowlog",
      "unit/maxmemory",
