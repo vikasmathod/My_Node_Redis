@@ -80,6 +80,7 @@ var Test_helper = function () {
 	 "integration/replication-3",
 	 "integration/replication-4",
      "integration/aof",
+	 "integration/rdb",
      "unit/pubsub",
      "unit/slowlog",
      "unit/maxmemory",
