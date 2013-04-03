@@ -82,6 +82,7 @@ var Test_helper = function () {
      "integration/aof",
 	 "integration/rdb",
 	 "integration/convert-zipmap-hash-on-load",
+	 "integration/redis-cli",
      "unit/pubsub",
      "unit/slowlog",
      "unit/maxmemory",
