@@ -12,6 +12,7 @@ redis.log_to_file = false;
 async = require('async');
 rimraf = require('rimraf');
 Log = require('log');
+sprintf = require('sprintf').sprintf;
 buffertools = require('buffertools');
 Buffer = require('buffer').Buffer;
 g = require('./tests/support/global.js');
@@ -53,7 +54,7 @@ var Test_helper = function () {
   numclients = 16,
   test_list = new Array(
 
-    "unit/printver",
+     "unit/printver",
      "unit/auth",
      "unit/protocol",
      "unit/basic",
@@ -65,13 +66,24 @@ var Test_helper = function () {
      "unit/type/hash",
      "unit/sort",
      "unit/expire",
+	 "unit/aofrw",
+	 "unit/bitops",
+	 "unit/dump",
+	 "unit/limits",
+	 "unit/multi",
+	 "unit/scripting",
+	 "unit/obuf-limits",
      "unit/other",
      "unit/cas",
      "unit/quit",
      "integration/replication",
      "integration/replication-2",
-     "integration/replication-3",
+	 "integration/replication-3",
+	 "integration/replication-4",
      "integration/aof",
+	 "integration/rdb",
+	 "integration/convert-zipmap-hash-on-load",
+	 "integration/redis-cli",
      "unit/pubsub",
      "unit/slowlog",
      "unit/maxmemory",
@@ -92,7 +104,19 @@ var Test_helper = function () {
       console.log("Test units: " + test_list[i]);
     }
   }
-
+ /* With the parallel test running multiple Redis instances at the same time
+	 we need a fast enough computer, otherwise a lot of tests may generate
+	 false positives.
+	 If the computer is too slow we revert the sequetial test without any
+ parallelism, that is, clients == 1.*/
+	function is_a_slow_computer() {
+		var start  = new Date().getTime();
+		var elapsed = "";
+		for(var i=0;i<1000000;j++){
+			i=i;
+		}
+		return (new Date().getTime() - start) > 200;
+	}
   //parse arguments
   for (var index = 2; index < process.argv.length ; index++) {
     var option = process.argv[index];
