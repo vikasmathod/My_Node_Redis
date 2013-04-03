@@ -72,6 +72,7 @@ var Test_helper = function () {
 	 "unit/limits",
 	 "unit/multi",
 	 "unit/scripting",
+	 "unit/obuf-limits",
      "unit/other",
      "unit/cas",
      "unit/quit",
