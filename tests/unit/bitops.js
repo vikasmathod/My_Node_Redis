@@ -552,11 +552,13 @@ exports.Bitops = (function () {
 			test_case = "BITOP " + testArray[iLoopindx] + " fuzzing";
 			g.asyncFor(0, 10, function (innerloop) {
 				client.flushall();
-				vec = veckeys = [];
+				vec =[];
+				veckeys = [];
 				numvec = g.randomInt(10) + 1;
-				g.asyncFor(0, numvec, function (vecloop) {
+				g.asyncFor(0, 2, function (vecloop) {
 					ivecLoopindx = vecloop.iteration();
-					str = ut.randstring(0, 1000, 'alpha');
+					//str = ut.randstring(0, 1000, 'alpha');
+					str = g.randomInt(10);
 					vec.push(str);
 					veckeys.push("vector_" + ivecLoopindx);
 					client.set("vector_" + ivecLoopindx, str, function (err, res) {
@@ -568,32 +570,38 @@ exports.Bitops = (function () {
 							errorCallback(err);
 						}
 						var test = simulate_bit_op(testArray[iLoopindx], vec);
-						client.get('target', function (err, res) {
-							if (err) {
-								errorCallback(err);
-							}
+						var conv_String = conv_bits(test)
+						iLen = conv_String.toString().length;
+						strBit = "",iLoopIndex = 0;
+						g.asyncFor(0,iLen,function(iloop){
+							iLoopIndex = iloop.iteration();
+							client.getbit('target',(iLen - iLoopIndex-1),function(err,res){
+								strBit += res.toString();
+								iloop.next();
+							});
+						},function(){
 							try {
-								if (!assert.equal(res, test, test_case))
+								if (!assert.equal(strBit, conv_String, test_case))
 									innerloop.next();
 							} catch (e) {
 								ErrorMsg = e;
 								innerloop.break();
 							}
-						});
+						});	
 					});
 
 				});
 			}, function () {
-				if (ErrorMsg == "")
+				if (ErrorMsg == ""){
+					ut.pass(test_case);
 					loop.next();
-				else
-					loop.break();
+				}
+				else{
+					ut.fail(ErrorMsg, true);
+					loop.break();					
+				}
 			});
 		}, function () {
-			if (ErrorMsg == "")
-				ut.pass(test_case);
-			else
-				ut.fail(ErrorMsg, true);
 			testEmitter.emit('next');
 		});
 	};
