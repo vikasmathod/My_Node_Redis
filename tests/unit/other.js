@@ -1029,7 +1029,7 @@ exports.Other = (function () {
 			testEmitter.emit('next');
 		});
 	};
-
+	
 	tester.other25 = function (errorCallback) {
 		var test_case = "Monitor",
 		replies = [],
@@ -1044,14 +1044,14 @@ exports.Other = (function () {
 		});
 		m_client.on("monitor", function (time, args) {
 			replies.push(args);
-			if (replies.length === 3) {
+			if (replies.length === 2) {
 
 				try {
-					if ((!assert.equal(replies[0].length, 1, test_case)) && (!assert.deepEqual(replies[0][0], 'monitor', test_case)) &&
-						(!assert.equal(replies[1].length, 1, test_case)) && (!assert.deepEqual(replies[1][0], 'dbsize', test_case)) &&
-						(!assert.equal(replies[2].length, 3, test_case)) && (!assert.deepEqual(replies[2][0], 'set', test_case)) && (!assert.deepEqual(replies[2][1], 'json', test_case)) && (!assert.deepEqual(replies[2][2], '{"name":"John","surname":"Doe"}', test_case))) {
+					if ((!assert.equal(replies[0].length, 1, test_case)) && (!assert.deepEqual(replies[0][0], 'dbsize', test_case)) &&
+						(!assert.equal(replies[1].length, 3, test_case)) && (!assert.deepEqual(replies[1][0], 'set', test_case)) &&
+						(!assert.deepEqual(replies[1][1], 'json', test_case)) &&
+						(!assert.deepEqual(replies[1][2], '{"name":"John","surname":"Doe"}', test_case)))
 						ut.pass(test_case);
-					}
 				} catch (e) {
 					ut.fail(e, true);
 				}
@@ -1060,6 +1060,7 @@ exports.Other = (function () {
 				if (other.debug_mode) {
 					log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
 				}
+				testEmitter.emit('next');
 			}
 		});
 		m_client.monitor(function (err, res) {
@@ -1069,7 +1070,7 @@ exports.Other = (function () {
 					surname : "Doe"
 				}));
 		});
-		testEmitter.emit('next');
+
 	};
 
 	return other;
