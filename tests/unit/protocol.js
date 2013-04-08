@@ -333,7 +333,7 @@ exports.Protocol = (function () {
 	tester.Proto10 = function (errorCallback) {
 		g.asyncFor(0, seq.length, function (outerloop) {
 			var retval;
-			var error = null;
+			var error = '';
 			var stream = net.createConnection(server_port, server_host);
 			stream.on('connect', function () {
 				if (protocol.debug_mode) {
@@ -355,9 +355,9 @@ exports.Protocol = (function () {
 			var test_start = new Date().getTime();
 			var test_time_limit = 30;
 			g.asyncFor(0, -1, function (innerloop) {
-				stream.write(payload, function () {
-					if (!error) {
-						retval = "Protocol error";
+				stream.write(payload, function (err, res) {
+					if (err) {
+						retval = err;
 						stream.end();
 						if (protocol.debug_mode) {
 							log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
@@ -366,7 +366,8 @@ exports.Protocol = (function () {
 					} else {
 						//windows - if data available, read line
 						//if {[read $s 1] ne ""} { set retval [gets $s] }
-
+						if (res)
+							retval = res;
 						var elapsed = new Date().getTime() - test_start;
 						if (elapsed > test_time_limit) {
 							stream.end();
@@ -374,12 +375,14 @@ exports.Protocol = (function () {
 								log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
 							}
 							errorCallback(new Error("assertion:Redis did not closed connection after protocol desync"));
+							innerloop.break();
 						}
+						innerloop.next();
 					}
 				});
 			}, function () {
 				try {
-					if (!assert.ok(ut.match('Protocol error', retval), test_case)) {
+					if (!assert.ok(ut.match('ECONNABORTED', retval), test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {
@@ -394,65 +397,46 @@ exports.Protocol = (function () {
 
 	tester.Proto11 = function (errorCallback) {
 		var test_case = "Regression for a crash with blocking ops and pipelining";
-		var tags = "regression";
-		var overrides = {};
-		var args = {};
-		args['name'] = name;
-		args['tags'] = tags;
-		args['overrides'] = overrides;
-		var server_port1 = "";
-		var server_host1 = "";
-
-		//create a stream and write BLPOP command in that stream
-		var stream = net.createConnection(server_port, server_host);
-		stream.on('connect', function () {
+		client1 = redis.createClient(server_port, server_host);
+		client1.on('ready', function () {
 			if (protocol.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_port + ":" + server_host);
+				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
 			}
-		});
-		stream.on('error', function (err) {
-			errorCallback(err);
-		});
-		//flush
-		stream.on('drain', function (err) {
-			stream.end();
-		});
-		stream.write("*3\r\n\$5\r\nBLPOP\r\n\$6\r\nnolist\r\n\$1\r\n0\r\n*3\r\n\$5\r\nBLPOP\r\n\$6\r\nnolist\r\n\$1\r\n0\r\n");
-
-		server1.start_server(client_pid, args, function (err, res) {
-			if (err) {
-				errorCallback(err, null);
-			}
-			server_pid1 = res;
-			client_pid1 = client_pid;
-			server_port1 = g.srv[client_pid1][server_pid1]['port'];
-			server_host1 = g.srv[client_pid1][server_pid1]['host'];
-
-			client1 = redis.createClient(server_port, server_host);
-			client1.on('ready', function () {
+			//create a stream and write BLPOP command in that stream
+			var stream = net.createConnection(server_port, server_host);
+			stream.on('connect', function () {
 				if (protocol.debug_mode) {
-					log.notice(name + ":Client connected  and listening on socket: " + server_host1 + ":" + server_port1);
+					log.notice(name + ":Client connected  and listening on socket: " + server_port + ":" + server_host);
 				}
-				client1.rpush('nolist', 'a', function (err, res) {
-					if (err) {
-						errorCallback(err);
-					} else if (res) {
-						client1.rpush('nolist', 'a', function (err, res) {
-							if (err) {
-								errorCallback(err);
-							} else if (res) {
-								server1.kill_server(client_pid1, server_pid1, function (err, res) {
-									ut.pass(test_case);
-									testEmitter.emit('next');
-								});
-							}
-						});
-					}
-				});
+			});
+			stream.on('error', function (err) {
+				errorCallback(err);
+			});
+			//flush
+			stream.on('data', function (err) {
+				stream.end();
+
+			});
+			stream.write("*3\r\n\$5\r\nBLPOP\r\n\$6\r\nnolist\r\n\$1\r\n0\r\n*3\r\n\$5\r\nBLPOP\r\n\$6\r\nnolist\r\n\$1\r\n0\r\n");
+
+			client1.rpush('nolist', 'a', function (err, res) {
+				if (err) {
+					errorCallback(err);
+				} else if (res) {
+					client1.rpush('nolist', 'a', function (err, res) {
+						if (err) {
+							errorCallback(err);
+						} else if (res) {
+							client1.end();
+							ut.pass(test_case);
+							testEmitter.emit('next');
+						}
+					});
+				}
 			});
 		});
-	};
-
+	}
+	
 	return protocol;
 
 }

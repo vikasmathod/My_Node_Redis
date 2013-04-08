@@ -66,41 +66,48 @@ exports.Aofrw = (function () {
 
 	tester.Aofrw1 = function (errorCallback) {
 		var test_case = "Turning off AOF kills the background writing child if any";
-		client.config('set', 'appendonly', 'yes');
-		ut.waitForBgrewriteaof(client, function (err, res) {
+		client.config('set', 'appendonly', 'yes', function (err, res) {
 			if (err) {
 				errorCallback(err);
 			}
-			var MultiCom = client.multi();
-			MultiCom.bgrewriteaof();
-			MultiCom.config('set', 'appendonly', 'no');
-			MultiCom.exec(function (err, res) {
+			ut.waitForBgrewriteaof(client, function (err, res) {
 				if (err) {
 					errorCallback(err);
 				}
-				ut.wait_for_condition(50, 100, function (cb) {
-					var file = g.srv[client_pid][server_pid]['stdout'];
-					var strText = "";
-					fs.readFile(file, function (err, result) {
-						var resStrArray = result.toString().split("\n");
-						var resFlag = false;
-						for (var j = resStrArray.length; j > resStrArray.length - 5; j--) {
-							if (ut.match("Killing running AOF rewrite child", resStrArray[j])) {
-								resFlag = true;
-								cb(true);
-								break;
+				var MultiCom = client.multi();
+				MultiCom.bgrewriteaof();
+				MultiCom.config('set', 'appendonly', 'no');
+				MultiCom.exec(function (err, res) {
+					if (err) {
+						errorCallback(err);
+					}
+					ut.wait_for_condition(50, 100, function (cb) {
+						var file = g.srv[client_pid][server_pid]['stdout'];
+						var strText = "";
+						fs.readFile(file, function (err, result) {
+							if (err) {
+								errorCallback(err);
 							}
-						}
-						if (resFlag) {
-							ut.pass(test_case);
-						} else {
-							ut.fail("Can't find 'Killing AOF child' into recent logs");
-						}
-						setTimeout(function () {
-							testEmitter.emit('next');
-						}, 500);
-					});
-				}, function () {});
+							var resStrArray = result.toString().split("\n");
+							var resFlag = false;
+							for (var j = resStrArray.length; j > resStrArray.length - 5; j--) {
+								if (ut.match("Killing running AOF rewrite child", resStrArray[j])) {
+									resFlag = true;
+									cb(true);
+									break;
+								}
+							}
+							if (resFlag) {
+								ut.pass(test_case);
+							} else {
+								ut.fail("Can't find 'Killing AOF child' into recent logs");
+							}
+							setTimeout(function () {
+								testEmitter.emit('next');
+							}, 500);
+						});
+					}, function () {});
+				});
 			});
 		});
 	};
@@ -126,20 +133,34 @@ exports.Aofrw = (function () {
 					g.asyncFor(0, len, function (loop) {
 						data = (dataTypes[iDtype] == 'string') ? ut.randstring(0, 16, 'alpha') : g.randomInt(4000000000);
 						client.lpush('key', data, function (err, res) {
+							if (err) {
+								errorCallback(err);
+							}
 							loop.next();
 						});
 					}, function () {
 						client.object('encoding', 'key', function (err, ObjType) {
+							if (err) {
+								errorCallback(err);
+							}
 							try {
 								if (!assert.equal(ObjType, dataObjs[iDataObj], test_case)) {
 									client.debug('digest', function (err, d1) {
+										if (err) {
+											errorCallback(err);
+										}
 										client.bgrewriteaof(function (err, res) {
+											if (err) {
+												errorCallback(err);
+											}
 											ut.waitForBgrewriteaof(client, function (err, res) {
 												if (err) {
 													console.log(err)
 												}
-
 												client.debug('digest', function (err, d2) {
+													if (err) {
+														console.log(err)
+													}
 													if (d1 != d2) {
 														ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
 														dObjloop.break();
@@ -199,6 +220,9 @@ exports.Aofrw = (function () {
 					}, function () {
 						var testPass = false;
 						client.object('encoding', 'key', function (err, ObjType) {
+							if (err) {
+								errorCallback(err);
+							}
 							try {
 								if (dataTypes[iDtype] != 'string') {
 									if (!assert.equal(ObjType, dataObjs[iDataObj], test_case))
@@ -208,22 +232,35 @@ exports.Aofrw = (function () {
 
 								if (testPass) {
 									client.debug('digest', function (err, d1) {
-										client.bgrewriteaof();
-										ut.waitForBgrewriteaof(client, function (err, res) {
-
-											client.debug('digest', function (err, d2) {
-												if (d1 != d2) {
-													ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
-													dObjloop.break();
-													dTypeloop.break();
-												} else {
-													ut.pass(test_case);
-													setTimeout(function () {
-														dObjloop.next();
-													}, 80);
+										if (err) {
+											errorCallback(err);
+										}
+										client.bgrewriteaof(function (err, res) {
+											if (err) {
+												errorCallback(err);
+											}
+											ut.waitForBgrewriteaof(client, function (err, res) {
+												if (err) {
+													errorCallback(err);
 												}
+												client.debug('digest', function (err, d2) {
+													if (err) {
+														errorCallback(err);
+													}
+													if (d1 != d2) {
+														ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
+														dObjloop.break();
+														dTypeloop.break();
+													} else {
+														ut.pass(test_case);
+														setTimeout(function () {
+															dObjloop.next();
+														}, 80);
+													}
+												});
 											});
 										});
+
 									});
 								}
 							} catch (e) {
@@ -246,6 +283,86 @@ exports.Aofrw = (function () {
 
 	tester.Aofrw4 = function (errorCallback) {
 		var dataTypes = ['string', 'int'];
+		var dataObjs = ['ziplist', 'skiplist'];
+		var test_case = "";
+		var len = 0;
+		var data = "";
+		var iDtype = 0,
+		iDataObj = 0;
+		g.asyncFor(0, dataTypes.length, function (dTypeloop) {
+			iDtype = dTypeloop.iteration();
+			g.asyncFor(0, dataObjs.length, function (dObjloop) {
+				iDataObj = dObjloop.iteration();
+				test_case = "AOF rewrite of zset with " + dataObjs[iDataObj] + " encoding, " + dataTypes[iDtype] + " data";
+				client.flushall(function (err, res) {
+					if (err) {
+						errorCallback(err);
+					}
+					len = (dataObjs[iDataObj] == 'ziplist') ? 10 : 1000;
+					g.asyncFor(0, len, function (loop) {
+						data = (dataTypes[iDtype] == 'string') ? ut.randstring(0, 16, 'alpha') : g.randomInt(4000000000);
+						client.zadd('key', Math.random(), data, function (err, res) {
+							loop.next();
+						});
+					}, function () {
+						client.object('encoding', 'key', function (err, ObjType) {
+							if (err) {
+								errorCallback(err);
+							}
+							try {
+								if (!assert.equal(ObjType, dataObjs[iDataObj], test_case)) {
+									client.debug('digest', function (err, d1) {
+										if (err) {
+											errorCallback(err);
+										}
+										client.bgrewriteaof(function (err, res) {
+											if (err) {
+												errorCallback(err);
+											}
+											ut.waitForBgrewriteaof(client, function (err, res) {
+												if (err) {
+													errorCallback(err);
+												}
+												client.debug('digest', function (err, d2) {
+													if (err) {
+														errorCallback(err);
+													}
+													if (d1 != d2) {
+														ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
+														dObjloop.break();
+														dTypeloop.break();
+													} else {
+														ut.pass(test_case);
+														setTimeout(function () {
+															dObjloop.next();
+														}, 80);
+													}
+												});
+											});
+										});
+									});
+								}
+							} catch (e) {
+								ut.fail(e, true);
+								dObjloop.break();
+								dTypeloop.break();
+							}
+						});
+					});
+				});
+
+			}, function () {
+				dTypeloop.next();
+			});
+		}, function () {
+			setTimeout(function () {
+				testEmitter.emit('next');
+			}, 500);
+		});
+	};
+
+	tester.Aofrw5 = function (errorCallback) {
+		var dataTypes = ['string', 'int'];
 		var dataObjs = ['ziplist', 'hashtable'];
 		var test_case = "";
 		var len = 0;
@@ -257,39 +374,54 @@ exports.Aofrw = (function () {
 			g.asyncFor(0, dataObjs.length, function (dObjloop) {
 				iDataObj = dObjloop.iteration();
 				test_case = "AOF rewrite of hash with " + dataObjs[iDataObj] + " encoding, " + dataTypes[iDtype] + " data";
-				client.multi([['flushall']]).exec(function (err, res) {
+				client.flushall(function (err, res) {
 					if (err) {
 						errorCallback(err);
 					}
 					len = (dataObjs[iDataObj] == 'ziplist') ? 10 : 1000;
 					g.asyncFor(0, len, function (loop) {
 						data = (dataTypes[iDtype] == 'string') ? ut.randstring(0, 16, 'alpha') : g.randomInt(4000000000);
-						client.hset('key', data, data);
-						loop.next();
+						client.hset('key', data, data,function(err,res){
+							loop.next();
+						});						
 					}, function () {
 						client.object('encoding', 'key', function (err, ObjType) {
+							if (err) {
+								errorCallback(err);
+							}
 							try {
 								if (!assert.equal(ObjType, dataObjs[iDataObj], test_case)) {
 									client.debug('digest', function (err, d1) {
-										client.bgrewriteaof();
-										ut.waitForBgrewriteaof(client, function (err, res) {
-											//client.debug('loadaof');
-											client.debug('digest', function (err, d2) {
+										if (err) {
+											errorCallback(err);
+										}
+										client.bgrewriteaof(function (err, res) {
+											if (err) {
+												errorCallback(err);
+											}
+											ut.waitForBgrewriteaof(client, function (err, res) {
 												if (err) {
 													errorCallback(err);
 												}
-												if (d1 != d2) {
-													ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
-													dObjloop.break();
-													dTypeloop.break();
-												} else {
-													ut.pass(test_case);
-													setTimeout(function () {
-														dObjloop.next();
-													}, 80);
-												}
+												//client.debug('loadaof');
+												client.debug('digest', function (err, d2) {
+													if (err) {
+														errorCallback(err);
+													}
+													if (d1 != d2) {
+														ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
+														dObjloop.break();
+														dTypeloop.break();
+													} else {
+														ut.pass(test_case);
+														setTimeout(function () {
+															dObjloop.next();
+														}, 80);
+													}
+												});
 											});
 										});
+
 									});
 								}
 							} catch (e) {
@@ -313,64 +445,6 @@ exports.Aofrw = (function () {
 
 	};
 
-	tester.Aofrw5 = function (errorCallback) {
-		var dataTypes = ['string', 'int'];
-		var dataObjs = ['ziplist', 'skiplist'];
-		var test_case = "";
-		var len = 0;
-		var data = "";
-		var iDtype = 0,
-		iDataObj = 0;
-		g.asyncFor(0, dataTypes.length, function (dTypeloop) {
-			iDtype = dTypeloop.iteration();
-			g.asyncFor(0, dataObjs.length, function (dObjloop) {
-				iDataObj = dObjloop.iteration();
-				test_case = "AOF rewrite of zset with " + dataObjs[iDataObj] + " encoding, " + dataTypes[iDtype] + " data";
-				client.flushall();
-				len = (dataObjs[iDataObj] == 'ziplist') ? 10 : 1000;
-				g.asyncFor(0, len, function (loop) {
-					data = (dataTypes[iDtype] == 'string') ? ut.randstring(0, 16, 'alpha') : g.randomInt(4000000000);
-					client.zadd('key', Math.random(), data, function (err, res) {
-						loop.next();
-					});
-				}, function () {
-					client.object('encoding', 'key', function (err, ObjType) {
-						try {
-							if (!assert.equal(ObjType, dataObjs[iDataObj], test_case)) {
-								client.debug('digest', function (err, d1) {
-									client.bgrewriteaof();
-									ut.waitForBgrewriteaof(client, function (err, res) {
-										client.debug('digest', function (err, d2) {
-											if (d1 != d2) {
-												ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
-												dObjloop.break();
-												dTypeloop.break();
-											} else {
-												ut.pass(test_case);
-												setTimeout(function () {
-													dObjloop.next();
-												}, 80);
-											}
-										});
-									});
-								});
-							}
-						} catch (e) {
-							ut.fail(e, true);
-							dObjloop.break();
-							dTypeloop.break();
-						}
-					});
-				});
-
-			}, function () {
-				dTypeloop.next();
-			});
-		}, function () {
-			testEmitter.emit('next');
-		});
-	};
-
 	tester.Aofrw6 = function (errorCallback) {
 		var test_case = "BGREWRITEAOF is delayed if BGSAVE is in progress";
 		var MultiCli = client.multi();
@@ -384,7 +458,9 @@ exports.Aofrw = (function () {
 			} catch (e) {
 				ut.fail(test_case);
 			}
-			testEmitter.emit('next');
+			setTimeout(function () {
+				testEmitter.emit('next');
+			}, 500);
 		});
 
 	};
@@ -392,8 +468,14 @@ exports.Aofrw = (function () {
 	tester.Aofrw7 = function (errorCallback) {
 		var test_case = "BGREWRITEAOF is refused if already in progress";
 		client.multi().bgrewriteaof().exec(function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
 			setTimeout(function () {
 				client.multi().bgrewriteaof().bgrewriteaof().exec(function (err, res) {
+					if (err) {
+						errorCallback(err);
+					}
 					try {
 						if (!assert.equal(ut.match("already in progress", res.toString()), true, test_case)) {
 							g.asyncFor(0, -1, function (loop) {

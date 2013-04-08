@@ -413,6 +413,151 @@ exports.Dump = (function () {
 	};
 
 	tester.dump7 = function (errorCallback) {
+		var test_case = "MIGRATE can correctly transfer hashes";
+		var first = g.srv[client_pid][server_pid]['client'];
+		client.del('key');
+		client.hmset('key', 'field1', "item 1", 'field2', "item 2", 'field3', "item 3",
+			'field4', "item 4", 'field5', "item 5", 'field6', "item 6", function (err, res) {
+			var args = {};
+			args['name'] = name;
+			args['tags'] = 'repl';
+			args['overrides'] = {};
+			server4.start_server(client_pid, args, function (err, res) {
+				if (err) {
+					errorCallback(err, null);
+				}
+				var server_pid1 = res;
+				var second = g.srv[client_pid][server_pid1]['client'];
+				second_server_host = g.srv[client_pid][server_pid1]['host'];
+				second_server_port = g.srv[client_pid][server_pid1]['port'];
+				first.exists('key', function (err, res) {
+					if (err) {
+						errorCallback(err);
+					}
+					try {
+						if (!assert.equal(res, 1, test_case)) {
+							second.exists('key', function (err, res) {
+								if (err) {
+									errorCallback(err);
+								}
+								if (!assert.equal(res, 0, test_case)) {
+									client.migrate(second_server_host, second_server_port, 'key', 0, 10000, function (err, res) {
+										if (err) {
+											errorCallback(err);
+										}
+										if (!assert.equal(res, 'OK', test_case)) {
+											first.exists('key', function (err, res) {
+												if (err) {
+													errorCallback(err);
+												}
+												if (!assert.equal(res, 0, test_case)) {
+													second.exists('key', function (err, res) {
+														if (err) {
+															errorCallback(err);
+														}
+														if (!assert.equal(res, 1, test_case)) {
+															second.ttl('key', function (err, res) {
+																if (err) {
+																	errorCallback(err);
+																}
+																if (!assert.equal(res, -1, test_case)) {
+																	ut.pass(test_case);
+																	second.end();
+																	server4.kill_server(client_pid, server_pid1, function (err, res) {
+																		if (err) {
+																			errorCallback(err);
+																		};
+																		testEmitter.emit('next');
+
+																	});
+																}
+															});
+														}
+													});
+												}
+											});
+										}
+									});
+								}
+							});
+						}
+					} catch (e) {
+						ut.fail(e);
+						second.end();
+						server4.kill_server(client_pid, server_pid1, function (err, res) {
+							if (err) {
+								errorCallback(err);
+							};
+							testEmitter.emit('next');
+						});
+					}
+				});
+
+			});
+		});
+	};
+
+	tester.dump8 = function (errorCallback) {
+		var test_case = "MIGRATE timeout actually works";
+		var first = g.srv[client_pid][server_pid]['client'];
+		client.set('key', "Some Value");
+		var args = {};
+		args['name'] = name;
+		args['tags'] = 'repl';
+		args['overrides'] = {};
+		server5.start_server(client_pid, args, function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+
+			var server_pid1 = res;
+			var second = g.srv[client_pid][server_pid1]['client'];
+			second_server_host = g.srv[client_pid][server_pid1]['host'];
+			second_server_port = g.srv[client_pid][server_pid1]['port'];
+			first.exists('key', function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				try {
+					if (!assert.equal(res, 1, test_case)) {
+						second.exists('key', function (err, res) {
+							if (err) {
+								errorCallback(err);
+							}
+							if (!assert.equal(res, 0, test_case)) {
+								var newClient = redis.createClient(second_server_port, second_server_host);
+								newClient.debug('sleep', 5.0);
+								setTimeout(function () {
+									client.migrate(second_server_host, second_server_port, 'key', 0, 1000, function (err, res) {
+										if (!assert.equal(ut.match("IOERR", err), true, test_case)) {
+											ut.pass(test_case);
+											newClient.end();
+											second.end();
+											server5.kill_server(client_pid, server_pid1, function (err, res) {
+												testEmitter.emit('next');
+											});
+										}
+									});
+								}, 50);
+							}
+						});
+					}
+				} catch (e) {
+					ut.fail(e, true);
+					second.end();
+					server5.kill_server(client_pid, server_pid1, function (err, res) {
+						if (err) {
+							errorCallback(err);
+						}
+						testEmitter.emit('next');
+					});
+				}
+			});
+
+		});
+	};
+
+	tester.dump9 = function (errorCallback) {
 		var test_case = "MIGRATE can correctly transfer large values";
 		var first = g.srv[client_pid][server_pid]['client'];
 		client.del('key');
@@ -479,7 +624,7 @@ exports.Dump = (function () {
 																					errorCallback(err);
 																				}
 																				try {
-																					if (!assert.equal(res, 500 * 20, test_case))
+																					if (!assert.equal(res, 5000 * 20, test_case))
 																						ut.pass(test_case);
 																				} catch (e) {
 																					ut.fail(e, true);
@@ -553,150 +698,6 @@ exports.Dump = (function () {
 					testEmitter.emit('next');
 				}
 			});
-		});
-	};
-
-	tester.dump8 = function (errorCallback) {
-		var test_case = "MIGRATE can correctly transfer hashes";
-		var first = g.srv[client_pid][server_pid]['client'];
-		client.del('key');
-		client.hmset('key', 'field1', "item 1", 'field2', "item 2", 'field3', "item 3",
-			'field4', "item 4", 'field5', "item 5", 'field6', "item 6", function (err, res) {
-			var args = {};
-			args['name'] = name;
-			args['tags'] = 'repl';
-			args['overrides'] = {};
-			server4.start_server(client_pid, args, function (err, res) {
-				if (err) {
-					errorCallback(err, null);
-				}
-				var server_pid1 = res;
-				var second = g.srv[client_pid][server_pid1]['client'];
-				second_server_host = g.srv[client_pid][server_pid1]['host'];
-				second_server_port = g.srv[client_pid][server_pid1]['port'];
-				first.exists('key', function (err, res) {
-					if (err) {
-						errorCallback(err);
-					}
-					try {
-						if (!assert.equal(res, 1, test_case)) {
-							second.exists('key', function (err, res) {
-								if (err) {
-									errorCallback(err);
-								}
-								if (!assert.equal(res, 0, test_case)) {
-									client.migrate(second_server_host, second_server_port, 'key', 0, 10000, function (err, res) {
-										if (err) {
-											errorCallback(err);
-										}
-										if (!assert.equal(res, 'OK', test_case)) {
-											first.exists('key', function (err, res) {
-												if (err) {
-													errorCallback(err);
-												}
-												if (!assert.equal(res, 0, test_case)) {
-													second.exists('key', function (err, res) {
-														if (err) {
-															errorCallback(err);
-														}
-														if (!assert.equal(res, 1, test_case)) {
-															second.ttl('key', function (err, res) {
-																if (err) {
-																	errorCallback(err);
-																}
-																if (!assert.equal(res, -1, test_case)) {
-																	ut.pass(test_case);
-																	second.end();
-																	server4.kill_server(client_pid, server_pid1, function (err, res) {
-																		if (err) {
-																			errorCallback(err);
-																		};
-																		testEmitter.emit('next');
-																	});
-																}
-															});
-														}
-													});
-												}
-											});
-										}
-									});
-								}
-							});
-						}
-					} catch (e) {
-						ut.fail(e);
-						second.end();
-						server4.kill_server(client_pid, server_pid1, function (err, res) {
-							if (err) {
-								errorCallback(err);
-							};
-							testEmitter.emit('next');
-						});
-					}
-				});
-
-			});
-		});
-	};
-
-	tester.dump9 = function (errorCallback) {
-		var test_case = "MIGRATE timeout actually works";
-		var first = g.srv[client_pid][server_pid]['client'];
-		client.set('key', "Some Value");
-		var args = {};
-		args['name'] = name;
-		args['tags'] = 'repl';
-		args['overrides'] = {};
-		server5.start_server(client_pid, args, function (err, res) {
-			if (err) {
-				errorCallback(err, null);
-			}
-
-			var server_pid1 = res;
-			var second = g.srv[client_pid][server_pid1]['client'];
-			second_server_host = g.srv[client_pid][server_pid1]['host'];
-			second_server_port = g.srv[client_pid][server_pid1]['port'];
-			first.exists('key', function (err, res) {
-				if (err) {
-					errorCallback(err);
-				}
-				try {
-					if (!assert.equal(res, 1, test_case)) {
-						second.exists('key', function (err, res) {
-							if (err) {
-								errorCallback(err);
-							}
-							if (!assert.equal(res, 0, test_case)) {
-								var newClient = redis.createClient(second_server_port, second_server_host);
-								newClient.debug('sleep', 5.0);
-								setTimeout(function () {
-									client.migrate(second_server_host, second_server_port, 'key', 0, 1000, function (err, res) {
-										if (!assert.equal(ut.match("IOERR", err), true, test_case)) {
-											ut.pass(test_case);
-											newClient.end();
-											second.end();
-											server5.kill_server(client_pid, server_pid1, function (err, res) {
-												testEmitter.emit('next');
-											});
-										}
-									});
-								}, 50);
-							}
-						});
-					}
-				} catch (e) {
-					ut.fail(e, true);
-					second.end();
-					server5.kill_server(client_pid, server_pid1, function (err, res) {
-						if (err) {
-							errorCallback(err);
-						}
-						testEmitter.emit('next');
-					});
-				}
-			});
-
 		});
 	};
 
