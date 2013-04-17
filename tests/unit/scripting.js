@@ -6,6 +6,7 @@ exports.Scripting = (function () {
 	server1 = new Server(),
 	server2 = new Server(),
 	server3 = new Server(),
+	server4 = new Server(),
 	scripting = {},
 	name = "Scripting",
 	client = "",
@@ -661,14 +662,14 @@ exports.Scripting = (function () {
 	tester.scripting40 = function (errorCallback) {
 		var test_case = "Test an example script DECR_IF_GT";
 		var script = '\
-																	local current \
-																	current = redis.call("get",KEYS[1]) \
-																	if not current then return nil end \
-																	if current > ARGV[1] then \
-																		return redis.call("decr",KEYS[1]) \
-																	else \
-																		return redis.call("get",KEYS[1]) \
-																	end';
+				local current \
+				current = redis.call("get",KEYS[1]) \
+				if not current then return nil end \
+				if current > ARGV[1] then \
+				return redis.call("decr",KEYS[1]) \
+				else \
+				return redis.call("get",KEYS[1]) \
+				end';
 		client.set('foo', 5);
 		var result = "";
 		client.eval(script, 1, 'foo', 2, function (err, res) {
@@ -760,33 +761,6 @@ exports.Scripting = (function () {
 	}
 
 	tester.scripting43 = function (errorCallback) {
-		var test_case = "Scripting engine PRNG can be seeded correctly";
-		client.eval("math.randomseed(ARGV[1]); return tostring(math.random())", 0, 10, function (err, res1) {
-			if (err) {
-				errorCallback(err)
-			}
-			client.eval("math.randomseed(ARGV[1]); return tostring(math.random())", 0, 10, function (err, res2) {
-				if (err) {
-					errorCallback(err)
-				}
-				client.eval("math.randomseed(ARGV[1]); return tostring(math.random())", 0, 20, function (err, res3) {
-					if (err) {
-						errorCallback(err)
-					}
-					try {
-						if (!assert.equal(res1, res2, test_case) && !assert.notEqual(res2, res3, test_case))
-							ut.pass(test_case);
-					} catch (e) {
-						ut.fail(e, true);
-					}
-					testEmitter.emit('next');
-				});
-			});
-		});
-
-	}
-
-	tester.scripting44 = function (errorCallback) {
 		var tags = "scripting-repl";
 		var overrides = {};
 		var args = {};
@@ -947,6 +921,7 @@ exports.Scripting = (function () {
 		var server_host1 = '',
 		server_port1 = '',
 		server_pid1 = '';
+		var KillServer = true;
 		server1.start_server(client_pid, args, function (err, res) {
 			if (err) {
 				errorCallback(err, null);
@@ -959,11 +934,13 @@ exports.Scripting = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				kill_server(function (err, res) {
-					if (err) {
-						errorCallback(err)
-					}
-				});
+				if (KillServer) {
+					kill_server(function (err, res) {
+						if (err) {
+							errorCallback(err)
+						}
+					});
+				}
 			});
 		});
 		function kill_server(callback) {
@@ -978,6 +955,7 @@ exports.Scripting = (function () {
 				one : function (async_cb) {
 					var test_case = "Timedout read-only scripts can be killed by SCRIPT KILL"
 						var newClient = redis.createClient(server_port1, server_host1);
+
 					client1.config('set', 'lua-time-limit', 10);
 					newClient.eval('while true do end', 0, function (err, res) {});
 					setTimeout(function () {
@@ -1026,6 +1004,9 @@ exports.Scripting = (function () {
 				three : function (async_cb) {
 					var test_case = "Timedout scripts that modified data can't be killed by SCRIPT KILL";
 					var newClient = redis.createClient(server_port1, server_host1);
+					newClient.on('error', function (err) {
+						newClient.end();
+					});
 					newClient.eval("redis.call('set','x','y'); while true do end", 0);
 					setTimeout(function () {
 						client1.ping(function (err, res) {
@@ -1035,76 +1016,60 @@ exports.Scripting = (function () {
 										try {
 											if (!assert.ok(ut.match("UNKILLABLE", err)), test_case) {
 												client1.ping(function (err, res) {
-													async.series({
-														a : function (async_cb) {
-															try {
-																if (!assert.ok(ut.match("BUSY", err)), test_case) {
-																	ut.pass(test_case);
+													try {
+														if (!assert.ok(ut.match("BUSY", err)), test_case) {
+															ut.pass(test_case);
+
+															test_case = "SHUTDOWN NOSAVE can kill a timedout script anyway";
+															client1.write(ut.formatCommand(['shutdown', 'nosave']), function (error, res) {
+																if (res) {
+																	errorCallback(res);
 																}
-															} catch (e) {
-																ut.fail(e, true);
-															}
-															async_cb(null, false);
-														},
-														b : function () {
-															var test_case = "SHUTDOWN NOSAVE can kill a timedout script anyway";
-															client1.ping(function (err, res) {
-																try {
-																	if (!assert.ok(ut.match("BUSY", err)), test_case) {
-																		client1.shutdown('nosave', function (err, res) {
-																			try {
-																				newClient1 = redis.createClient(server_port1, server_host1);
-																				newClient1.on("error", function (msg) {
-																					try {
-																						if (!assert.ok(ut.match("connect ECONNREFUSED", msg)), test_case)
-																							ut.pass(test_case);
-																					} catch (e) {
-																						ut.fail(e, true);
-																					}
-																					newClient.end();
-																					async_cb(null, false);
-																				});
-																			} catch (e) {
-																				ut.fail(e, true);
-																				newClient.end();
-																				async_cb(null, true);
-																			}
-																		});
+																newClient1 = redis.createClient(server_port1, server_host1);
+																newClient1.on("error", function (msg) {
+																	try {
+																		if (!assert.ok(ut.match("connect ECONNREFUSED", msg)), test_case)
+																			ut.pass(test_case);
+																	} catch (e) {
+																		ut.fail(e, true);
 																	}
-																} catch (e) {
-																	ut.fail(e, true);
+																	KillServer = false;
+																	client1.end();
 																	newClient.end();
-																	async_cb(null, true);
-																}
+																	newClient1.end();
+																	testEmitter.emit('next');
+																});
 															});
-														},
-													}, function () {
-														async_cb(null, true);
-													});
+														}
+													} catch (e) {
+														newClient.end();
+														ut.fail(e, true);
+														async_cb(e);
+													}
 												});
 											}
 										} catch (e) {
-											ut.fail(e, true);
 											newClient.end();
-											async_cb(null, true);
+											ut.fail(e, true);
+											async_cb(e);
 										}
 									});
 								}
 							} catch (e) {
-								ut.fail(e, true);
 								newClient.end();
-								async_cb(null, true);
+								ut.fail(e, true);
+								async_cb(e);
 							}
+
 						});
+
 					}, 200);
 				},
-
 			}, function (err, rep) {
 				if (err) {
 					callback(err, null);
 				}
 				callback(null, true);
-				testEmitter.emit('next');
 			});
 
 		}

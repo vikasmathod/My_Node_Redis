@@ -52,9 +52,9 @@ exports.Aofrw = (function () {
 					});
 				} else {
 					client.end();
-					/* if (aofrw.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
-					} */
+					if (aofrw.debug_mode) {
+						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+					} 
 					testEmitter.emit('end');
 				}
 		});
@@ -382,6 +382,9 @@ exports.Aofrw = (function () {
 					g.asyncFor(0, len, function (loop) {
 						data = (dataTypes[iDtype] == 'string') ? ut.randstring(0, 16, 'alpha') : g.randomInt(4000000000);
 						client.hset('key', data, data,function(err,res){
+							if(err){
+								errorCallback(err);
+							}
 							loop.next();
 						});						
 					}, function () {
@@ -434,7 +437,10 @@ exports.Aofrw = (function () {
 					});
 				});
 			}, function () {
-				dTypeloop.next();
+				setTimeout(function () {
+					dTypeloop.next();
+				}, 80);
+				
 			});
 
 		}, function () {

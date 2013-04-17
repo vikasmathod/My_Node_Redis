@@ -555,7 +555,7 @@ exports.Bitops = (function () {
 				vec =[];
 				veckeys = [];
 				numvec = g.randomInt(10) + 1;
-				g.asyncFor(0, 2, function (vecloop) {
+				g.asyncFor(0, numvec, function (vecloop) {
 					ivecLoopindx = vecloop.iteration();
 					//str = ut.randstring(0, 1000, 'alpha');
 					str = g.randomInt(10);

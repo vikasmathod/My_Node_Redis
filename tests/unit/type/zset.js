@@ -2944,7 +2944,6 @@ exports.Zset = (function () {
 							}
 							try {
 								if (!assert.deepEqual(res, [100], test_case)) {
-									console.log("2")
 									ut.pass(test_case);
 									testEmitter.emit('next');
 								}

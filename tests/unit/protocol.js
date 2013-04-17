@@ -352,7 +352,7 @@ exports.Protocol = (function () {
 
 			var payload = g.fillString(1024, 'A');
 			payload += "\n";
-			var test_start = new Date().getTime();
+			var test_start = new Date().getSeconds();
 			var test_time_limit = 30;
 			g.asyncFor(0, -1, function (innerloop) {
 				stream.write(payload, function (err, res) {
@@ -368,7 +368,7 @@ exports.Protocol = (function () {
 						//if {[read $s 1] ne ""} { set retval [gets $s] }
 						if (res)
 							retval = res;
-						var elapsed = new Date().getTime() - test_start;
+						var elapsed = new Date().getSeconds() - test_start;
 						if (elapsed > test_time_limit) {
 							stream.end();
 							if (protocol.debug_mode) {
@@ -380,16 +380,22 @@ exports.Protocol = (function () {
 						innerloop.next();
 					}
 				});
-			}, function () {
+			}, function () {});
+
+			stream.on('close', function (data) {
+				error = fs.readFileSync(server.stdout_file).toString().split('\n');
+				retval = error[error.length - 2];
 				try {
-					if (!assert.ok(ut.match('ECONNABORTED', retval), test_case)) {
+					if (!assert.ok(ut.match('Protocol error', retval), test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {
 					ut.fail(e, true);
 				}
 				outerloop.next();
+
 			});
+
 		}, function () {
 			testEmitter.emit('next');
 		});
@@ -436,7 +442,7 @@ exports.Protocol = (function () {
 			});
 		});
 	}
-	
+
 	return protocol;
 
 }

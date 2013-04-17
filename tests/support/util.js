@@ -516,6 +516,8 @@ Utility.prototype.createComplexDataset = function (client, ops, useexpire, callb
 						client.hdel(k, f, v);
 					}
 					break;
+				default:
+					break;
 				}
 				async_cb(null);
 			},

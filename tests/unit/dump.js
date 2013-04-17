@@ -629,55 +629,76 @@ exports.Dump = (function () {
 																				} catch (e) {
 																					ut.fail(e, true);
 																				}
+																				second.end();
 																				server3.kill_server(client_pid, server_pid1, function (err, res) {
-																					second.end();
+																					if (err) {
+																						errorCallback(err);
+																					}
 																					testEmitter.emit('next');
 																				});
 																			});
 																		} else {
 																			ut.fail("ttl value donot match");
+																			second.end();
 																			server3.kill_server(client_pid, server_pid1, function (err, res) {
-																				second.end();
+																				if (err) {
+																					errorCallback(err);
+																				}
 																				testEmitter.emit('next');
 																			});
 																		}
 																	});
 																} else {
 																	ut.fail("Key dosen't exists in second Client", true);
+																	second.end();
 																	server3.kill_server(client_pid, server_pid1, function (err, res) {
-																		second.end();
+																		if (err) {
+																			errorCallback(err);
+																		}
 																		testEmitter.emit('next');
 																	});
 																}
 															});
 														} else {
 															ut.fail("Key Exists in first Client", true);
+															second.end();
 															server3.kill_server(client_pid, server_pid1, function (err, res) {
-																second.end();
+																if (err) {
+																	errorCallback(err);
+																}
 																testEmitter.emit('next');
 															});
 														}
 													});
 												} else {
 													ut.fail("Error occured while performing migrate. check the logs", true);
+													second.end();
 													server3.kill_server(client_pid, server_pid1, function (err, res) {
-														second.end();
+														if (err) {
+															errorCallback(err);
+														}
 														testEmitter.emit('next');
 													});
 												}
 											});
 										} else {
 											ut.fail("Key Exists in second client", true);
+											second.end();
 											server3.kill_server(client_pid, server_pid1, function (err, res) {
-												second.end();
+												if (err) {
+													errorCallback(err);
+												}
 												testEmitter.emit('next');
 											});
 										}
 									});
 								} else {
 									ut.fail("Key donot exist in first client", true);
+									second.end();
 									server3.kill_server(client_pid, server_pid1, function (err, res) {
-										second.end();
+										if (err) {
+											errorCallback(err);
+										}
 										testEmitter.emit('next');
 									});
 								}

@@ -27,7 +27,6 @@
 #### Known Issues
 - Testcases written for obuf-limits might fail
 - 2 Tests in Dump.js (Test on restore commands throws error and are commented for now)
-- 1 Test in Bitops.js (Fuzzing operation throws error)
 - 2 Tests in Basic.js (Fuzzing operation in binary format, need to find the nodejs alternative for the same.)
 - 1 test in list3.js takes more than 60 seconds to run.
 - The code for returning number of test case pass/fails seems to have a bug. Will fix this asap.

@@ -77,259 +77,6 @@ exports.Replication = (function () {
 			handle.kill("SIGKILL");
 		} catch (e) {}
 	}
-	tester.Repl3 = function (errorCallback) {
-		var test_case = "Connect multiple slaves at the same time (issue #141)";
-		var tags = "repl-mr31";
-		var overrides = {};
-		var args = {};
-		args['name'] = name + "(Master)";
-		args['tags'] = tags;
-		args['overrides'] = overrides;
-		server.start_server(client_pid, args, function (err, res) {
-			if (err) {
-				errorCallback(err, null);
-			}
-			server_pid = res;
-			setTimeout(function () {
-				master = g.srv[client_pid][server_pid]['client'];
-				master_host = g.srv[client_pid][server_pid]['host'];
-				master_port = g.srv[client_pid][server_pid]['port'];
-				load_handle0 = start_write_load(master_host, master_port, 3);
-				load_handle1 = start_write_load(master_host, master_port, 5);
-				load_handle2 = start_write_load(master_host, master_port, 20);
-				load_handle3 = start_write_load(master_host, master_port, 8);
-				load_handle4 = start_write_load(master_host, master_port, 4);
-				setTimeout(function () {
-					var overrides = {};
-					var tags = "repl-mr32";
-					var args = {};
-					args['name'] = name + "(Slave0)";
-					args['tags'] = tags;
-					args['overrides'] = overrides;
-					server1.start_server(client_pid, args, function (err, res) {
-						if (err) {
-							errorCallback(err, null);
-						}
-						server_pid2 = res;
-						client1 = g.srv[client_pid][server_pid2]['client'];
-						setTimeout(function () {
-							var overrides = {};
-							var tags = "repl-mr33";
-							var args = {};
-							args['name'] = name + "(Slave1)";
-							args['tags'] = tags;
-							args['overrides'] = overrides;
-							server2.start_server(client_pid, args, function (err, res) {
-								if (err) {
-									errorCallback(err, null);
-								}
-								server_pid3 = res;
-								client2 = g.srv[client_pid][server_pid3]['client'];
-								setTimeout(function () {
-									var overrides = {};
-									var tags = "repl-mr34";
-									var args = {};
-									args['name'] = name + "(Slave2)";
-									args['tags'] = tags;
-									args['overrides'] = overrides;
-									server3.start_server(client_pid, args, function (err, res) {
-										if (err) {
-											errorCallback(err, null);
-										}
-										server_pid4 = res;
-										client3 = g.srv[client_pid][server_pid4]['client'];
-										start_actual_test(function (err, res) {
-											if (err) {
-												errorCallback(err)
-											}
-											kill_server(function (err, res) {
-												if (err) {
-													errorCallback(err)
-												}
-												testEmitter.emit('next');
-											});
-										});
-									});
-								}, 100);
-							});
-						}, 100);
-					});
-				}, 2000);
-			}, 100);
-		});
-		function kill_server(callback) {
-			server.kill_server(client_pid, server_pid, function (err, res) {
-				if (err) {
-					callback(err, null);
-				}
-				server1.kill_server(client_pid, server_pid2, function (err, res) {
-					if (err) {
-						callback(err, null);
-					}
-					server2.kill_server(client_pid, server_pid3, function (err, res) {
-						if (err) {
-							callback(err, null);
-						}
-						server3.kill_server(client_pid, server_pid4, function (err, res) {
-							if (err) {
-								callback(err, null);
-							}
-							callback(null, true);
-						});
-					});
-				});
-			});
-		};
-		function start_actual_test(callback) {
-			client1.slaveof(master_host, master_port, function (err, res) {
-				if (err) {
-					callback(err)
-				}
-				client2.slaveof(master_host, master_port, function (err, res) {
-					if (err) {
-						callback(err)
-					}
-					client3.slaveof(master_host, master_port, function (err, res) {
-						if (err) {
-							callback(err)
-						}
-						// Wait for all the three slaves to reach the "online" state
-						var retry = 500;
-						var count = 0;
-						g.asyncFor(0, retry, function (loop) {
-							ut.getserverInfo(master, function (err, res) {
-								if (err) {
-									callback(err)
-								}
-								// Don't know why this regex is not getting caught.
-								//var patt = "slave\d{1}\:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\,\d{0,5}\,online ";
-								var patt = "connected_slaves:3"
-									if (ut.match(patt, res)) {
-										loop.break();
-									} else {
-										setTimeout(function () {
-											count++;
-											loop.next();
-										}, 100);
-									}
-							});
-						}, function () {
-							if (count == retry) {
-								callback(new Error("Error:Slaves not up."));
-							} else {
-								// no error observed should continue.
-							}
-							stop_write_load(load_handle0);
-							stop_write_load(load_handle1);
-							stop_write_load(load_handle2);
-							stop_write_load(load_handle3);
-							stop_write_load(load_handle4);
-							var retry = 10;
-							//Wait that slaves exit the "loading" state
-							ut.wait_for_condition(500, 100, function (cb) {
-								client1.info(function (err, info0) {
-									if (err) {
-										callback(err);
-									}
-									client2.info(function (err, info1) {
-										if (err) {
-											callback(err);
-										}
-										client3.info(function (err, info2) {
-											if (err) {
-												callback(err);
-											}
-											var patt = "loading:1";
-											if (!ut.match(patt, info0) && !ut.match(patt, info1) && !ut.match(patt, info2)) {
-												cb(true);
-											} else {
-												cb(false);
-											}
-										});
-									});
-								});
-							}, function () {
-								//Make sure that slaves and master have same number of keys
-								ut.wait_for_condition(500, 100, function (cb) {
-									master.dbsize(function (err, db) {
-										if (err) {
-											callback(err);
-										}
-										client1.dbsize(function (err, db0) {
-											if (err) {
-												callback(err);
-											}
-											client2.dbsize(function (err, db1) {
-												if (err) {
-													callback(err);
-												}
-												client3.dbsize(function (err, db2) {
-													if (err) {
-														callback(err);
-													}
-													if ((db === db0) && (db === db1) && (db === db2)) {
-														cb(true);
-													} else {
-														cb(false);
-													}
-												});
-											});
-										});
-									});
-								}, function () {
-									//Check digests
-									setTimeout(function () {
-										master.debug('digest', function (err, digest) {
-											if (err) {
-												callback(err);
-											}
-											client1.debug('digest', function (err, digest0) {
-												if (err) {
-													callback(err);
-												}
-												client2.debug('digest', function (err, digest1) {
-													if (err) {
-														callback(err);
-													}
-													client3.debug('digest', function (err, digest2) {
-														if (err) {
-															callback(err);
-														}
-														try {
-															if ((!assert.notEqual(digest, '0000000000000000000000000000000000000000', test_case)) && (!assert.deepEqual(digest, digest0, test_case)) && (!assert.deepEqual(digest, digest1, test_case)) && (!assert.deepEqual(digest, digest2, test_case))) {
-																ut.pass(test_case);
-																client3.end();
-																client2.end();
-																client1.end();
-																master.end();
-																if (replication.debug_mode) {
-																	log.notice(g.srv[client_pid][server_pid4]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid4]['host'] + ":" + g.srv[client_pid][server_pid4]['port']);
-																	log.notice(g.srv[client_pid][server_pid3]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid3]['host'] + ":" + g.srv[client_pid][server_pid3]['port']);
-																	log.notice(g.srv[client_pid][server_pid2]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
-																	log.notice(g.srv[client_pid][server_pid]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
-																}
-																callback(null, true);
-															}
-														} catch (e) {
-															callback(e);
-														}
-													});
-												});
-											});
-										});
-									}, 100);
-								}, function () {
-									cb(new Error("Different number of keys between masted and slave after too long time."), null);
-								});
-							}, function () {
-								callback(new Error("Slaves still loading data after too much time"), null);
-							});
-						});
-					});
-				});
-			});
-		};
-	};
 	tester.Repl1 = function (errorCallback) {
 		var tags = "repl-mr11";
 		var overrides = {};
@@ -793,6 +540,260 @@ exports.Replication = (function () {
 			});
 		};
 
+	};
+
+	tester.Repl3 = function (errorCallback) {
+		var test_case = "Connect multiple slaves at the same time (issue #141)";
+		var tags = "repl-mr31";
+		var overrides = {};
+		var args = {};
+		args['name'] = name + "(Master)";
+		args['tags'] = tags;
+		args['overrides'] = overrides;
+		server.start_server(client_pid, args, function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			server_pid = res;
+			setTimeout(function () {
+				master = g.srv[client_pid][server_pid]['client'];
+				master_host = g.srv[client_pid][server_pid]['host'];
+				master_port = g.srv[client_pid][server_pid]['port'];
+				load_handle0 = start_write_load(master_host, master_port, 3);
+				load_handle1 = start_write_load(master_host, master_port, 5);
+				load_handle2 = start_write_load(master_host, master_port, 20);
+				load_handle3 = start_write_load(master_host, master_port, 8);
+				load_handle4 = start_write_load(master_host, master_port, 4);
+				setTimeout(function () {
+					var overrides = {};
+					var tags = "repl-mr32";
+					var args = {};
+					args['name'] = name + "(Slave0)";
+					args['tags'] = tags;
+					args['overrides'] = overrides;
+					server1.start_server(client_pid, args, function (err, res) {
+						if (err) {
+							errorCallback(err, null);
+						}
+						server_pid2 = res;
+						client1 = g.srv[client_pid][server_pid2]['client'];
+						setTimeout(function () {
+							var overrides = {};
+							var tags = "repl-mr33";
+							var args = {};
+							args['name'] = name + "(Slave1)";
+							args['tags'] = tags;
+							args['overrides'] = overrides;
+							server2.start_server(client_pid, args, function (err, res) {
+								if (err) {
+									errorCallback(err, null);
+								}
+								server_pid3 = res;
+								client2 = g.srv[client_pid][server_pid3]['client'];
+								setTimeout(function () {
+									var overrides = {};
+									var tags = "repl-mr34";
+									var args = {};
+									args['name'] = name + "(Slave2)";
+									args['tags'] = tags;
+									args['overrides'] = overrides;
+									server3.start_server(client_pid, args, function (err, res) {
+										if (err) {
+											errorCallback(err, null);
+										}
+										server_pid4 = res;
+										client3 = g.srv[client_pid][server_pid4]['client'];
+										start_actual_test(function (err, res) {
+											if (err) {
+												errorCallback(err)
+											}
+											kill_server(function (err, res) {
+												if (err) {
+													errorCallback(err)
+												}
+												testEmitter.emit('next');
+											});
+										});
+									});
+								}, 100);
+							});
+						}, 100);
+					});
+				}, 2000);
+			}, 100);
+		});
+		function kill_server(callback) {
+			server.kill_server(client_pid, server_pid, function (err, res) {
+				if (err) {
+					callback(err, null);
+				}
+				server1.kill_server(client_pid, server_pid2, function (err, res) {
+					if (err) {
+						callback(err, null);
+					}
+					server2.kill_server(client_pid, server_pid3, function (err, res) {
+						if (err) {
+							callback(err, null);
+						}
+						server3.kill_server(client_pid, server_pid4, function (err, res) {
+							if (err) {
+								callback(err, null);
+							}
+							callback(null, true);
+						});
+					});
+				});
+			});
+		};
+		function start_actual_test(callback) {
+			client1.slaveof(master_host, master_port, function (err, res) {
+				if (err) {
+					callback(err)
+				}
+				client2.slaveof(master_host, master_port, function (err, res) {
+					if (err) {
+						callback(err)
+					}
+					client3.slaveof(master_host, master_port, function (err, res) {
+						if (err) {
+							callback(err)
+						}
+						// Wait for all the three slaves to reach the "online" state
+						var retry = 500;
+						var count = 0;
+						g.asyncFor(0, retry, function (loop) {
+							ut.getserverInfo(master, function (err, res) {
+								if (err) {
+									callback(err)
+								}
+								// Don't know why this regex is not getting caught.
+								//var patt = "slave\d{1}\:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\,\d{0,5}\,online ";
+								var patt = "connected_slaves:3"
+									if (ut.match(patt, res)) {
+										loop.break();
+									} else {
+										setTimeout(function () {
+											count++;
+											loop.next();
+										}, 100);
+									}
+							});
+						}, function () {
+							if (count == retry) {
+								callback(new Error("Error:Slaves not up."));
+							} else {
+								// no error observed should continue.
+							}
+							stop_write_load(load_handle0);
+							stop_write_load(load_handle1);
+							stop_write_load(load_handle2);
+							stop_write_load(load_handle3);
+							stop_write_load(load_handle4);
+							var retry = 10;
+							//Wait that slaves exit the "loading" state
+							ut.wait_for_condition(500, 100, function (cb) {
+								client1.info(function (err, info0) {
+									if (err) {
+										callback(err);
+									}
+									client2.info(function (err, info1) {
+										if (err) {
+											callback(err);
+										}
+										client3.info(function (err, info2) {
+											if (err) {
+												callback(err);
+											}
+											var patt = "loading:1";
+											if (!ut.match(patt, info0) && !ut.match(patt, info1) && !ut.match(patt, info2)) {
+												cb(true);
+											} else {
+												cb(false);
+											}
+										});
+									});
+								});
+							}, function () {
+								//Make sure that slaves and master have same number of keys
+								ut.wait_for_condition(500, 100, function (cb) {
+									master.dbsize(function (err, db) {
+										if (err) {
+											callback(err);
+										}
+										client1.dbsize(function (err, db0) {
+											if (err) {
+												callback(err);
+											}
+											client2.dbsize(function (err, db1) {
+												if (err) {
+													callback(err);
+												}
+												client3.dbsize(function (err, db2) {
+													if (err) {
+														callback(err);
+													}
+													if ((db === db0) && (db === db1) && (db === db2)) {
+														cb(true);
+													} else {
+														cb(false);
+													}
+												});
+											});
+										});
+									});
+								}, function () {
+									//Check digests
+									setTimeout(function () {
+										master.debug('digest', function (err, digest) {
+											if (err) {
+												callback(err);
+											}
+											client1.debug('digest', function (err, digest0) {
+												if (err) {
+													callback(err);
+												}
+												client2.debug('digest', function (err, digest1) {
+													if (err) {
+														callback(err);
+													}
+													client3.debug('digest', function (err, digest2) {
+														if (err) {
+															callback(err);
+														}
+														try {
+															if ((!assert.notEqual(digest, '0000000000000000000000000000000000000000', test_case)) && (!assert.deepEqual(digest, digest0, test_case)) && (!assert.deepEqual(digest, digest1, test_case)) && (!assert.deepEqual(digest, digest2, test_case))) {
+																ut.pass(test_case);
+																client3.end();
+																client2.end();
+																client1.end();
+																master.end();
+																if (replication.debug_mode) {
+																	log.notice(g.srv[client_pid][server_pid4]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid4]['host'] + ":" + g.srv[client_pid][server_pid4]['port']);
+																	log.notice(g.srv[client_pid][server_pid3]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid3]['host'] + ":" + g.srv[client_pid][server_pid3]['port']);
+																	log.notice(g.srv[client_pid][server_pid2]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
+																	log.notice(g.srv[client_pid][server_pid]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+																}
+																callback(null, true);
+															}
+														} catch (e) {
+															callback(e);
+														}
+													});
+												});
+											});
+										});
+									}, 100);
+								}, function () {
+									cb(new Error("Different number of keys between masted and slave after too long time."), null);
+								});
+							}, function () {
+								callback(new Error("Slaves still loading data after too much time"), null);
+							});
+						});
+					});
+				});
+			});
+		};
 	};
 
 	return replication;

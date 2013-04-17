@@ -99,9 +99,11 @@ exports.Replication4 = (function () {
 					}
 					server_pid2 = res;
 					slave_cli = g.srv[client_pid][server_pid2]['client'];
-					load_handle0 = start_bg_complex_data(master_host, master_port, 0, 100000);
-					load_handle1 = start_bg_complex_data(master_host, master_port, 11, 100000);
-					load_handle2 = start_bg_complex_data(master_host, master_port, 12, 100000);
+					setTimeout(function(){load_handle0 = start_bg_complex_data(master_host, master_port, 0, 100000);},100);
+					setTimeout(function(){load_handle1 = start_bg_complex_data(master_host, master_port, 11, 100000);},100);
+					setTimeout(function(){load_handle2 = start_bg_complex_data(master_host, master_port, 12, 100000);},100);
+					
+					
 					start_actual_test(function (err, res) {
 						if (err) {
 							errorCallback(err);
@@ -172,6 +174,7 @@ exports.Replication4 = (function () {
 						stop_bg_complex_data(load_handle0);
 						stop_bg_complex_data(load_handle1);
 						stop_bg_complex_data(load_handle2);
+						
 						var retry = 10;
 						g.asyncFor(0, retry, function (loop) {
 							master_cli.debug('digest', function (err, digest0) {

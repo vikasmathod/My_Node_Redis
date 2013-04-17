@@ -72,15 +72,23 @@ exports.Limits = (function () {
 		var c = 0,
 		iLoopIndex = 0;
 		var newClient = "";
-		g.asyncFor(0, 50, function (loop) {
-			c = loop.iteration();
-			newClient = redis.createClient(server_port, server_host);
-			newClient.on("ready", function () {
-				loop.next();
-			});
-			newClient.on("error", function () {
-				loop.break();
-			});
+		g.asyncFor(0, 12, function (loop) {
+			iLoopIndex = loop.iteration();
+			setTimeout(function () {
+				newClient = redis.createClient(server_port, server_host);
+				newClient.on("ready", function () {
+					newClient.ping(function (err, res) {
+						if (err) {
+							loop.break();
+						}
+						c++;
+						loop.next();
+					});
+				});
+				newClient.on("error", function (err,res) {
+					loop.next();
+				});				
+			}, 100);
 		}, function () {
 			try {
 				if (!assert(c > 8 && c <= 10, test_case))
@@ -88,9 +96,9 @@ exports.Limits = (function () {
 			} catch (e) {
 				ut.fail(e, true);
 			}
+			newClient.end();
 			testEmitter.emit('next');
 		});
-
 	};
 	return limits;
 }

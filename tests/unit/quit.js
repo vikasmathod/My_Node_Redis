@@ -86,7 +86,6 @@ exports.Quit = (function () {
 					if (res) {
 						errorCallback(res);
 					}
-					console.log(err);
 					try {
 						if ((!assert.ok(err, test_case)) && (!assert.equal(result, 'OK', test_case))) {
 							ut.pass(test_case);
