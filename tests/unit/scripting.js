@@ -1075,6 +1075,552 @@ exports.Scripting = (function () {
 		}
 	}
 
+	//Increase Code coverage
+	tester.scripting45 = function (errorCallback) {
+		var test_case = "Shutdown save works";
+		var tags = "scripting";
+		var overrides = {};
+		var args = {};
+		args['name'] = name;
+		args['tags'] = tags;
+		args['overrides'] = overrides;
+		server4.start_server(client_pid, args, function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			server_pid1 = res;
+			client1 = g.srv[client_pid][server_pid1]['client'];
+			server_host = g.srv[client_pid][server_pid1]['host'];
+			server_port = g.srv[client_pid][server_pid1]['port'];
+			function killserver() {
+				server4.kill_server(client_pid, server_pid1, function (err, res) {
+					if (err) {
+						errorCallback(err, null);
+					}
+				});
+			}
+
+			client1.shutdown('somecommand', function (err, res) {
+				try {
+					if (!assert.ok(ut.match('syntax error', err), test_case)) {
+						client1.shutdown('save', function (err, res) {
+							setTimeout(function () {
+								var msg = fs.readFileSync(g.srv[client_pid][server_pid1]['stdout']).toString().split('\n');
+								var val = msg[msg.length - 4];
+								try {
+									if (!assert.ok(ut.match('Saving', val), test_case))
+										ut.pass(test_case);
+								} catch (e) {
+									ut.fail(e, true);
+								}
+								client1.end();
+								testEmitter.emit('next');
+							}, 500);
+						});
+					}
+				} catch (e) {
+					client1.end();
+					killserver();
+					ut.fail(e, true);
+				}
+			});
+		});
+	}
+
+	tester.scripting46 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Syntax Error";
+
+		client.eval("local foo = redis.pcall('set','mykey','myval') return {type(foo),foo['ok}", 0, function (err, res) {
+			try {
+				if (!assert.ok(ut.match('Error', err), test_case))
+					ut.pass(test_case);
+			} catch (e) {
+				ut.fail(e, true);
+			}
+			testEmitter.emit('next');
+		});
+	}
+	tester.scripting47 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Unknown command";
+
+		client.eval("local foo = redis.pcall('int.parse(2)')  return {type(foo),foo}", 0, function (err, res) {
+			try {
+				if (!assert.deepEqual(res, ['table', 'Unknown Redis command called from Lua script'], test_case))
+					ut.pass(test_case);
+			} catch (e) {
+				ut.fail(e, true);
+			}
+			testEmitter.emit('next');
+		});
+	}
+
+	tester.scripting48 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua type tonumber";
+		var result_array = [];
+		client.eval('return {tonumber(math.random()),tonumber("55"),tonumber(10101.1012e12),tonumber("100110",2),tonumber("LUA", 36),tonumber("55 "),tonumber("100112",2)}', 0, function (err, res) {
+			result_array.push(res);
+			client.eval('return tonumber("a",50)', 0, function (errB, res) {
+				try {
+					if (!assert.deepEqual(result_array, [[0, 55, 10101101200000000, 38, 28306, 55]], test_case)
+						 && !assert.ok(ut.match('base out of range', errB), test_case))
+						ut.pass(test_case);
+				} catch (e) {
+					ut.fail(e, true);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	}
+
+	tester.scripting49 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua type String format";
+
+		client.eval('return string.format("%s %q", "Hello", "Lua user!")', 0, function (err, res1) {
+			client.eval('return string.format("%c%c%c", 76,117,97)', 0, function (err, res2) {
+				client.eval('return string.format("%e, %E", math.pi,math.pi)', 0, function (err, res3) {
+					client.eval('return string.format("%f, %g", math.pi,math.pi)', 0, function (err, res4) {
+						client.eval('return string.format("%d, %i, %u", -100,-100,-100)', 0, function (err, res5) {
+							client.eval('return string.format("%o, %x, %X", -100,-100,-100)', 0, function (err, res6) {
+								try {
+									if (!assert.deepEqual(res1, 'Hello "Lua user!"', test_case) && !assert.deepEqual(res2, 'Lua', test_case)
+										 && !assert.deepEqual(res3, '3.141593e+000, 3.141593E+000', test_case) && !assert.deepEqual(res4, '3.141593, 3.14159', test_case)
+										 && !assert.deepEqual(res5, '-100, -100, 4294967196', test_case) && !assert.deepEqual(res6, '37777777634, ffffff9c, FFFFFF9C', test_case))
+										ut.pass(test_case);
+								} catch (e) {
+									ut.fail(e, true);
+								}
+								testEmitter.emit('next');
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting50 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua type String byte and char";
+		var resArray = [];
+		client.eval('return string.byte("ABCDE")', 0, function (err, res1) {
+			resArray.push(res1);
+			client.eval('return string.byte("ABCDE",0)', 0, function (err, res2) {
+				resArray.push(res2);
+				client.eval('return string.byte("ABCDE",0)', 0, function (err, res3) {
+					resArray.push(res3);
+					client.eval('return string.byte("ABCDE",3,4)', 0, function (err, res4) {
+						resArray.push(res4);
+						client.eval('local s = "ABCDE" return s:byte(3,4)', 0, function (err, res5) {
+							resArray.push(res5);
+							client.eval('return string.char(65,66,67)', 0, function (err, res6) {
+								resArray.push(res6);
+								client.eval('return string.char()', 0, function (err, res7) {
+									resArray.push(res7);
+									try {
+										if (!assert.deepEqual(resArray, [65, null, null, 67, 67, 'ABC', ''], test_case))
+											ut.pass(test_case);
+									} catch (e) {
+										ut.fail(e, true);
+									}
+									testEmitter.emit('next');
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting51 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua type String Ops";
+		var resArray = [];
+		client.eval('return string.sub("Hello Lua user", 7, 9)', 0, function (err, res) {
+			resArray.push(res);
+			client.eval('return string.sub("Hello Lua user", -8, -6)', 0, function (err, res) {
+				resArray.push(res);
+				client.eval('return string.reverse("lua")', 0, function (err, res) {
+					resArray.push(res);
+					client.eval('return string.rep("Lua ",2)', 0, function (err, res) {
+						resArray.push(res);
+						client.eval('return string.match("I have 2 questions for you.", "%d+ %a+")', 0, function (err, res) {
+							resArray.push(res);
+							client.eval('return string.format("%d, %q", string.match("I have 2 questions for you.", "(%d+) (%a+)"))', 0, function (err, res) {
+								resArray.push(res);
+								client.eval('return string.len("Lua")', 0, function (err, res) {
+									resArray.push(res);
+									client.eval('return string.len("Lua\000user")', 0, function (err, res) {
+										resArray.push(res);
+										client.eval('return tostring(null)', 0, function (err, res) {
+											resArray.push(res);
+											client.eval('return {string.upper ("lua"),string.lower ("LUA"),string.len("Lua")}', 0, function (err, res) {
+												resArray.push(res);
+												try {
+													if (!assert.deepEqual(resArray, ['Lua', 'Lua', 'aul', 'Lua Lua ', '2 questions', '2, "questions"', 3, 8, undefined, ['LUA', 'lua', 3]], test_case))
+														ut.pass(test_case);
+												} catch (e) {
+													ut.fail(e, true);
+												}
+												testEmitter.emit('next');
+											});
+										});
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting52 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua type String find and pattern";
+		var resArray = [];
+		client.eval('return string.find("Hello Lua user", "Lua")', 0, function (err, res) {
+			resArray.push(res);
+			client.eval('return string.find("Hello Lua user", "banana")', 0, function (err, res) {
+				resArray.push(res);
+				client.eval('return string.find("Hello Lua user", "Lua", 1)', 0, function (err, res) {
+					resArray.push(res);
+					client.eval('return string.find("Hello Lua user", "Lua", 8)', 0, function (err, res) {
+						resArray.push(res);
+						client.eval('return string.find("Hello Lua user", "e", -5)', 0, function (err, res) {
+							resArray.push(res);
+							client.eval('return string.find("Hello Lua user", "%su")', 0, function (err, res) {
+								resArray.push(res);
+								client.eval('return string.find("Hello Lua user", "%su", 1, true)', 0, function (err, res) {
+									resArray.push(res);
+									try {
+										if (!assert.deepEqual(resArray, [7, null, 7, null, 13, 10, null], test_case))
+											ut.pass(test_case);
+									} catch (e) {
+										ut.fail(e, true);
+									}
+									testEmitter.emit('next');
+								});
+							});
+
+						});
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting53 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua type String gsub and gmatch";
+		var resArray = [];
+		client.eval('local t = false for i,n in string.gmatch("from=world, to=Lua", "%a+") do t=true end return tostring(t)', 0, function (err, res) {
+			resArray.push(res);
+			client.eval('return string.gsub("Hello banana", "banana", "Lua user")', 0, function (err, res) {
+				resArray.push(res);
+				client.eval('return string.gsub("banana", "a", "A", 2)', 0, function (err, res) {
+					resArray.push(res);
+					client.eval('return string.gsub("banana", "(an)", "%1-")', 0, function (err, res) {
+						resArray.push(res);
+						client.eval('return string.gsub("banana", "(a)(n)", "%2%1")', 0, function (err, res) {
+							resArray.push(res);
+							client.eval('return string.gsub("Hello Lua user", "(%w+)", print)', 0, function (err, res) {
+								resArray.push(res);
+								client.eval('return string.gsub("Hello Lua user", "(%w+)", function(w) return string.len(w) end)', 0, function (err, res) {
+									resArray.push(res);
+									client.eval('return string.gsub("banana", "(a)", string.upper)', 0, function (err, res) {
+										resArray.push(res);
+										client.eval('return string.gsub("banana", "(a)(n)", function(a,b) return b..a end)', 0, function (err, res) {
+											resArray.push(res);
+											try {
+												if (!assert.deepEqual(resArray, ['true', 'Hello Lua user', 'bAnAna', 'ban-an-a', 'bnanaa', 'Hello Lua user', '5 3 4', 'bAnAnA', 'bnanaa'], test_case))
+													ut.pass(test_case);
+											} catch (e) {
+												ut.fail(e, true);
+											}
+											testEmitter.emit('next');
+										});
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting54 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua type Table";
+		var resArray = [];
+		client.eval('return assert( 1 == 1, "true" )', 0, function (err, res) {
+			resArray.push(res);
+			client.eval('return assert( 1 == 2, "true" )', 0, function (errorMsg, res) {
+				client.eval('local myTable  = { 1, 4, "LUA"} return type(myTable)', 0, function (err, res) {
+					resArray.push(res);
+					client.eval('local myTable  = { 1, 4, "LUA"} return table.concat(myTable)', 0, function (err, res) {
+						resArray.push(res);
+						client.eval('local myTable  = { 1, 4, "LUA"} return table.concat(myTable, " space ")', 0, function (err, res) {
+							resArray.push(res);
+							client.eval('local myTable  = { 1, 4, "LUA"} return table.concat(myTable, " space ", 2, 3)', 0, function (err, res) {
+								resArray.push(res);
+								client.eval('local myTable  = { 1, 4, "LUA"} table.insert(myTable, 5) return table.concat(myTable)', 0, function (err, res) {
+									resArray.push(res);
+									client.eval('local myTable  = { 1, 4, "LUA"} return table.getn (myTable)', 0, function (err, res) {
+										resArray.push(res);
+										client.eval('local myTable  = { 1, 4, "LUA"} table.remove(myTable, 1) return table.getn(myTable)', 0, function (err, res) {
+											resArray.push(res);
+											client.eval('local myTable  = { 4, 1, 3} table.sort(myTable) return table.concat(myTable)', 0, function (err, res) {
+												resArray.push(res);
+												client.eval('local myTable  = {"c","a","b"} table.sort(myTable) return table.concat(myTable)', 0, function (err, res) {
+													resArray.push(res);
+													try {
+														if (!assert.deepEqual(resArray, [1, 'table', '14LUA', '1 space 4 space LUA', '4 space LUA', '14LUA5', 3, 2, '134', 'abc'], test_case) && !assert.ok(ut.match("Error", errorMsg), test_case))
+															ut.pass(test_case);
+													} catch (e) {
+														ut.fail(e, true);
+													}
+													testEmitter.emit('next');
+												});
+											});
+										});
+									});
+
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting55 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Math";
+		var resArray = [];
+		client.eval('return {math.abs(1.1),math.acos(1),math.asin(1),math.atan(1),math.atan2(1,0)}', 0, function (err, res) {
+			resArray.push(res);
+			client.eval('return{math.cos(1),math.cosh(1)}', 0, function (err, res) {
+				resArray.push(res);
+				client.eval('return {math.ceil(math.pi),math.deg (0),math.exp (1),math.floor (1.9),math.fmod (3, 2),math.frexp (1),math.ldexp (2,2),math.log (10)}', 0, function (err, res) {
+					resArray.push(res);
+					client.eval('return {math.max (1,2,3),math.min (1,2,3),math.modf (2),math.pow (2, 2),math.rad (90)}', 0, function (err, res) {
+						resArray.push(res);
+						client.eval('return {math.sin (90),math.sinh (0),math.sqrt (4),math.tan (45),math.tanh (0)}', 0, function (err, res) {
+							resArray.push(res);
+							try {
+								if (!assert.deepEqual(resArray, [[1, 0, 1, 0, 1], [0, 1], [4, 0, 2, 1, 1, 0, 8, 2], [3, 1, 2, 4, 1], [0, 0, 2, 1, 0]], test_case))
+									ut.pass(test_case);
+							} catch (e) {
+								ut.fail(e, true);
+							}
+							testEmitter.emit('next');
+						});
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting56 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua loadstring and unpack";
+		var resultArray = [];
+		client.eval('local f = loadstring("i = i + 1") return {tostring(f)}', 0, function (err, resload) {
+			client.eval('return {unpack{10,20,30}}', 0, function (err, res) {
+				resultArray.push(res);
+				client.eval('local a,b = unpack{10,20,30} return {a,b}', 0, function (err, res) {
+					resultArray.push(res);
+					try {
+						if (!assert.ok(ut.match('function', resload), test_case) && !assert.deepEqual(resultArray, [[10, 20, 30], [10, 20]], test_case))
+							ut.pass(test_case);
+					} catch (e) {
+						ut.fail(e, true);
+					}
+					testEmitter.emit('next');
+				});
+			});
+		});
+	}
+
+	tester.scripting57 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua coroutine and select";
+		var resultArray = [];
+		var script = '\
+					local co = coroutine.create(function ()\
+						return coroutine.wrap(function () return("hi") end)\
+					end)\
+					';
+		client.eval(script + ' return coroutine.status(co)', 0, function (err, res) {
+			resultArray.push(res);
+			client.eval(script + ' return {coroutine.resume(co),coroutine.status(co)}', 0, function (err, res) {
+				resultArray.push(res);
+				var script = '\
+									local co = coroutine.create(function (a,b)\
+									coroutine.yield(a + b, a - b)\
+									coroutine.running ()\
+									end)\
+									';
+				client.eval(script + ' return {coroutine.resume(co, 20, 10)}', 0, function (err, res) {
+					resultArray.push(res);
+					client.eval('return {select(-1, 1, 2, 3),select(1, 1, 2, 3),select(4, 1, 2, 3)}', 0, function (err, res) {
+						resultArray.push(res);
+						client.eval('return {select("#", {1,2,3}, 4, 5, {6,7,8})}', 0, function (err, res) {
+							resultArray.push(res);
+							client.eval('return select(0, 1, 2, 3)', 0, function (errZ, res) {
+								client.eval('return select(-2,1)', 0, function (errN, res) {
+									try {
+										if (!assert.deepEqual(resultArray, ['suspended', [1, 'dead'], [1, 30, 10], [3, 1], [4]], test_case)
+											 && !assert.ok(ut.match('out of range', errZ), test_case) && !assert.ok(ut.match('out of range', errN), test_case))
+											ut.pass(test_case);
+									} catch (e) {
+										ut.fail(e, true);
+									}
+									testEmitter.emit('next');
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting58 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua newproxy";
+		var script = '\
+					local a = newproxy(true)\
+					getmetatable(a).__len = function() return 5 end\
+					local b = newproxy(a)\
+					local c = newproxy(false)\
+					local is_collected = false\
+					local o = newproxy(true)\
+					getmetatable(o).__gc = function() is_collected = true end\
+					o = nil; collectgarbage()\
+					return {type(a),#a,tostring(b ~= a),tostring(getmetatable(b) == getmetatable(a)),#b,tostring(not getmetatable(c)),tostring(is_collected)}';
+		client.eval(script, 0, function (err, res) {
+			client.eval('local a = newproxy(0) return {type(a)}', 0, function (errE, resE) {
+				try {
+					if (!assert.deepEqual(res, ['userdata', 5, 'true', 'true', 5, 'true', 'true'], test_case)
+						 && !assert.ok(ut.match('boolean or proxy expected', errE), test_case))
+						ut.pass(test_case);
+				} catch (e) {
+					ut.fail(e, true);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	}
+
+	tester.scripting59 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua setfenv";
+		var script = '\
+					a = 1 \
+					setfenv(1, {})\
+					return {a}';
+		client.eval(script, 0, function (errG, res) {
+			script = '\
+							local a = 1; \
+							local newgt = {}\
+							setmetatable(newgt, {__index = _G})\
+							setfenv(1, newgt)\
+							return a';
+			client.eval(script, 0, function (err, res) {
+				script = 'return {gcinfo(),getfenv(1)}';
+				client.eval(script, 0, function (errL, resL) {
+					try {
+						if (!assert.ok(ut.match("global variable", errG), test_case) && !assert.equal(res, 1, test_case)
+							 && !assert.deepEqual(resL[1], [], test_case))
+							ut.pass(test_case);
+					} catch (e) {
+						ut.fail(e, true);
+					}
+					testEmitter.emit('next');
+				});
+			});
+		});
+	}
+
+	tester.scripting60 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua pcall and xpcall";
+		var script = '\
+					local add = function(a,b)\
+						return tonumber(a)+tonumber(b)\
+					end\
+					return {pcall(add,"a"," ")}';
+		client.eval(script, 0, function (errP, resP) {
+			var script = '\
+							local add = function(a,b)\
+							return tonumber(a)+tonumber(b)\
+							end\
+							local err = function(a,b)\
+							return "Error in Function"\
+							end\
+							return {xpcall(add,err,"a"," ")}';
+			client.eval(script, 0, function (errXP, resXP) {
+				try {
+					if (!assert.ok(ut.match("nil value", resP[1]), test_case) && !assert.ok(ut.match("Error", resXP[1]), test_case))
+						ut.pass(test_case);
+				} catch (e) {
+					ut.fail(e, true);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	}
+
+	tester.scripting61 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Running code within code";
+		var script = 'local code = [[ return ("Redis") ]]\
+					local test = loadstring(code) return test()';
+		client.eval(script, 0, function (errL, resL) {
+			script = 'local code = string.dump(function() return("Redis") end)\
+							local test = loadstring(code)\
+							return test()';
+			client.eval(script, 0, function (errOL, resOL) {
+				script = 'local filefunc = dofile("test.lua")\
+									local returnedfunc = filefunc(2, 3)\
+									return returnedfunc';
+				client.eval(script, 0, function (errStr, resStr) {
+					script = 'return {tostring(rawequal(1,1)),tostring(rawequal(1,2))}';
+					client.eval(script, 0, function (errLF, resLF) {
+						try {
+							if (!assert.ok(ut.match("Redis", resL), test_case) && !assert.ok(ut.match("Redis", resOL), test_case)
+								 && !assert.ok(ut.match("Error", errStr), test_case) && !assert.deepEqual(resLF, ['true', 'false'], test_case))
+								ut.pass(test_case);
+						} catch (e) {
+							ut.fail(e, true);
+						}
+						testEmitter.emit('next');
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting62 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua pairs and ipairs";
+		var script = 'local Name = {"Jones","Smith","Patel","Brown","Ng"}\
+					local temp_table={}\
+					for index,val in ipairs(Name) do\
+					 table.insert(temp_table,index .. " - " .. val)\
+					end\
+					return table.concat(temp_table,",")';
+		client.eval(script, 0, function (errOL, resOL) {
+			script = 'local Name = {"Jones","Smith","Patel","Brown","Ng"}\
+							local temp_table={}\
+							for index,val in pairs(Name) do\
+								table.insert(temp_table,index .. " - " .. val)\
+							end\
+							return table.concat(temp_table,",")';
+			client.eval(script, 0, function (errStr, resStr) {
+				try {
+					if (!assert.equal(resOL, "1 - Jones,2 - Smith,3 - Patel,4 - Brown,5 - Ng", test_case)
+						 && !assert.equal(resStr, "1 - Jones,2 - Smith,3 - Patel,4 - Brown,5 - Ng", test_case))
+						ut.pass(test_case);
+				} catch (e) {
+					ut.fail(e, true);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	}
+
 	return scripting;
 }
 	())
