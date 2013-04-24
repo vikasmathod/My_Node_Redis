@@ -1621,6 +1621,171 @@ exports.Scripting = (function () {
 		});
 	}
 
+	tester.scripting63 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Json decoding simple types";
+		var res_Array = [];
+		//var script="return cjson.decode(cjson.encode('{v_rocks:true,whos_v:\"http://www.vishalshah.org\"}'))";
+		client.eval("return cjson.decode('\"test string\"')", 0, function (err, res) {
+			res_Array.push(res);
+			client.eval("return cjson.decode('[0.0, -5e3, -1, 0.3e-3]')", 0, function (err, res) {
+				res_Array.push(res);
+				client.eval("return cjson.decode('null')", 0, function (err, res) {
+					res_Array.push(res);
+					client.eval("return {tostring(cjson.decode('true')),tostring(cjson.decode('false'))}", 0, function (err, res) {
+						res_Array.push(res);
+						client.eval("return cjson.decode(cjson.encode('{\"1\": \"one\", \"3\": \"three\"}'))", 0, function (err, res) {
+							res_Array.push(res);
+							try {
+								if (!assert.deepEqual(res_Array, ["test string", [0, -5000, -1, 0], null, ['true', 'false'], '{"1": "one", "3": "three"}'], test_case))
+									ut.pass(test_case);
+							} catch (e) {
+								ut.fail(e, true);
+							}
+							testEmitter.emit('next');
+						});
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting64 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Json decoding and encoding errors";
+		client.eval("return cjson.decode('{ \"unexpected eof\": ')", 0, function (errTE, res) {
+			client.eval("return cjson.decode('{ \"extra data\": true }, false')", 0, function (errTC, res) {
+				client.eval("return cjson.decode([[ { bad escape \q code } ]])", 0, function (errI, res) {
+					client.eval("return cjson.decode([[ { \"bad escape \q code\"  } ]])", 0, function (errTO, res) {
+						client.eval("return cjson.decode('[ -+12 ]')", 0, function (errN, res) {
+							client.eval("return cjson.encode({ [false] = \"wrong\" })", 0, function (errEn, res) {
+								client.eval("return cjson.decode('\0\"0\"')", 0, function (errSy, res) {
+									client.eval("local foo=cjson.null return cjson.decode(foo)", 0, function (errLD, res) {
+										try {
+											if (!assert.ok(ut.match('Expected value but found T_END', errTE), test_case) &&
+												!assert.ok(ut.match('Expected the end but found T_COMMA', errTC), test_case) &&
+												!assert.ok(ut.match('Expected object key string but found invalid token', errI), test_case) &&
+												!assert.ok(ut.match('Expected colon but found T_OBJ_END', errTO), test_case) &&
+												!assert.ok(ut.match('invalid number', errN), test_case) &&
+												!assert.ok(ut.match('Cannot serialise', errEn), test_case) &&
+												!assert.ok(ut.match('JSON parser does not support UTF-16 or UTF-32', errSy), test_case) &&
+												!assert.ok(ut.match('got userdata', errLD), test_case))
+												ut.pass(test_case);
+										} catch (e) {
+											ut.fail(e, true);
+										}
+										testEmitter.emit('next');
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting65 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Json decoding nested arrays / objects";
+		var res_Array = [];
+		client.eval("return cjson.encode_max_depth(5)", 0, function (err, res) {
+			res_Array.push(res);
+			client.eval("return cjson.decode('[ \"nested\" ]')", 0, function (err, res) {
+				res_Array.push(res);
+				client.eval("return cjson.decode(cjson.encode('{\"a\":{\"b\":{\"c\":{\"d\":{\"e\":\"nested\"}}}}}'))", 0, function (err, res) {
+					res_Array.push(res);
+					try {
+						if (!assert.deepEqual(res_Array, [5, ['nested'], '{"a":{"b":{"c":{"d":{"e":"nested"}}}}}'], test_case))
+							ut.pass(test_case);
+					} catch (e) {
+						ut.fail(e, true);
+					}
+					testEmitter.emit('next');
+				});
+			});
+		});
+	}
+
+	tester.scripting66 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Json encoding simple types";
+		var res_Array = [];
+		client.eval("return {cjson.encode(true),cjson.encode(false)}", 0, function (err, res) {
+			res_Array.push(res);
+			client.eval("return {cjson.encode({ }),cjson.encode(10)}", 0, function (err, res) {
+				res_Array.push(res);
+				try {
+					if (!assert.deepEqual(res_Array, [['true', 'false'], ['{}', 10]], test_case))
+						ut.pass(test_case);
+				} catch (e) {
+					ut.fail(e, true);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	}
+
+	tester.scripting67 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Json encoding table tests";
+		var res_Array = [];
+		client.eval("cjson.encode_sparse_array(true, 2, 3) cjson.encode_max_depth(5) return {cjson.encode({ [3] = \"sparse test\" })}", 0, function (err, res) {
+			res_Array.push(res);
+			client.eval("cjson.encode_sparse_array(true, 2, 3) cjson.encode_max_depth(5) return cjson.encode({ [1] = \"one\", [4] = \"sparse test\" })", 0, function (err, res) {
+				res_Array.push(res);
+				client.eval("cjson.encode_sparse_array(true, 2, 3) cjson.encode_max_depth(5) return cjson.encode({ [\"2\"] = \"numeric string key test\" })", 0, function (err, res) {
+					res_Array.push(res);
+					client.eval("cjson.encode_sparse_array(true, 2, 3) cjson.encode_max_depth(5) return cjson.encode({ {{{{{ \"nested\" }}}}}})", 0, function (err, res) {
+						try {
+							if (!assert.deepEqual(res_Array, [['[null,null,"sparse test"]'], '["one",null,null,"sparse test"]', '{"2":"numeric string key test"}'], test_case)
+								 && !assert.ok(ut.match('excessive nesting', err), test_case))
+								ut.pass(test_case);
+						} catch (e) {
+							ut.fail(e, true);
+						}
+						testEmitter.emit('next');
+					});
+				});
+			});
+		});
+	}
+
+	tester.scripting68 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua msgpack";
+		var script = '\
+						local payload = {1, 2, 3}\
+						local varpack = cmsgpack.pack(payload)\
+						local varunpack = cmsgpack.unpack(varpack)\
+						return varunpack';
+		client.eval(script, 0, function (err, res) {
+			try {
+				if (!assert.deepEqual(res, [1, 2, 3], test_case))
+					ut.pass(test_case);
+			} catch (e) {
+				ut.fail(e, true);
+			}
+			testEmitter.emit('next');
+		});
+	}
+
+	tester.scripting69 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Json escaping unicode";
+		var res_Array = [];
+		client.eval("cjson.refuse_invalid_numbers(true) return cjson.encode(tonumber(0/0))", 0, function (errN, res) {
+			client.eval("cjson.encode_keep_buffer(true) cjson.encode_number_precision(2) return cjson.encode({1.23})", 0, function (err, resP) {
+				client.eval("cjson.refuse_invalid_numbers(false) return cjson.encode(tonumber(0/0))", 0, function (errRF, resRF) {
+					client.eval("cjson.encode_number_precision(15) return cjson.encode({1.23})", 0, function (errE, res) {
+						try {
+							if (!assert.ok(ut.match('NaN or Inf', errN), test_case) &&
+								!assert.equal(resP, "[1.2]", test_case) && !assert.equal(resRF, '-1.$', test_case) &&
+								!assert.ok(ut.match('expected integer between 1 and 14', errE), test_case))
+								ut.pass(test_case);
+						} catch (e) {
+							ut.fail(e, true);
+						}
+						testEmitter.emit('next');
+					});
+				});
+			});
+		});
+	}
+
 	return scripting;
 }
 	())
