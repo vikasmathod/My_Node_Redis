@@ -1579,14 +1579,38 @@ exports.Scripting = (function () {
 				client.eval(script, 0, function (errStr, resStr) {
 					script = 'return {tostring(rawequal(1,1)),tostring(rawequal(1,2))}';
 					client.eval(script, 0, function (errLF, resLF) {
-						try {
-							if (!assert.ok(ut.match("Redis", resL), test_case) && !assert.ok(ut.match("Redis", resOL), test_case)
-								 && !assert.ok(ut.match("Error", errStr), test_case) && !assert.deepEqual(resLF, ['true', 'false'], test_case))
-								ut.pass(test_case);
-						} catch (e) {
-							ut.fail(e, true);
-						}
-						testEmitter.emit('next');
+						script = 'local code = string.dump(function() return(1) end)\
+								local test = loadstring(code)\
+								return test()';
+						client.eval(script, 0, function (errLN, resLN) {
+							script = 'local code = string.dump(function() return(true) end)\
+									local test = loadstring(code)\
+									return test()';
+							client.eval(script, 0, function (errLB, resLB) {
+								script = 'local code = string.dump(function() return("") end)\
+										local test = loadstring(code)\
+										return test()';
+								client.eval(script, 0, function (errLNiL, resLNiL) {
+									script = 'local code = function(a)\
+												return a\
+												end\
+												local test = load(code)\
+												return test()';
+									client.eval(script, 0, function (errLd, resLd) {
+										try {
+											if (!assert.ok(ut.match("Redis", resL), test_case) && !assert.ok(ut.match("Redis", resOL), test_case)
+												 && !assert.ok(ut.match("Error", errStr), test_case) && !assert.deepEqual(resLF, ['true', 'false'], test_case)
+												  && !assert.ok(ut.match(1, resLN), test_case) && !assert.ok(ut.match(1, resLB), test_case) 
+												  && !assert.ok(ut.match('', resLNiL), test_case))
+												ut.pass(test_case);
+										} catch (e) {
+											ut.fail(e, true);
+										}
+										testEmitter.emit('next');
+									});
+								});
+							});
+						});
 					});
 				});
 			});
@@ -1624,10 +1648,9 @@ exports.Scripting = (function () {
 	tester.scripting63 = function (errorCallback) {
 		var test_case = "EVAL - Redis status reply -> Lua Json decoding simple types";
 		var res_Array = [];
-		//var script="return cjson.decode(cjson.encode('{v_rocks:true,whos_v:\"http://www.vishalshah.org\"}'))";
 		client.eval("return cjson.decode('\"test string\"')", 0, function (err, res) {
 			res_Array.push(res);
-			client.eval("return cjson.decode('[0.0, -5e3, -1, 0.3e-3]')", 0, function (err, res) {
+			client.eval("cjson.refuse_invalid_numbers(true) return cjson.decode('[0.0, -5e3, -1, 0.3e-3]')", 0, function (err, res) {
 				res_Array.push(res);
 				client.eval("return cjson.decode('null')", 0, function (err, res) {
 					res_Array.push(res);
@@ -1752,10 +1775,17 @@ exports.Scripting = (function () {
 						local payload = {1, 2, 3}\
 						local varpack = cmsgpack.pack(payload)\
 						local varunpack = cmsgpack.unpack(varpack)\
-						return varunpack';
+						return {varunpack,cmsgpack.unpack(cmsgpack.pack(17)),cmsgpack.unpack(cmsgpack.pack(-1))\
+						,cmsgpack.unpack(cmsgpack.pack(true)),cmsgpack.unpack(cmsgpack.pack(false)),cmsgpack.unpack(cmsgpack.pack(1.5))\
+						,cmsgpack.unpack(cmsgpack.pack(101)),cmsgpack.unpack(cmsgpack.pack(-101)),cmsgpack.unpack(cmsgpack.pack(20001))\
+						,cmsgpack.unpack(cmsgpack.pack(-20001)),cmsgpack.unpack(cmsgpack.pack(-20000001)),cmsgpack.unpack(cmsgpack.pack(20000001))\
+						,cmsgpack.unpack(cmsgpack.pack(200000000001)),cmsgpack.unpack(cmsgpack.pack(-200000000001))\
+						,cmsgpack.unpack(cmsgpack.pack(0xff)),cmsgpack.unpack(cmsgpack.pack(0xffff)),cmsgpack.unpack(cmsgpack.pack(0xffffffff))\
+						,cmsgpack.unpack(cmsgpack.pack(-128)),cmsgpack.unpack(cmsgpack.pack(-32768)),cmsgpack.unpack(cmsgpack.pack(-2147483648))\
+						,cmsgpack.unpack(cmsgpack.pack(nil)),cmsgpack.unpack(cmsgpack.pack("abc")),cmsgpack.unpack(cmsgpack.pack("xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"))}';
 		client.eval(script, 0, function (err, res) {
 			try {
-				if (!assert.deepEqual(res, [1, 2, 3], test_case))
+				if (!assert.deepEqual(res, [ [ 1, 2, 3 ],17,-1,1, null, 1, 101, -101, 20001, -20001, -20000001, 20000001, 200000000001, -200000000001, 255, 65535, 4294967295, -128, -32768, -2147483648 ], test_case))
 					ut.pass(test_case);
 			} catch (e) {
 				ut.fail(e, true);
@@ -1767,25 +1797,148 @@ exports.Scripting = (function () {
 	tester.scripting69 = function (errorCallback) {
 		var test_case = "EVAL - Redis status reply -> Lua Json escaping unicode";
 		var res_Array = [];
-		client.eval("cjson.refuse_invalid_numbers(true) return cjson.encode(tonumber(0/0))", 0, function (errN, res) {
-			client.eval("cjson.encode_keep_buffer(true) cjson.encode_number_precision(2) return cjson.encode({1.23})", 0, function (err, resP) {
-				client.eval("cjson.refuse_invalid_numbers(false) return cjson.encode(tonumber(0/0))", 0, function (errRF, resRF) {
-					client.eval("cjson.encode_number_precision(15) return cjson.encode({1.23})", 0, function (errE, res) {
-						try {
-							if (!assert.ok(ut.match('NaN or Inf', errN), test_case) &&
-								!assert.equal(resP, "[1.2]", test_case) && !assert.equal(resRF, '-1.$', test_case) &&
-								!assert.ok(ut.match('expected integer between 1 and 14', errE), test_case))
-								ut.pass(test_case);
-						} catch (e) {
-							ut.fail(e, true);
-						}
-						testEmitter.emit('next');
+		client.eval("cjson.refuse_invalid_numbers(true) return {cjson.encode(tonumber(0/0))}", 0, function (errN, res) {
+			client.eval("cjson.refuse_invalid_numbers(true) return cjson.decode('0xa')", 0, function (errI, res) {
+				client.eval("cjson.encode_keep_buffer(true) cjson.encode_number_precision(2) return cjson.encode({1.23})", 0, function (err, resP) {
+					client.eval("cjson.refuse_invalid_numbers(false) return cjson.encode(tonumber(0/0))", 0, function (errRF, resRF) {
+						client.eval("cjson.encode_number_precision(15) return cjson.encode({1.23})", 0, function (errE, res) {
+							try {
+								if (!assert.ok(ut.match('NaN or Inf', errN), test_case) && !assert.ok(ut.match(' invalid number', errI), test_case) &&
+									!assert.equal(resP, "[1.2]", test_case) && !assert.equal(resRF, '-1.$', test_case) &&
+									!assert.ok(ut.match('expected integer between 1 and 14', errE), test_case))
+									ut.pass(test_case);
+							} catch (e) {
+								ut.fail(e, true);
+							}
+							testEmitter.emit('next');
+						});
 					});
 				});
 			});
 		});
 	}
 
-	return scripting;
+	tester.scripting70 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua Json unicode_escape";
+		var res_Array = [];
+		client.eval("return cjson.decode('\"\\\\u0000\"')", 0, function (err, res) {
+			res_Array.push(res);	
+			client.eval("return cjson.decode('\"\\\\uda00\\\\uDC00\"')", 0, function (err, res) {
+				client.eval("return cjson.decode('\"\\\\uda00\\\\u0000\"')", 0, function (errI, res) {
+					client.eval("return cjson.decode('\"\\\\uda00\\\\u\"')", 0, function (errI1, res) {		
+						client.eval("return cjson.decode('\"\\\\uda00\"')", 0, function (errI2, res) {
+							client.eval("return cjson.decode('\"\\\\u\"')", 0, function (errI3, res) {	
+								try {
+									if (!assert.deepEqual(res_Array, ['\u0000'], test_case) && 
+										!assert.ok(ut.match('invalid unicode escape',errI),test_case) &&
+										!assert.ok(ut.match('invalid unicode escape',errI1),test_case) && 
+										!assert.ok(ut.match('invalid unicode escape',errI2),test_case) && 
+										!assert.ok(ut.match('invalid unicode escape',errI3),test_case))
+										ut.pass(test_case);
+								} catch (e) {
+									ut.fail(e, true);
+								}
+								testEmitter.emit('next');	
+							});
+						});
+					});
+				});			
+			});			
+		});
+	}
+	
+	tester.scripting71 = function (errorCallback) {
+		var test_case = "EVAL - Redis status reply -> Lua msgpack regression";
+		var script = '\
+						local failed = 0\
+						local passed = 0\
+						local hex = function(s)\
+							local i\
+							local h = ""\
+							for i = 1, #s do\
+								h = h .. string.format("%02x",string.byte(s,i))\
+							end\
+							return h\
+						end\
+						local test_pack = function(name,obj,raw)\
+							if hex(cmsgpack.pack(obj)) ~= raw then\
+								failed = failed+1\
+							else\
+								passed = passed+1\
+							end\
+						end\
+						local ascii_to_num = function(c)\
+							if (c >= string.byte("0") and c <= string.byte("9")) then\
+								return c - string.byte("0")\
+							elseif (c >= string.byte("A") and c <= string.byte("F")) then\
+								return (c - string.byte("A"))+10\
+							elseif (c >= string.byte("a") and c <= string.byte("f")) then\
+								return (c - string.byte("a"))+10\
+							end\
+						end\
+						local unhex = function(h)\
+							local i\
+							local s = ""\
+							for i = 1, #h, 2 do\
+								local high = ascii_to_num(string.byte(h,i))\
+								local low = ascii_to_num(string.byte(h,i+1))\
+								s = s .. string.char((high*16)+low)\
+							end\
+							return s\
+						end\
+						local compare_objects = function(a,b)\
+							if (type(a) == "table") then\
+								local count = 0\
+								for k,v in pairs(a) do\
+									count = count + 1\
+								end\
+								for k,v in pairs(b) do count = count - 1 end\
+								if count == 0 then return true else return false end\
+							else\
+								return a == b\
+							end\
+						end\
+						local test_unpack = function(name,raw,obj)\
+							if not compare_objects(cmsgpack.unpack(unhex(raw)),obj) then\
+								failed = failed+1\
+							else\
+								passed = passed+1\
+							end\
+						end\
+						local test_pack_and_unpack = function(name,obj,raw)\
+							test_pack(name,obj,raw)\
+							test_unpack(name,raw,obj)\
+						end\
+						test_pack_and_unpack("positive fixnum",0,"00")\
+						test_pack_and_unpack("negative fixnum",-1,"ff")\
+						test_pack_and_unpack("uint8",255,"ccff")\
+						test_pack_and_unpack("fix raw","a","a161")\
+						test_pack_and_unpack("fix array",{0},"9100")\
+						test_pack_and_unpack("fix map",{a=64},"81a16140")\
+						test_pack_and_unpack("nil",nil,"c0")\
+						test_pack_and_unpack("true",true,"c3")\
+						test_pack_and_unpack("false",false,"c2")\
+						test_pack_and_unpack("double",0.1,"cb3fb999999999999a")\
+						test_pack_and_unpack("uint16",32768,"cd8000")\
+						test_pack_and_unpack("uint32",1048576,"ce00100000")\
+						test_pack_and_unpack("int8",-64,"d0c0")\
+						test_pack_and_unpack("int16",-1024,"d1fc00")\
+						test_pack_and_unpack("int32",-1048576,"d2fff00000")\
+						test_pack_and_unpack("int64",-1099511627776,"d3ffffff0000000000")\
+						test_pack_and_unpack("raw16","                                        ","da002820202020202020202020202020202020202020202020202020202020202020202020202020202020")\
+						test_pack_and_unpack("array 16",{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},"dc001000000000000000000000000000000000")\
+						return {failed,passed}';
+		client.eval(script, 0, function (err, res) {
+			try {
+				if (!assert.deepEqual(res, [0,36], test_case))
+					ut.pass(test_case);
+			} catch (e) {
+				ut.fail(e, true);
+			}
+			testEmitter.emit('next');
+		});
+	}
+
+	 return scripting;
 }
 	())

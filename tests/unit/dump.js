@@ -10,6 +10,8 @@ exports.Dump = (function () {
 	var dump = {},
 	name = "Dump",
 	client = "",
+	server_host = "",
+	server_port = "",
 	tester = {},
 	server_pid = "",
 	all_tests = "",
@@ -68,79 +70,94 @@ exports.Dump = (function () {
 		testEmitter.emit('start');
 	}
 
-	/* tester.dump1 = function(errorCallback){
-	var test_case = "DUMP / RESTORE are able to serialize / unserialize a simple key";
-	var encoded = "";
-	client.set('foo','bar');
-	client.dump('foo',function(err,res){
-	if(err){
-	errorCallback(err);
-	}
-	encoded = res;
-	client.del('foo');
-	client.exists('foo',function(err,exist){
-	if(err){
-	errorCallback(err);
-	}
-	client.restore('foo',0,encoded,function(err,resRes){
-	if(err){
-	errorCallback(err);
-	}
-	client.ttl('foo',function(err,ttlres){
-	if(err){
-	errorCallback(err);
-	}
-	client.get('foo',function(err,res){
-	try{
-	if(!assert.equal(exist,0,test_case) && !assert.equal(resRes,'OK',test_case)
-	&& !assert.equal(ttlres,-1,test_case) && !assert.equal(res,'bar',test_case))
-	ut.pass(test_case);
-	}catch(e){
-	ut.pass(e,true);
-	}
-	testEmitter.emit('next');
-	});
-	})
-	});
-	});
-	});
+	tester.dump1 = function (errorCallback) {
+		var test_case = "DUMP / RESTORE are able to serialize / unserialize a simple key";
+		var encoded = "";
+		var newClient = redis.createClient(server_port, server_host, {
+				return_buffers : true
+			});
+		newClient.on("error", function (err) {
+			newClient.end();
+		});
+		newClient.set('foo', 'bar');
+		newClient.dump('foo', function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			encoded = res;
+			newClient.del('foo');
+			newClient.exists('foo', function (err, exist) {
+				if (err) {
+					errorCallback(err);
+				}
+				newClient.restore('foo', 0, encoded, function (err, resRes) {
+					if (err) {
+						errorCallback(err);
+					}
+					newClient.ttl('foo', function (err, ttlres) {
+						if (err) {
+							errorCallback(err);
+						}
+						newClient.get('foo', function (err, res) {
+							try {
+								if (!assert.equal(exist, 0, test_case) && !assert.equal(resRes, 'OK', test_case)
+									 && !assert.equal(ttlres, -1, test_case) && !assert.equal(res, 'bar', test_case))
+									ut.pass(test_case);
+							} catch (e) {
+								ut.pass(e, true);
+							}
+							newClient.end();
+							testEmitter.emit('next');
+						});
+					})
+				});
+			});
+		});
 	};
 
 	tester.dump2 = function (errorCallback) {
-	var test_case = "RESTORE can set an arbitrary expire to the materialized key";
-	client.set('foo', 'bar');
-	client.dump('foo', function (err, encoded) {
-	if (err) {
-	errorCallback(err);
-	}
-	client.del('foo');
-	client.restore('foo', 5000, encoded, function (err, res) {
-	if (err) {
-	errorCallback(err);
-	}
-	client.pttl('foo', function (err, ttl) {
-	if (err) {
-	errorCallback(err);
-	}
-	try {
-	if (!assert(ttl >= 3000 && ttl <= 5000, test_case)) {
-	client.get('foo', function (err, res) {
-	if (err) {
-	errorCallback(err);
-	}
-	if (!assert.equal(res, 'bar', test_case))
-	ut.pass(test_case);
-	});
-	}
-	} catch (e) {
-	ut.fail(e, true);
-	}
-	testEmitter.emit('next');
-	});
-	});
-	});
+		var test_case = "RESTORE can set an arbitrary expire to the materialized key";
+		var newClient = redis.createClient(server_port, server_host, {
+				return_buffers : true
+			});
+		newClient.on("error", function (err) {
+			newClient.end();
+		});
+		newClient.set('foo', 'bar');
+		newClient.dump('foo', function (err, encoded) {
+			if (err) {
+				errorCallback(err);
+			}
+			newClient.del('foo');
+			newClient.restore('foo', 5000, encoded, function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				newClient.pttl('foo', function (err, ttl) {
+					if (err) {
+						errorCallback(err);
+					}
+					try {
+						if (!assert(ttl >= 3000 && ttl <= 5000, test_case)) {
+							newClient.get('foo', function (err, res) {
+								if (err) {
+									errorCallback(err);
+								}
+								if (!assert.equal(res, 'bar', test_case)){
+									ut.pass(test_case);
+								}
+							});
+						}
+					} catch (e) {
+						ut.fail(e, true);
+					}
+					newClient.end();
+					testEmitter.emit('next');
+				});
+			});
+		});
 	};
-	 */
+	 
 	tester.dump3 = function (errorCallback) {
 		var test_case = "RESTORE returns an error of the key already exists";
 		client.set('foo', 'bar');
