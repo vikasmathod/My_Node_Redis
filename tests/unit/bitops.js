@@ -4,12 +4,12 @@ exports.Bitops = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	bitops = {},
-	name = "Bitops",
-	client = "",
+	name = 'Bitops',
+	client = '',
 	tester = {},
-	server_pid = "",
-	all_tests = "",
-	client_pid = "";
+	server_pid = '',
+	all_tests = '',
+	client_pid = '';
 
 	//public property
 	bitops.debug_mode = false;
@@ -17,13 +17,13 @@ exports.Bitops = (function () {
 	//public method
 	function fourDgtBinNum(n) {
 		if (n == 0)
-			return "0000";
+			return '0000';
 		if (n > 0 && n < 10)
-			return "000" + n;
+			return '000' + n;
 		else if (n > 9 && n < 100)
-			return "00" + n;
+			return '00' + n;
 		else if (n > 99 && n < 1000)
-			return "0" + n;
+			return '0' + n;
 		else
 			return n;
 	}
@@ -35,29 +35,29 @@ exports.Bitops = (function () {
 	}
 
 	function conv_bits(str) {
-		var Bin = "",
-		HexASCII = "";
+		var Bin = '',
+		HexASCII = '';
 		for (var iStr = 0; iStr < str.length; iStr++) {
 			val = str[iStr].charCodeAt(0);
 			HexASCII = decimalToHex(val);
 			for (var i = 0; i < HexASCII.toString().length; i++) {
 				switch (HexASCII.toString()[i]) {
-				case "A":
+				case 'A':
 					Bin += fourDgtBinNum(parseInt(10).toString(2));
 					break;
-				case "B":
+				case 'B':
 					Bin += fourDgtBinNum(parseInt(11).toString(2));
 					break;
-				case "C":
+				case 'C':
 					Bin += fourDgtBinNum(parseInt(12).toString(2));
 					break;
-				case "D":
+				case 'D':
 					Bin += fourDgtBinNum(parseInt(13).toString(2));
 					break;
-				case "E":
+				case 'E':
 					Bin += fourDgtBinNum(parseInt(14).toString(2));
 					break;
-				case "F":
+				case 'F':
 					Bin += fourDgtBinNum(parseInt(15).toString(2));
 					break;
 				default:
@@ -67,13 +67,13 @@ exports.Bitops = (function () {
 				}
 			}
 		}
-		return Bin.split("").reverse().join("");
+		return Bin.split('').reverse().join('');
 	}
 
 	function convBin_string(binNum) {
-		var charSet = "";
-		var Singchar = ""
-			binNum = binNum.split("").reverse().join("")
+		var charSet = '';
+		var Singchar = ''
+			binNum = binNum.split('').reverse().join('')
 			for (var i = 0; i < binNum.length; i = i + 8) {
 				Singchar = binNum.substring(i, i + 8);
 				charSet += String.fromCharCode(parseInt(Singchar, 2).toString(10));
@@ -89,7 +89,7 @@ exports.Bitops = (function () {
 		var maxlen = 0;
 		var j = 0;
 		var count = args.length;
-		var BinNum = "";
+		var BinNum = '';
 		var bArray = {};
 		for (var i = 0; i < count; i++) {
 			BinNum = conv_bits(args[i]);
@@ -105,13 +105,13 @@ exports.Bitops = (function () {
 			}
 		}
 
-		var out = "",
-		bit = "",
-		bit2 = "";
+		var out = '',
+		bit = '',
+		bit2 = '';
 		for (var x = 0; x < maxlen; x++) {
 			bit = bArray[0].toString().substring(x, x + 1);
 			if (op == 'not') {
-				bit = (bit == "1") ? 0 : 1;
+				bit = (bit == '1') ? 0 : 1;
 			}
 			for (var j = 1; j < count; j++) {
 				bit2 = parseInt(bArray[j].toString().substring(x, x + 1));
@@ -134,7 +134,7 @@ exports.Bitops = (function () {
 
 	bitops.start_test = function (cpid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "bitops";
+			var tags = 'bitops';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -171,7 +171,7 @@ exports.Bitops = (function () {
 				} else {
 					client.end();
 					if (bitops.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -183,7 +183,7 @@ exports.Bitops = (function () {
 	}
 
 	tester.Bitops1 = function (errorCallback) {
-		var test_case = "BITCOUNT returns 0 against non existing key";
+		var test_case = 'BITCOUNT returns 0 against non existing key';
 		client.bitcount('no-key', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -199,15 +199,15 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops2 = function (errorCallback) {
-		//var ipArray = ["",'\xaa',"\x00\x00\xff","foobar","123"];
-		var ipArray = ["", 'xaa', "x00x00xff", "foobar", "123"];
+		//var ipArray = ['','\xaa','\x00\x00\xff','foobar','123'];
+		var ipArray = ['', 'xaa', 'x00x00xff', 'foobar', '123'];
 		var num = 0;
-		var test_case = "";
-		var iLoopIndx = "";
+		var test_case = '';
+		var iLoopIndx = '';
 		g.asyncFor(0, ipArray.length, function (loop) {
 			iLoopIndx = loop.iteration();
 			num++;
-			test_case = "BITCOUNT against test vector #" + num;
+			test_case = 'BITCOUNT against test vector #' + num;
 			client.set('str', ipArray[iLoopIndx], function (err, res) {
 				if (err) {
 					errorCallback(err);
@@ -232,8 +232,8 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops3 = function (errorCallback) {
-		var test_case = "BITCOUNT fuzzing";
-		var str = "",
+		var test_case = 'BITCOUNT fuzzing';
+		var str = '',
 		bitCnt = 0,
 		test_pass = true;
 		g.asyncFor(0, 100, function (loop) {
@@ -263,7 +263,7 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops4 = function (errorCallback) {
-		var test_case = "BITCOUNT with start, end";
+		var test_case = 'BITCOUNT with start, end';
 		var bitCnt1 = 0,
 		bitCnt2 = 0,
 		bitCnt3 = 0;
@@ -271,9 +271,9 @@ exports.Bitops = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			bitCnt1 = count_bits("foobar");
-			bitCnt2 = count_bits("ooba");
-			bitCnt3 = count_bits("");
+			bitCnt1 = count_bits('foobar');
+			bitCnt2 = count_bits('ooba');
+			bitCnt3 = count_bits('');
 			client.bitcount('s', 0, -1, function (err, res1) {
 				if (err) {
 					errorCallback(err);
@@ -306,7 +306,7 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops5 = function (errorCallback) {
-		var test_case = "BITCOUNT syntax error #1";
+		var test_case = 'BITCOUNT syntax error #1';
 		client.bitcount('s', 0, function (err, res) {
 			try {
 				if (!assert.equal(ut.match('syntax error', err), true, test_case))
@@ -319,7 +319,7 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops6 = function (errorCallback) {
-		var test_case = "BITCOUNT regression test for github issue #582";
+		var test_case = 'BITCOUNT regression test for github issue #582';
 		client.del('str', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -342,7 +342,7 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops7 = function (errorCallback) {
-		var test_case = "BITOP NOT (empty string)";
+		var test_case = 'BITOP NOT (empty string)';
 		client.set('s', '');
 		client.bitop('not', 'dest', 's', function (err, res) {
 			if (err) {
@@ -364,8 +364,8 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops8 = function (errorCallback) {
-		var test_case = "BITOP NOT (known string)";
-		client.set('s', "1");
+		var test_case = 'BITOP NOT (known string)';
+		client.set('s', '1');
 		client.bitop('not', 'dest', 's', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -386,8 +386,8 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops9 = function (errorCallback) {
-		var test_case = "BITOP where dest and target are the same key";
-		client.set('s', "1");
+		var test_case = 'BITOP where dest and target are the same key';
+		client.set('s', '1');
 		client.bitop('not', 's', 's', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -408,8 +408,8 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops10 = function (errorCallback) {
-		var test_case = "BITOP AND|OR|XOR don't change the string with single input key";
-		client.set('a', "\x01\x02\xff");
+		var test_case = 'BITOP AND|OR|XOR don\'t change the string with single input key';
+		client.set('a', '\x01\x02\xff');
 		client.bitop('and', 'res1', 'a', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -435,8 +435,8 @@ exports.Bitops = (function () {
 									errorCallback(err);
 								}
 								try {
-									if (!assert.equal(res1, "\x01\x02\xff", test_case) && !assert.equal(res2, "\x01\x02\xff", test_case)
-										 && !assert.equal(res3, "\x01\x02\xff", test_case))
+									if (!assert.equal(res1, '\x01\x02\xff', test_case) && !assert.equal(res2, '\x01\x02\xff', test_case)
+										 && !assert.equal(res3, '\x01\x02\xff', test_case))
 										ut.pass(test_case);
 								} catch (e) {
 									ut.fail(e, true);
@@ -451,8 +451,8 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops11 = function (errorCallback) {
-		var test_case = "BITOP missing key is considered a stream of zero";
-		client.set('a', "\x01\x02\xff");
+		var test_case = 'BITOP missing key is considered a stream of zero';
+		client.set('a', '\x01\x02\xff');
 		client.bitop('and', 'no-suck-key', 'a', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -478,8 +478,8 @@ exports.Bitops = (function () {
 									errorCallback(err);
 								}
 								try {
-									if (!assert.equal(res1, "\x01\x02\xff", test_case) && !assert.equal(res2, "\x01\x02\xff", test_case)
-										 && !assert.equal(res3, "\x01\x02\xff", test_case))
+									if (!assert.equal(res1, '\x01\x02\xff', test_case) && !assert.equal(res2, '\x01\x02\xff', test_case)
+										 && !assert.equal(res3, '\x01\x02\xff', test_case))
 										ut.pass(test_case);
 								} catch (e) {
 									ut.fail(e, true);
@@ -494,9 +494,9 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops12 = function (errorCallback) {
-		var test_case = "BITOP shorter keys are zero-padded to the key with max length";
-		client.set('a', "\x01\x02\xff\xff");
-		client.set('b', "\x01\x02\xff");
+		var test_case = 'BITOP shorter keys are zero-padded to the key with max length';
+		client.set('a', '\x01\x02\xff\xff');
+		client.set('b', '\x01\x02\xff');
 		client.bitop('and', 'res1', 'a', 'b', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -522,8 +522,8 @@ exports.Bitops = (function () {
 									errorCallback(err);
 								}
 								try {
-									if (!assert.equal(res1, "\x01\x02\xff\x00\x00", test_case) && !assert.equal(res2, "\x01\x02\xff\xff", test_case)
-										 && !assert.equal(res3, "\x00\x00\x00\x00\xff", test_case))
+									if (!assert.equal(res1, '\x01\x02\xff\x00\x00', test_case) && !assert.equal(res2, '\x01\x02\xff\xff', test_case)
+										 && !assert.equal(res3, '\x00\x00\x00\x00\xff', test_case))
 										ut.pass(test_case);
 								} catch (e) {
 									ut.fail(e, true);
@@ -539,17 +539,17 @@ exports.Bitops = (function () {
 
 	tester.Bitops13 = function (errorCallback) {
 		var testArray = ['and', 'or', 'xor'];
-		var test_case = "",
-		ErrorMsg = "";
+		var test_case = '',
+		ErrorMsg = '';
 		var iLoopindx = 0,
 		ivecLoopindx = 0;
 		var vec = [],
 		veckeys = [],
-		str = "",
+		str = '',
 		numvec = 0;
 		g.asyncFor(0, testArray.length, function (loop) {
 			iLoopindx = loop.iteration();
-			test_case = "BITOP " + testArray[iLoopindx] + " fuzzing";
+			test_case = 'BITOP ' + testArray[iLoopindx] + ' fuzzing';
 			g.asyncFor(0, 10, function (innerloop) {
 				client.flushall();
 				vec =[];
@@ -560,8 +560,8 @@ exports.Bitops = (function () {
 					//str = ut.randstring(0, 1000, 'alpha');
 					str = g.randomInt(10);
 					vec.push(str);
-					veckeys.push("vector_" + ivecLoopindx);
-					client.set("vector_" + ivecLoopindx, str, function (err, res) {
+					veckeys.push('vector_' + ivecLoopindx);
+					client.set('vector_' + ivecLoopindx, str, function (err, res) {
 						vecloop.next();
 					});
 				}, function () {
@@ -572,7 +572,7 @@ exports.Bitops = (function () {
 						var test = simulate_bit_op(testArray[iLoopindx], vec);
 						var conv_String = conv_bits(test)
 						iLen = conv_String.toString().length;
-						strBit = "",iLoopIndex = 0;
+						strBit = '',iLoopIndex = 0;
 						g.asyncFor(0,iLen,function(iloop){
 							iLoopIndex = iloop.iteration();
 							client.getbit('target',(iLen - iLoopIndex-1),function(err,res){
@@ -592,7 +592,7 @@ exports.Bitops = (function () {
 
 				});
 			}, function () {
-				if (ErrorMsg == ""){
+				if (ErrorMsg == ''){
 					ut.pass(test_case);
 					loop.next();
 				}
@@ -607,9 +607,9 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops14 = function (errorCallback) {
-		var test_case = "BITOP NOT fuzzing";
-		var str = "",
-		result = "",strBit = "",iLoopIndex = 0,iLen=0,errormsg = "";
+		var test_case = 'BITOP NOT fuzzing';
+		var str = '',
+		result = '',strBit = '',iLoopIndex = 0,iLen=0,errormsg = '';
 		g.asyncFor(0, 5, function (loop) {
 			client.flushall();
 			str = ut.randstring(0, 1000, 'alpha');
@@ -623,7 +623,7 @@ exports.Bitops = (function () {
 					}
 					result = simulate_bit_op('not', [str]);
 					iLen = conv_bits(result).toString().length;
-					strBit = "",iLoopIndex = 0;
+					strBit = '',iLoopIndex = 0;
 					g.asyncFor(0,iLen,function(iloop){
 						iLoopIndex = iloop.iteration();
 						client.getbit('target',(iLen - iLoopIndex-1),function(err,res){
@@ -643,7 +643,7 @@ exports.Bitops = (function () {
 				});
 			})
 		}, function () {
-			if(errormsg == "")
+			if(errormsg == '')
 				ut.pass(test_case);
 			else
 				ut.fail(errormsg, true);
@@ -652,7 +652,7 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops15 = function (errorCallback) {
-		var test_case = "BITOP with integer encoded source objects";
+		var test_case = 'BITOP with integer encoded source objects';
 		client.set('a', 1);
 		client.set('b', 2);
 		client.bitop('xor', 'dest', 'a', 'b', 'a', function (err, res) {
@@ -675,7 +675,7 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops16 = function (errorCallback) {
-		var test_case = "BITOP with non string source key";
+		var test_case = 'BITOP with non string source key';
 		client.del('c');
 		client.set('a', 1);
 		client.set('b', 2);
@@ -685,7 +685,7 @@ exports.Bitops = (function () {
 			}
 			client.bitop('xor', 'dest', 'a', 'b', 'c', 'd', function (err, res) {
 				try {
-					if (!assert.equal(ut.match("ERR", err), true, test_case))
+					if (!assert.equal(ut.match('ERR', err), true, test_case))
 						ut.pass(test_case);
 				} catch (e) {
 					ut.fail(e, true);
@@ -696,9 +696,9 @@ exports.Bitops = (function () {
 	};
 
 	tester.Bitops17 = function (errorCallback) {
-		var test_case = "BITOP with empty string after non empty string (issue #529)";
+		var test_case = 'BITOP with empty string after non empty string (issue #529)';
 		client.flushdb();
-		client.set('a', "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00");
+		client.set('a', '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00');
 		client.bitop('or', 'x', 'a', 'b', function (err, res) {
 			if (err) {
 				errorCallback(err);

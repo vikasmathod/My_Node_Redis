@@ -43,7 +43,7 @@ exports.rdb = (function () {
 			args['name'] = name;
 			args['tags'] = tags;
 			overrides['dir'] = server_path;
-			overrides['dbfilename'] = "encodings.rdb";
+			overrides['dbfilename'] = 'encodings.rdb';
 			args['overrides'] = overrides;
 			server.start_server(client_pid, args, function (err, res) {
 				if (err) {
@@ -76,7 +76,7 @@ exports.rdb = (function () {
 				} else {
 					client.end();
 					if (rdb.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -88,7 +88,7 @@ exports.rdb = (function () {
 	}
 
 	tester.rdb1 = function (errorCallback) {
-		var test_case = "RDB encoding loading test";
+		var test_case = 'RDB encoding loading test';
 		var result_Array = [];
 		result_Array = ['"compressible"', '"string"', '"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"',
 			'\n', '"hash"', '"hash"', '"b"', '"undefined"', '"a"', '"a"', '"c"', '"undefined"', '"a"', '"a"', '"b"', '"b"', '"c"', '"c"', '"b"', '"b"',

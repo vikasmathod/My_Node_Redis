@@ -5,10 +5,10 @@ exports.List2 = (function () {
 	server = new Server(),
 	list_common = require('./list-common.js'),
 	list2 = {},
-	name = "List2",
-	client = "",
+	name = 'List2',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {};
 
 	//public property
@@ -17,7 +17,7 @@ exports.List2 = (function () {
 	//public method
 	list2.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "list";
+			var tags = 'list';
 			var overrides = {};
 			overrides['list-max-ziplist-entries'] = 256;
 			overrides['list-max-ziplist-value'] = 16;
@@ -45,7 +45,7 @@ exports.List2 = (function () {
 				} else {
 					client.end();
 					if (list2.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -68,7 +68,7 @@ exports.List2 = (function () {
 
 	//private methods
 	tester.List2_1 = function (errorCallback) {
-		var test_case = "LTRIM stress testing - ziplist";
+		var test_case = 'LTRIM stress testing - ziplist';
 		var large = list_common.ziplist;
 		var mylist = [];
 		var pass_count = 0;
@@ -146,7 +146,7 @@ exports.List2 = (function () {
 	};
 
 	tester.List2_2 = function (errorCallback) {
-		var test_case = "LTRIM stress testing - linkedlist";
+		var test_case = 'LTRIM stress testing - linkedlist';
 		var large = list_common.linkedlist;
 		var mylist = [];
 		var pass_count = 0;

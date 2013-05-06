@@ -21,7 +21,7 @@ exports.Obuf_limits = (function () {
 			args = {};
 			args['name'] = name;
 			args['tags'] = tags;
-			overrides['slave-read-only'] = "no";
+			overrides['slave-read-only'] = 'no';
 			args['overrides'] = overrides;
 			server.start_server(client_pid, args, function (err, res) {
 				if (err) {
@@ -54,7 +54,7 @@ exports.Obuf_limits = (function () {
 				} else {
 					client.end();
 					if (obuf_limits.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -67,7 +67,7 @@ exports.Obuf_limits = (function () {
 
 	//UnStable
 	tester.obuf_limits1 = function (errorCallback) {
-		var test_case = "Client output buffer hard limit is enforced";
+		var test_case = 'Client output buffer hard limit is enforced';
 		client.config('set', 'client-output-buffer-limit', 'pubsub 100000 0 0', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -95,10 +95,10 @@ exports.Obuf_limits = (function () {
 
 							//reading client list
 							client.client('list', function (err, res) {
-								clients = res.split("\n");
+								clients = res.split('\n');
 								if (clients[1]) {
-									c = clients[1].split(" ");
-									omem = c[13].split("=")[1];
+									c = clients[1].split(' ');
+									omem = c[13].split('=')[1];
 
 									if (omem <= 200000) {
 										i = 0;
@@ -118,7 +118,7 @@ exports.Obuf_limits = (function () {
 							if (omem >= 99000 && omem < 200000)
 								ut.pass(test_case);
 							else
-								ut.fail("Client output buffer hard limit is not enforced", true);
+								ut.fail('Client output buffer hard limit is not enforced', true);
 							testEmitter.emit('next');
 						});
 					}
@@ -132,7 +132,7 @@ exports.Obuf_limits = (function () {
 
 	//UnStable
 	tester.obuf_limits2 = function (errorCallback) {
-		var test_case = "Client output buffer soft limit is not enforced if time is not overreached";
+		var test_case = 'Client output buffer soft limit is not enforced if time is not overreached';
 		var i = 0,
 		start_time = 0,
 		time_elapsed = 0,
@@ -163,15 +163,15 @@ exports.Obuf_limits = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								clients = res.split("\n");
+								clients = res.split('\n');
 								if (clients[1]) {
 									i = 0;
 									while (i < 3200) {
 										client.publish('foo', 'bar');
 										i++;
 									}
-									c = clients[1].split(" ");
-									omem = c[13].split("=")[1];
+									c = clients[1].split(' ');
+									omem = c[13].split('=')[1];
 									if (omem > 100000) {
 										start_time = (start_time == 0) ? new Date().getTime() / 1000 : start_time;
 										time_elapsed = new Date().getTime() / 1000 - start_time;
@@ -190,7 +190,7 @@ exports.Obuf_limits = (function () {
 							if (omem >= 100000 && time_elapsed >= 5 && time_elapsed <= 10)
 								ut.pass(test_case);
 							else
-								ut.fail("Client output buffer soft limit enforcing failed", true);
+								ut.fail('Client output buffer soft limit enforcing failed', true);
 							testEmitter.emit('next');
 						});
 					}
@@ -204,7 +204,7 @@ exports.Obuf_limits = (function () {
 
 	//UnStable
 	tester.obuf_limits3 = function (errorCallback) {
-		var test_case = "Client output buffer soft limit is enforced if time is overreached";
+		var test_case = 'Client output buffer soft limit is enforced if time is overreached';
 		var i = 0,
 		start_time = 0,
 		time_elapsed = 0,
@@ -240,14 +240,14 @@ exports.Obuf_limits = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								clients = res.split("\n");
+								clients = res.split('\n');
 								if (clients[1]) {
-									c = clients[1].split(" ");
+									c = clients[1].split(' ');
 
 									//omem value is cleared on reaching limit
 									//if this happens then stop publishing and check for last omem value recorded
-									if (omem < c[13].split("=")[1]) {
-										omem = c[13].split("=")[1];
+									if (omem < c[13].split('=')[1]) {
+										omem = c[13].split('=')[1];
 									} else
 										loop.break();
 
@@ -267,7 +267,7 @@ exports.Obuf_limits = (function () {
 							if (omem >= 100000 && time_elapsed < 6)
 								ut.pass(test_case);
 							else
-								ut.fail("Client output buffer soft limit is not enforced ", true);
+								ut.fail('Client output buffer soft limit is not enforced ', true);
 							testEmitter.emit('next');
 						});
 					}

@@ -4,13 +4,13 @@ exports.Pubsub = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	pubsub = {},
-	name = "PubSub",
-	client = "",
+	name = 'PubSub',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {},
-	server_host = "",
-	server_host = "",
+	server_host = '',
+	server_host = '',
 	sub_msg = [],
 	unsub_msg = [];
 
@@ -20,7 +20,7 @@ exports.Pubsub = (function () {
 	//public method
 	pubsub.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "pubsub";
+			var tags = 'pubsub';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -35,7 +35,7 @@ exports.Pubsub = (function () {
 				server_port = g.srv[client_pid][server_pid]['port'];
 				g.srv[client_pid][server_pid]['client'].end();
 				if (pubsub.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+					log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 				}
 				all_tests = Object.keys(tester);
 				testEmitter.emit('next');
@@ -71,10 +71,10 @@ exports.Pubsub = (function () {
 	//private methods
 	function subscribe(client, channels, callback) {
 		var sub_counts = [];
-		client.on("subscribe", function (channel, count) {
+		client.on('subscribe', function (channel, count) {
 			sub_counts.push(count);
 		});
-		client.on("message", function (channel, message) {
+		client.on('message', function (channel, message) {
 			sub_msg.push(message);
 		});
 
@@ -91,14 +91,14 @@ exports.Pubsub = (function () {
 
 	function unsubscribe(client, channels, callback) {
 		var unsub_counts = [];
-		client.on("unsubscribe", function (channel, count) {
+		client.on('unsubscribe', function (channel, count) {
 			unsub_counts.push(count);
 		});
-		client.on("message", function (channel, message) {
+		client.on('message', function (channel, message) {
 			unsub_msg.push(message);
 		});
 
-		if (channels != "") {
+		if (channels != '') {
 			client.unsubscribe(ut.expand(channels), function (err, res) {
 				if (err) {
 					callback(err, null);
@@ -119,10 +119,10 @@ exports.Pubsub = (function () {
 
 	function psubscribe(client, channels, callback) {
 		var psub_counts = [];
-		client.on("psubscribe", function (channel, count) {
+		client.on('psubscribe', function (channel, count) {
 			psub_counts.push(count);
 		});
-		client.on("pmessage", function (channel, message) {
+		client.on('pmessage', function (channel, message) {
 			sub_msg.push(message);
 		});
 
@@ -139,14 +139,14 @@ exports.Pubsub = (function () {
 
 	function punsubscribe(client, channels, callback) {
 		var punsub_counts = [];
-		client.on("punsubscribe", function (channel, count) {
+		client.on('punsubscribe', function (channel, count) {
 			punsub_counts.push(count);
 		});
-		client.on("pmessage", function (channel, message) {
+		client.on('pmessage', function (channel, message) {
 			unsub_msg.push(message);
 		});
 
-		if (channels != "") {
+		if (channels != '') {
 			client.punsubscribe(ut.expand(channels), function (err, res) {
 				if (err) {
 					callback(err, null);
@@ -166,20 +166,20 @@ exports.Pubsub = (function () {
 	}
 
 	tester.psub1 = function (errorCallback) {
-		var test_case = "PUBLISH/SUBSCRIBE basics";
+		var test_case = 'PUBLISH/SUBSCRIBE basics';
 		var result1 = [],
 		result2 = [],
 		result3 = [],
 		client = redis.createClient(server_port, server_host);
 		client.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client1 = redis.createClient(server_port, server_host);
 		client1.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		async.series({
@@ -268,32 +268,32 @@ exports.Pubsub = (function () {
 			client.end();
 			client1.end();
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-				log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 			}
 			testEmitter.emit('next');
 		});
 	};
 
 	tester.psub2 = function (errorCallback) {
-		var test_case = "PUBLISH/SUBSCRIBE with two clients";
+		var test_case = 'PUBLISH/SUBSCRIBE with two clients';
 		var result = [],
 		client = redis.createClient(server_port, server_host),
 		client1 = redis.createClient(server_port, server_host),
 		client2 = redis.createClient(server_port, server_host);
 		client.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client1.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client2.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		subscribe(client1, ['chan1'], function (err, res) {
@@ -329,9 +329,9 @@ exports.Pubsub = (function () {
 					client1.end();
 					client2.end();
 					if (pubsub.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 					}
 					testEmitter.emit('next');
 				});
@@ -340,18 +340,18 @@ exports.Pubsub = (function () {
 	};
 
 	tester.psub3 = function (errorCallback) {
-		var test_case = "PUBLISH/SUBSCRIBE after UNSUBSCRIBE without arguments";
+		var test_case = 'PUBLISH/SUBSCRIBE after UNSUBSCRIBE without arguments';
 		var result = [],
 		client = redis.createClient(server_port, server_host);
 		client1 = redis.createClient(server_port, server_host);
 		client.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client1.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		subscribe(client1, ['chan1', 'chan2', 'chan3'], function (err, res) {
@@ -359,7 +359,7 @@ exports.Pubsub = (function () {
 				errorCallback(err);
 			}
 			result.push(res);
-			unsubscribe(client1, "", function (err, res) {
+			unsubscribe(client1, '', function (err, res) {
 				if (err) {
 					errorCallback(err);
 				}
@@ -390,8 +390,8 @@ exports.Pubsub = (function () {
 							client.end();
 							client1.end();
 							if (pubsub.debug_mode) {
-								log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-								log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 							}
 							testEmitter.emit('next');
 						});
@@ -401,18 +401,18 @@ exports.Pubsub = (function () {
 		});
 	};
 	tester.psub4 = function (errorCallback) {
-		var test_case = "SUBSCRIBE to one channel more than once";
+		var test_case = 'SUBSCRIBE to one channel more than once';
 		var result = [],
 		client = redis.createClient(server_port, server_host);
 		client1 = redis.createClient(server_port, server_host);
 		client.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client1.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		subscribe(client1, ['chan1', 'chan1', 'chan1'], function (err, res) {
@@ -441,8 +441,8 @@ exports.Pubsub = (function () {
 				client.end();
 				client1.end();
 				if (pubsub.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-					log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+					log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+					log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 				}
 				testEmitter.emit('next');
 			});
@@ -450,18 +450,18 @@ exports.Pubsub = (function () {
 	};
 
 	tester.psub5 = function (errorCallback) {
-		var test_case = "UNSUBSCRIBE from non-subscribed channels";
+		var test_case = 'UNSUBSCRIBE from non-subscribed channels';
 		var result = [],
 		client = redis.createClient(server_port, server_host);
 		client.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client1 = redis.createClient(server_port, server_host);
 		client1.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		// client.unsubscribe([],callback) - returns just one of the unsubscribed channed. This is seen in redis-cli.exe as well.
@@ -492,8 +492,8 @@ exports.Pubsub = (function () {
 					client.end();
 					client1.end();
 					if (pubsub.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 					}
 					testEmitter.emit('next');
 				});
@@ -502,20 +502,20 @@ exports.Pubsub = (function () {
 	};
 
 	tester.psub6 = function (errorCallback) {
-		var test_case = "PUBLISH/PSUBSCRIBE basics";
+		var test_case = 'PUBLISH/PSUBSCRIBE basics';
 		var result1 = [],
 		result2 = [],
 		result3 = [],
 		client = redis.createClient(server_port, server_host);
 		client.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client1 = redis.createClient(server_port, server_host);
 		client1.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		async.series({
@@ -630,31 +630,31 @@ exports.Pubsub = (function () {
 			client.end();
 			client1.end();
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-				log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 			}
 			testEmitter.emit('next');
 		});
 	};
 	tester.psub7 = function (errorCallback) {
-		var test_case = "PUBLISH/PSUBSCRIBE with two clients";
+		var test_case = 'PUBLISH/PSUBSCRIBE with two clients';
 		var result = [],
 		client = redis.createClient(server_port, server_host),
 		client1 = redis.createClient(server_port, server_host),
 		client2 = redis.createClient(server_port, server_host);
 		client.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client1.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client2.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		psubscribe(client1, ['chan.*'], function (err, res) {
@@ -689,9 +689,9 @@ exports.Pubsub = (function () {
 					client1.end();
 					client2.end();
 					if (pubsub.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 					}
 					testEmitter.emit('next');
 				});
@@ -699,18 +699,18 @@ exports.Pubsub = (function () {
 		});
 	};
 	tester.psub8 = function (errorCallback) {
-		var test_case = "PUBLISH/PSUBSCRIBE after PUNSUBSCRIBE without arguments";
+		var test_case = 'PUBLISH/PSUBSCRIBE after PUNSUBSCRIBE without arguments';
 		var result = [],
 		client = redis.createClient(server_port, server_host);
 		client.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client1 = redis.createClient(server_port, server_host);
 		client1.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		psubscribe(client1, ['chan1.*', 'chan2.*', 'chan3.*'], function (err, res) {
@@ -718,7 +718,7 @@ exports.Pubsub = (function () {
 				errorCallback(err);
 			}
 			result.push(res);
-			punsubscribe(client1, "", function (err, res) {
+			punsubscribe(client1, '', function (err, res) {
 				if (err) {
 					errorCallback(err);
 				}
@@ -748,8 +748,8 @@ exports.Pubsub = (function () {
 							client.end();
 							client1.end();
 							if (pubsub.debug_mode) {
-								log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-								log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 							}
 							testEmitter.emit('next');
 						});
@@ -759,18 +759,18 @@ exports.Pubsub = (function () {
 		});
 	};
 	tester.psub9 = function (errorCallback) {
-		var test_case = "PUNSUBSCRIBE from non-subscribed channels";
+		var test_case = 'PUNSUBSCRIBE from non-subscribed channels';
 		var result = [],
 		client = redis.createClient(server_port, server_host);
 		client1 = redis.createClient(server_port, server_host);
 		client.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client1.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		// client.punsubscribe([],callback) - returns just one of the unsubscribed channed. This is seen in redis-cli.exe as well.
@@ -801,8 +801,8 @@ exports.Pubsub = (function () {
 					client.end();
 					client1.end();
 					if (pubsub.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 					}
 					testEmitter.emit('next');
 				});
@@ -810,18 +810,18 @@ exports.Pubsub = (function () {
 		});
 	};
 	tester.psub10 = function (errorCallback) {
-		var test_case = "Mix SUBSCRIBE and PSUBSCRIBE";
+		var test_case = 'Mix SUBSCRIBE and PSUBSCRIBE';
 		var result = [],
 		client = redis.createClient(server_port, server_host);
 		client.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		client1 = redis.createClient(server_port, server_host);
 		client1.on('ready', function () {
 			if (pubsub.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
 		subscribe(client1, ['foo.bar'], function (err, res) {
@@ -854,8 +854,8 @@ exports.Pubsub = (function () {
 					client.end();
 					client1.end();
 					if (pubsub.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 					}
 					testEmitter.emit('next');
 				});

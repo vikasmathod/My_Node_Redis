@@ -1,6 +1,6 @@
 var portfinder = require('portfinder');
 
-exports.host = "127.0.0.1";
+exports.host = '127.0.0.1';
 exports.port = 6379;
 exports.srv = {};
 exports.results = {};
@@ -29,7 +29,7 @@ exports.fillArray = function (length, value) {
 };
 
 exports.fillString = function (length, value) {
-	var str = "";
+	var str = '';
 	for (var i = 0; i < length; i++) {
 		str = str + value;
 	}

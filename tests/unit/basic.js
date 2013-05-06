@@ -4,14 +4,14 @@ exports.Basic = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	basic = {},
-	name = "Basic",
-	client = "",
+	name = 'Basic',
+	client = '',
 	tester = {},
-	server_pid = "",
-	server_host = "",
-	server_port = "",
-	all_tests = "",
-	client_pid = "";
+	server_pid = '',
+	server_host = '',
+	server_port = '',
+	all_tests = '',
+	client_pid = '';
 
 	//public property
 	basic.debug_mode = false;
@@ -19,7 +19,7 @@ exports.Basic = (function () {
 	//public method
 	basic.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "basic";
+			var tags = 'basic';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -47,7 +47,7 @@ exports.Basic = (function () {
 				} else {
 					client.end();
 					if (basic.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -86,9 +86,9 @@ exports.Basic = (function () {
 					});
 				});
 			}
-			var message = "Encoding: Expected:" + enc + ", Actual:" + res + " for key:" + key;
+			var message = 'Encoding: Expected:' + enc + ', Actual:' + res + ' for key:' + key;
 			try {
-				if (!assert.equal(res, enc, "Error: " + message) && (!assert.ifError(error))) {
+				if (!assert.equal(res, enc, 'Error: ' + message) && (!assert.ifError(error))) {
 					callback(null, true);
 				}
 			} catch (e) {
@@ -98,13 +98,13 @@ exports.Basic = (function () {
 	}
 
 	tester.Basic1 = function (errorCallback) {
-		var test_case = "DEL all keys to start with a clean DB";
+		var test_case = 'DEL all keys to start with a clean DB';
 		client.keys('*', function (err, res) {
 			if (err) {
 				errorCallback(err);
 			}
 			if (res.length == 0) {
-				console.log("No keys to delete. Proceeding..\n");
+				console.log('No keys to delete. Proceeding..\n');
 				testEmitter.emit('next');
 			} else {
 				g.asyncFor(0, res.length, function (loop) {
@@ -134,7 +134,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic2 = function (errorCallback) {
-		var test_case = "SET and GET an item";
+		var test_case = 'SET and GET an item';
 		client.set('x', 'foobar', function (err, res) {
 			client.get('x', function (err, res) {
 				if (err) {
@@ -153,7 +153,7 @@ exports.Basic = (function () {
 	};
 	tester.Basic3 = function (errorCallback) {
 		client.set('x', '', function (err, res) {
-			var test_case = "SET and GET an empty item";
+			var test_case = 'SET and GET an empty item';
 			client.get('x', function (err, res) {
 				if (err) {
 					errorCallback(err);
@@ -170,7 +170,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic4 = function (errorCallback) {
-		var test_case = "Del against a single item";
+		var test_case = 'Del against a single item';
 		client.del('x', function (err) {
 			if (err) {
 				errorCallback(err);
@@ -191,7 +191,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic5 = function (errorCallback) {
-		var test_case = "Vararg Del";
+		var test_case = 'Vararg Del';
 		client.set('foo1', 'a', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -227,7 +227,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic6 = function (errorCallback) {
-		var test_case = "KEYS with pattern";
+		var test_case = 'KEYS with pattern';
 		var keys = ['key_x', 'key_y', 'key_z', 'foo_a', 'foo_b', 'foo_c'];
 		g.asyncFor(0, keys.length, function (loop) {
 			client.set(keys[loop.iteration()], 'Hello', function (err, res) {
@@ -253,7 +253,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic7 = function (errorCallback) {
-		var test_case = "KEYS to get all keys";
+		var test_case = 'KEYS to get all keys';
 		client.keys('*', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -273,7 +273,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic8 = function (errorCallback) {
-		var test_case = "DBSIZE";
+		var test_case = 'DBSIZE';
 		client.dbsize(function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -289,7 +289,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic9 = function (errorCallback) {
-		var test_case = "Del all keys";
+		var test_case = 'Del all keys';
 		client.keys('*', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -319,15 +319,15 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic10 = function (errorCallback) {
-		var test_case = "Very big payload in GET/SET";
+		var test_case = 'Very big payload in GET/SET';
 		var cli = redis.createClient(server_port, server_host, {
 				return_buffers : true
 			});
 		if (basic.debug_mode) {
-			log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+			log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 		}
 		var buf = new Buffer(1000000);
-		buf.fill("abcd");
+		buf.fill('abcd');
 		cli.set('foo', buf.toString(), function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -345,7 +345,7 @@ exports.Basic = (function () {
 				}
 				cli.end();
 				if (basic.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+					log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 				}
 				testEmitter.emit('next');
 			});
@@ -353,25 +353,25 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic11_1 = function (errorCallback) {
-		var test_case = "Very big payload random access";
+		var test_case = 'Very big payload random access';
 		var error = new Array();
 		var payload = {};
 		var cli = redis.createClient(server_port, server_host, {
 				return_buffers : true
 			});
 		if (basic.debug_mode) {
-			log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+			log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 		}
 		async.series({
 			one : function (cb) {
 				g.asyncFor(0, 100, function (loop) {
 					var j = loop.iteration();
 					var size = g.randomInt(100000) + 1;
-					var val = "pl-" + j;
+					var val = 'pl-' + j;
 					var buf = new Buffer(size);
 					buf.fill(val);
 					payload[j] = buf;
-					var key = "bigpayload_" + j;
+					var key = 'bigpayload_' + j;
 					cli.set(key, buf, function (err, res) {
 						if (err) {
 							cb(err);
@@ -385,13 +385,13 @@ exports.Basic = (function () {
 			two : function (cb) {
 				g.asyncFor(0, 1000, function (loop) {
 					var index = g.randomInt(100) - 1;
-					var key = "bigpayload_" + index;
+					var key = 'bigpayload_' + index;
 					cli.get(key, function (err, buf) {
 						if (err) {
 							errorCallback(err);
 						}
 						if (!buf.equals(payload[index])) {
-							error.push("Values Differ: I set " + payload[index].toString() + " but i read back " + buf.toString());
+							error.push('Values Differ: I set ' + payload[index].toString() + ' but i read back ' + buf.toString());
 							cb(new Error(error.shift()));
 						}
 						loop.next();
@@ -413,7 +413,7 @@ exports.Basic = (function () {
 			}
 			cli.end();
 			if (basic.debug_mode) {
-				log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 			}
 			testEmitter.emit('next');
 		});
@@ -421,7 +421,7 @@ exports.Basic = (function () {
 
 	tester.Basic11_2 = function (errorCallback) {
 		//tag slow
-		var test_case = "SET 10000 numeric keys and access all them in reverse order";
+		var test_case = 'SET 10000 numeric keys and access all them in reverse order';
 		var error = new Array();
 		async.series({
 			one : function (cb) {
@@ -446,7 +446,7 @@ exports.Basic = (function () {
 							cb(err, null);
 						}
 						if (j != res) {
-							var str = "Element at position " + j + " is " + res + " instead of " + j;
+							var str = 'Element at position ' + j + ' is ' + res + ' instead of ' + j;
 							error.push(str);
 							cb(new Error(error), null);
 						}
@@ -473,7 +473,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic11_3 = function (errorCallback) {
-		var test_case = "DBSIZE should be 10101 now";
+		var test_case = 'DBSIZE should be 10101 now';
 		client.dbsize(function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -490,7 +490,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic12 = function (errorCallback) {
-		var test_case = "INCR against non existing key";
+		var test_case = 'INCR against non existing key';
 		client.incr('nokey', function (err, res1) {
 			if (err) {
 				errorCallback(err);
@@ -511,7 +511,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic13 = function (errorCallback) {
-		var test_case = "INCR against key created by incr itself";
+		var test_case = 'INCR against key created by incr itself';
 		client.incr('nokey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -527,7 +527,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic14 = function (errorCallback) {
-		var test_case = "INCR against key originally set with SET";
+		var test_case = 'INCR against key originally set with SET';
 		client.set('nokey', 100, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -549,7 +549,7 @@ exports.Basic = (function () {
 
 	};
 	tester.Basic15 = function (errorCallback) {
-		var test_case = "INCR over 32bit value";
+		var test_case = 'INCR over 32bit value';
 		client.set('nokey', 17179869184, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -570,7 +570,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic16 = function (errorCallback) {
-		var test_case = "INCRBY over 32bit value with over 32bit increment";
+		var test_case = 'INCRBY over 32bit value with over 32bit increment';
 		client.set('nokey', 17179869184, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -591,7 +591,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic17_1 = function (errorCallback) {
-		var test_case = "INCR fails against key with spaces (left)";
+		var test_case = 'INCR fails against key with spaces (left)';
 		client.set('novar', '  11', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -611,7 +611,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic17_2 = function (errorCallback) {
-		var test_case = "INCR fails against key with spaces (right)";
+		var test_case = 'INCR fails against key with spaces (right)';
 		client.set('novar', '11  ', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -631,7 +631,7 @@ exports.Basic = (function () {
 	};
 	
 	tester.Basic17_3 = function (errorCallback) {
-		var test_case = "INCR fails against key with spaces (both)";
+		var test_case = 'INCR fails against key with spaces (both)';
 		client.set('novar', '  11  ', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -651,7 +651,7 @@ exports.Basic = (function () {
 	};
 	
 	tester.Basic18 = function (errorCallback) {
-		var test_case = "INCR fails against a key holding a list";
+		var test_case = 'INCR fails against a key holding a list';
 		client.rpush('mylist', 45, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -677,7 +677,7 @@ exports.Basic = (function () {
 	};
 	
 	tester.Basic19 = function (errorCallback) {
-		var test_case = "DECRBY over 32bit value with over 32bit increment, negative res";
+		var test_case = 'DECRBY over 32bit value with over 32bit increment, negative res';
 		client.set('nokey', 17179869184, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -699,7 +699,7 @@ exports.Basic = (function () {
 	};
 	
 	tester.Basic19_1 = function (errorCallback) {
-		var test_case = "INCRBYFLOAT against non existing key";
+		var test_case = 'INCRBYFLOAT against non existing key';
 		var arr = [];
 		client.del('novar', function (err, res) {
 			if (err) {
@@ -741,7 +741,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic19_2 = function (errorCallback) {
-		var test_case = "INCRBYFLOAT against key originally set with SET";
+		var test_case = 'INCRBYFLOAT against key originally set with SET';
 		client.set('novar', 1.5, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -763,7 +763,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic19_3 = function (errorCallback) {
-		var test_case = "INCRBYFLOAT over 32bit value";
+		var test_case = 'INCRBYFLOAT over 32bit value';
 		client.set('novar', 17179869184, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -785,7 +785,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic19_4 = function (errorCallback) {
-		var test_case = "INCRBYFLOAT over 32bit value with over 32bit increment";
+		var test_case = 'INCRBYFLOAT over 32bit value with over 32bit increment';
 		client.set('novar', 17179869184, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -807,7 +807,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic19_5 = function (errorCallback) {
-		var test_case = "INCRBYFLOAT fails against key with spaces (left)";
+		var test_case = 'INCRBYFLOAT fails against key with spaces (left)';
 		client.set('novar', '  11', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -815,7 +815,7 @@ exports.Basic = (function () {
 			client.incrbyfloat('novar', 1.0, function (err, res) {
 				try {
 					// error should be observed.
-					if (!assert.ok(ut.match("not a valid", err), test_case)) {
+					if (!assert.ok(ut.match('not a valid', err), test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {
@@ -827,7 +827,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic19_6 = function (errorCallback) {
-		var test_case = "INCRBYFLOAT fails against key with spaces (right)";
+		var test_case = 'INCRBYFLOAT fails against key with spaces (right)';
 		client.set('novar', '11  ', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -835,7 +835,7 @@ exports.Basic = (function () {
 			client.incrbyfloat('novar', 1.0, function (err, res) {
 				try {
 					// error should be observed.
-					if (!assert.ok(ut.match("not a valid", err), test_case)) {
+					if (!assert.ok(ut.match('not a valid', err), test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {
@@ -847,7 +847,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic19_7 = function (errorCallback) {
-		var test_case = "INCRBYFLOAT fails against key with spaces (both)";
+		var test_case = 'INCRBYFLOAT fails against key with spaces (both)';
 		client.set('novar', '  11  ', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -855,7 +855,7 @@ exports.Basic = (function () {
 			client.incrbyfloat('novar', 1.0, function (err, res) {
 				try {
 					// error should be observed.
-					if (!assert.ok(ut.match("not a valid", err), test_case)) {
+					if (!assert.ok(ut.match('not a valid', err), test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {
@@ -867,7 +867,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic19_8 = function (errorCallback) {
-		var test_case = "INCRBYFLOAT fails against a key holding a list";
+		var test_case = 'INCRBYFLOAT fails against a key holding a list';
 		client.del('mylist', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -879,7 +879,7 @@ exports.Basic = (function () {
 				client.incrbyfloat('mylist', 1.0, function (err, res) {
 					try {
 						// error should be observed.
-						if (!assert.ok(ut.match("wrong kind", err), test_case)) {
+						if (!assert.ok(ut.match('wrong kind', err), test_case)) {
 							ut.pass(test_case);
 						}
 					} catch (e) {
@@ -897,7 +897,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic19_9 = function (errorCallback) {
-		var test_case = "INCRBYFLOAT does not allow NaN or Infinity";
+		var test_case = 'INCRBYFLOAT does not allow NaN or Infinity';
 		client.set('foo', 0, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -908,7 +908,7 @@ exports.Basic = (function () {
 				//perform divisions.
 				try {
 					// error should be observed.
-					if (!assert.ok(ut.match("would produce", err), test_case)) {
+					if (!assert.ok(ut.match('would produce', err), test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {
@@ -920,7 +920,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic19_10 = function (errorCallback) {
-		var test_case = "INCRBYFLOAT decrement";
+		var test_case = 'INCRBYFLOAT decrement';
 		client.set('foo', 1, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -941,7 +941,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic20 = function (errorCallback) {
-		var test_case = "SETNX target key missing";
+		var test_case = 'SETNX target key missing';
 		client.del('nokey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -968,7 +968,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic21 = function (errorCallback) {
-		var test_case = "SETNX target key exists";
+		var test_case = 'SETNX target key exists';
 		client.set('nokey', 'foobared', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -995,7 +995,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic22 = function (errorCallback) {
-		var test_case = "SETNX against not-expired volatile key";
+		var test_case = 'SETNX against not-expired volatile key';
 		client.set('x', 10, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1032,10 +1032,10 @@ exports.Basic = (function () {
 		// to the implementation of active expiry and dbAdd() but
 		// currently the only way to test that SETNX expires a key when
 		// it should have been.
-		var test_case = "SETNX against expired volatile key";
+		var test_case = 'SETNX against expired volatile key';
 		g.asyncFor(0, 9999, function (loop) {
 			var i = loop.iteration();
-			client.setex("key-" + i, 3600, 'value', function (err, res) {
+			client.setex('key-' + i, 3600, 'value', function (err, res) {
 				if (err) {
 					errorCallback(err);
 				}
@@ -1081,7 +1081,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic24 = function (errorCallback) {
-		var test_case = "EXISTS";
+		var test_case = 'EXISTS';
 		var result_array = new Array();
 		client.set('newkey', 'test', function (err, res) {
 			if (err) {
@@ -1115,7 +1115,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic25 = function (errorCallback) {
-		var test_case = "Zero length value in key. SET/GET/EXISTS";
+		var test_case = 'Zero length value in key. SET/GET/EXISTS';
 		var result_array = new Array();
 		client.set('emptykey', '', function (err, res) {
 			if (err) {
@@ -1155,14 +1155,14 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic26 = function (errorCallback) {
-		var test_case = "Commands pipelining";
+		var test_case = 'Commands pipelining';
 		var result = [];
 		var stream = net.createConnection(server_port, server_host);
 		if (basic.debug_mode) {
-			log.notice(name + ":Client connected listeting to socket : " + server_host + ":" + server_port);
+			log.notice(name + ':Client connected listeting to socket : ' + server_host + ':' + server_port);
 		}
 		stream.on('connect', function () {
-			stream.write("SET k1 xyzk\r\nGET k1\r\nPING\r\n");
+			stream.write('SET k1 xyzk\r\nGET k1\r\nPING\r\n');
 		});
 		stream.on('data', function (data) {
 			var res = data.toString();
@@ -1177,14 +1177,14 @@ exports.Basic = (function () {
 		});
 		stream.on('close', function () {
 			if (basic.debug_mode) {
-				log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 			}
 			testEmitter.emit('next');
 		});
 	};
 
 	tester.Basic27 = function (errorCallback) {
-		var test_case = "Non existing command";
+		var test_case = 'Non existing command';
 		try {
 			client.foobaredcommand(function (err, res) {
 				if (res) {
@@ -1198,7 +1198,7 @@ exports.Basic = (function () {
 		}
 	};
 	tester.Basic28 = function (errorCallback) {
-		var test_case = "RENAME basic usage";
+		var test_case = 'RENAME basic usage';
 		client.set('mykey', 'hello', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1229,7 +1229,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic29 = function (errorCallback) {
-		var test_case = "RENAME source key should no longer exist";
+		var test_case = 'RENAME source key should no longer exist';
 		client.exists('mykey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1245,7 +1245,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic30 = function (errorCallback) {
-		var test_case = "RENAME against already existing key";
+		var test_case = 'RENAME against already existing key';
 		var result_array = new Array();
 		client.set('mykey', 'a', function (err, res) {
 			if (err) {
@@ -1284,7 +1284,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic31 = function (errorCallback) {
-		var test_case = "RENAMENX basic usage";
+		var test_case = 'RENAMENX basic usage';
 		var result_array = new Array();
 		client.del('mykey', function (err, res) {
 			if (err) {
@@ -1328,7 +1328,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic32 = function (errorCallback) {
-		var test_case = "RENAMENX against already existing key (2)";
+		var test_case = 'RENAMENX against already existing key (2)';
 		var result_array = new Array();
 		client.get('mykey', function (err, res) {
 			if (err) {
@@ -1352,7 +1352,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic33 = function (errorCallback) {
-		var test_case = "RENAME against non existing source key";
+		var test_case = 'RENAME against non existing source key';
 		client.rename('fhdfdfgdfg', 'foobar', function (err, res) {
 			if (res != 'undefined') {
 				ut.pass(test_case);
@@ -1363,7 +1363,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic33_1 = function (errorCallback) {
-		var test_case = "RENAME where source and dest key is the same";
+		var test_case = 'RENAME where source and dest key is the same';
 		client.rename('mykey', 'mykey', function (err, res) {
 			if (res != 'undefined') {
 				ut.pass(test_case);
@@ -1376,7 +1376,7 @@ exports.Basic = (function () {
 	};
 	tester.Basic34 = function (errorCallback) {
 		var flag = 0;
-		var test_case = "RENAME with volatile key, should move the TTL as well";
+		var test_case = 'RENAME with volatile key, should move the TTL as well';
 		client.del('mykey', 'mykey2', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1434,7 +1434,7 @@ exports.Basic = (function () {
 	};
 	tester.Basic35 = function (errorCallback) {
 		var flag = 0;
-		var test_case = "RENAME with volatile key, should not inherit TTL of target key";
+		var test_case = 'RENAME with volatile key, should not inherit TTL of target key';
 		client.del('mykey', 'mykey2', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1491,7 +1491,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic36 = function (errorCallback) {
-		var test_case = "DEL all keys again (DB 0)";
+		var test_case = 'DEL all keys again (DB 0)';
 		client.keys('*', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1522,7 +1522,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic37 = function (errorCallback) {
-		var test_case = "DEL all keys again (DB 1)";
+		var test_case = 'DEL all keys again (DB 1)';
 		client.select(10, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1559,7 +1559,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic38 = function (errorCallback) {
-		var test_case = "MOVE basic usage";
+		var test_case = 'MOVE basic usage';
 		var result_array = new Array();
 		client.set('mykey', 'foobar', function (err, res) {
 			if (err) {
@@ -1611,7 +1611,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic39 = function (errorCallback) {
-		var test_case = "MOVE against key existing in the target DB";
+		var test_case = 'MOVE against key existing in the target DB';
 		client.set('mykey', 'hello', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1632,7 +1632,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic40 = function (errorCallback) {
-		var test_case = "SET/GET keys in different DBs";
+		var test_case = 'SET/GET keys in different DBs';
 		var result_array = new Array();
 		client.set('a', 'hello', function (err, res) {
 			if (err) {
@@ -1691,7 +1691,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic41 = function (errorCallback) {
-		var test_case = "MGET";
+		var test_case = 'MGET';
 		client.flushdb();
 		client.set('foo', 'BAR', function (err, res) {
 			if (err) {
@@ -1724,7 +1724,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic42 = function (errorCallback) {
-		var test_case = "MGET against non existing key";
+		var test_case = 'MGET against non existing key';
 		multi = client.multi();
 		multi.mget('foo', 'baazz', 'bar', function (err, res) {
 			if (err) {
@@ -1746,7 +1746,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic43 = function (errorCallback) {
-		var test_case = "MGET against non-string key";
+		var test_case = 'MGET against non-string key';
 		client.sadd('myset', 'ciao', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1779,7 +1779,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic44 = function (errorCallback) {
-		var test_case = "RANDOMKEY";
+		var test_case = 'RANDOMKEY';
 		var result = new Array();
 		var foo_seen = 0;
 		var bar_seen = 0;
@@ -1825,7 +1825,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic45 = function (errorCallback) {
-		var test_case = "RANDOMKEY against empty DB";
+		var test_case = 'RANDOMKEY against empty DB';
 		client.flushdb();
 		client.randomkey(function (err, res) {
 			if (err) {
@@ -1842,7 +1842,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic46 = function (errorCallback) {
-		var test_case = "RANDOMKEY regression 1";
+		var test_case = 'RANDOMKEY regression 1';
 		client.flushdb();
 		client.set('x', 10, function (err, res) {
 			if (err) {
@@ -1869,7 +1869,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic47 = function (errorCallback) {
-		var test_case = "GETSET (set new value)";
+		var test_case = 'GETSET (set new value)';
 		var result_array = new Array();
 		client.getset('foo', 'xyz', function (err, res) {
 			if (err) {
@@ -1893,7 +1893,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic48 = function (errorCallback) {
-		var test_case = "GETSET (replace old value)";
+		var test_case = 'GETSET (replace old value)';
 		var result_array = new Array();
 		client.set('foo', 'bar', function (err, res) {
 			if (err) {
@@ -1922,7 +1922,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic49 = function (errorCallback) {
-		var test_case = "MSET base case";
+		var test_case = 'MSET base case';
 		client.multi()
 		.mset('x', 10, 'y', 'foo bar', 'z', 'x x x x x x x\n\n\r\n')
 		.mget('x', 'y', 'z')
@@ -1941,7 +1941,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic50 = function (errorCallback) {
-		var test_case = "MSET wrong number of args";
+		var test_case = 'MSET wrong number of args';
 		client.multi()
 		.mset('x', 10, 'y', 'foo bar', 'z')
 		.exec(function (err, replies) {
@@ -1956,7 +1956,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic51 = function (errorCallback) {
-		var test_case = "MSETNX with already existent key";
+		var test_case = 'MSETNX with already existent key';
 		client.multi()
 		.msetnx('x1', 'xxx', 'y2', 'yyy', 'x', 20)
 		.exists('x1')
@@ -1976,7 +1976,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic52 = function (errorCallback) {
-		var test_case = "STRLEN against non-existing key";
+		var test_case = 'STRLEN against non-existing key';
 		client.strlen('notakey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1992,7 +1992,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic53 = function (errorCallback) {
-		var test_case = "STRLEN against integer-encoded value";
+		var test_case = 'STRLEN against integer-encoded value';
 		client.set('myinteger', -555, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2013,7 +2013,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic53 = function (errorCallback) {
-		var test_case = "STRLEN against plain string";
+		var test_case = 'STRLEN against plain string';
 		client.set('mystring', 'foozzz0123456789 baz', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2034,7 +2034,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic54 = function (errorCallback) {
-		var test_case = "SETBIT against non-existing key";
+		var test_case = 'SETBIT against non-existing key';
 		var result_array = new Array();
 		client.del('mykey', function (err, res) {
 			if (err) {
@@ -2049,7 +2049,7 @@ exports.Basic = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					// Ascii "@" is integer 64 = 01 00 00 00
+					// Ascii '@' is integer 64 = 01 00 00 00
 					// the result should be 01000000
 					result_array.push(res);
 					try {
@@ -2065,7 +2065,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic55 = function (errorCallback) {
-		var test_case = "SETBIT against string-encoded key";
+		var test_case = 'SETBIT against string-encoded key';
 		var result_array = new Array();
 		client.set('mykey', '@', function (err, res) {
 			if (err) {
@@ -2106,8 +2106,8 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic56 = function (errorCallback) {
-		var test_case = "SETBIT against integer-encoded key";
-		// Ascii "1" is integer 49 = 00 11 00 01
+		var test_case = 'SETBIT against integer-encoded key';
+		// Ascii '1' is integer 49 = 00 11 00 01
 		var result_array = new Array();
 		client.set('mykey', 1, function (err, res) {
 			if (err) {
@@ -2153,7 +2153,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic57 = function (errorCallback) {
-		var test_case = "SETBIT against key with wrong type";
+		var test_case = 'SETBIT against key with wrong type';
 		client.del('mykey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2179,7 +2179,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic58 = function (errorCallback) {
-		var test_case = "SETBIT with out of range bit offset";
+		var test_case = 'SETBIT with out of range bit offset';
 		client.del('mykey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2206,7 +2206,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic59 = function (errorCallback) {
-		var test_case = "SETBIT with non-bit argument";
+		var test_case = 'SETBIT with non-bit argument';
 		client.del('mykey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2243,7 +2243,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic61 = function (errorCallback) {
-		var test_case = "GETBIT against non-existing key";
+		var test_case = 'GETBIT against non-existing key';
 		client.del('mykey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2265,7 +2265,7 @@ exports.Basic = (function () {
 	};
 
 	tester.Basic62 = function (errorCallback) {
-		var test_case = "GETBIT against string-encoded key";
+		var test_case = 'GETBIT against string-encoded key';
 		var result_array = new Array();
 		client.set('mykey', '`', function (err, res) {
 			if (err) {
@@ -2324,7 +2324,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic62 = function (errorCallback) {
-		var test_case = "GETBIT against integer-encoded key";
+		var test_case = 'GETBIT against integer-encoded key';
 		var result_array = new Array();
 		client.set('mykey', 1, function (err, res) {
 			if (err) {
@@ -2334,7 +2334,7 @@ exports.Basic = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				// Ascii "1" is integer 49 = 00 11 00 01
+				// Ascii '1' is integer 49 = 00 11 00 01
 				client.getbit('mykey', 0, function (err, res) {
 					if (err) {
 						errorCallback(err);
@@ -2389,7 +2389,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic63 = function (errorCallback) {
-		var test_case = "SETRANGE against non-existing key";
+		var test_case = 'SETRANGE against non-existing key';
 		var result_array = new Array();
 		client.del('mykey', function (err, res) {
 			if (err) {
@@ -2409,7 +2409,7 @@ exports.Basic = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						client.setrange('mykey', 0, "", function (err, res) {
+						client.setrange('mykey', 0, '', function (err, res) {
 							if (err) {
 								errorCallback(err);
 							}
@@ -2452,7 +2452,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic64 = function (errorCallback) {
-		var test_case = "SETRANGE against string-encoded key";
+		var test_case = 'SETRANGE against string-encoded key';
 		var result_array = new Array();
 		client.set('mykey', 'foo', function (err, res) {
 			if (err) {
@@ -2472,7 +2472,7 @@ exports.Basic = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						client.setrange('mykey', 0, "", function (err, res) {
+						client.setrange('mykey', 0, '', function (err, res) {
 							if (err) {
 								errorCallback(err);
 							}
@@ -2532,7 +2532,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic64 = function (errorCallback) {
-		var test_case = "SETRANGE against integer-encoded key";
+		var test_case = 'SETRANGE against integer-encoded key';
 		var result_array = new Array();
 		client.set('mykey', 1234, function (err, res) {
 			if (err) {
@@ -2565,7 +2565,7 @@ exports.Basic = (function () {
 									if (err) {
 										errorCallback(err);
 									}
-									client.setrange('mykey', 0, "", function (err, res) {
+									client.setrange('mykey', 0, '', function (err, res) {
 										if (err) {
 											errorCallback(err);
 										}
@@ -2653,7 +2653,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic65 = function (errorCallback) {
-		var test_case = "SETRANGE against key with wrong type";
+		var test_case = 'SETRANGE against key with wrong type';
 		client.del('mykey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2679,7 +2679,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic66 = function (errorCallback) {
-		var test_case = "SETRANGE with out of range offset";
+		var test_case = 'SETRANGE with out of range offset';
 		client.del('mykey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2716,7 +2716,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic67 = function (errorCallback) {
-		var test_case = "GETRANGE against non-existing key";
+		var test_case = 'GETRANGE against non-existing key';
 		client.del('mykey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2737,7 +2737,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic68 = function (errorCallback) {
-		var test_case = "GETBIT against string-encoded key";
+		var test_case = 'GETBIT against string-encoded key';
 		var result_array = new Array();
 		client.set('mykey', 'Hello World', function (err, res) {
 			if (err) {
@@ -2790,7 +2790,7 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic69 = function (errorCallback) {
-		var test_case = "GETRANGE against integer-encoded value";
+		var test_case = 'GETRANGE against integer-encoded value';
 		var result_array = new Array();
 		client.set('mykey', 1234, function (err, res) {
 			if (err) {
@@ -2843,18 +2843,18 @@ exports.Basic = (function () {
 		});
 	};
 	tester.Basic70 = function (errorCallback) {
-		var test_case = "GETRANGE fuzzing";
+		var test_case = 'GETRANGE fuzzing';
 		var error = null;
 		var cli = redis.createClient(server_port, server_host, {
 				return_buffers : true
 			});
 		if (basic.debug_mode) {
-			log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+			log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 		}
 		g.asyncFor(0, 1000, function (loop) {
 			var i = loop.iteration();
 			var buf = new Buffer(1024);
-			var len = buf.write(ut.randstring(0, 1024, 'binary'), "binary");
+			var len = buf.write(ut.randstring(0, 1024, 'binary'), 'binary');
 			cli.set('bin', buf, function (err, res) {
 				if (err) {
 					errorCallback(err);
@@ -2882,14 +2882,14 @@ exports.Basic = (function () {
 			if (error) {
 				cli.end();
 				if (basic.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+					log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 				}
 				errorCallback(error);
 			} else {
 				ut.pass(test_case);
 				cli.end();
 				if (basic.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+					log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 				}
 				testEmitter.emit('next');
 			}
@@ -2897,12 +2897,12 @@ exports.Basic = (function () {
 	};
 
 	tester.basic71 = function (errorCallback) {
-		var test_case = "EXPIRES after a reload (snapshot + append only file)";
+		var test_case = 'EXPIRES after a reload (snapshot + append only file)';
 		var cli = redis.createClient(server_port, server_host, {
 				no_ready_check : true
 			});
 		if (basic.debug_mode) {
-			log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+			log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 		}
 		var e = new Array();
 		cli.flushdb(function (err, res) {
@@ -2963,7 +2963,7 @@ exports.Basic = (function () {
 													}
 													cli.end();
 													if (basic.debug_mode) {
-														log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+														log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 													}
 													testEmitter.emit('next');
 												});

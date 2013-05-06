@@ -5,17 +5,17 @@ exports.List = (function () {
 	server = new Server(),
 	list_common = require('./list-common.js'),
 	list = {},
-	name = "List",
-	client = "",
+	name = 'List',
+	client = '',
 	tester = {},
-	server_pid = "",
-	all_tests = "",
-	client_pid = "",
-	server_port = "",
-	server_host = "",
-	client1 = "",
-	client2 = "",
-	cli = "",
+	server_pid = '',
+	all_tests = '',
+	client_pid = '',
+	server_port = '',
+	server_host = '',
+	client1 = '',
+	client2 = '',
+	cli = '',
 	tosort = [],
 	result = [];
 
@@ -25,7 +25,7 @@ exports.List = (function () {
 	//public method
 	list.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "list";
+			var tags = 'list';
 			var overrides = {};
 			overrides['list-max-ziplist-entries'] = 256
 				overrides['list-max-ziplist-value'] = 16;
@@ -43,30 +43,30 @@ exports.List = (function () {
 				// we already have a client while checking for the server, we dont need it now.
 				g.srv[client_pid][server_pid]['client'].end();
 				if (list.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+					log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 				}
 				client = redis.createClient(server_port, server_host);
 				client.on('ready', function () {
 					if (list.debug_mode) {
-						log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+						log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 					}
 				});
 				client1 = redis.createClient(server_port, server_host);
 				client1.on('ready', function () {
 					if (list.debug_mode) {
-						log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+						log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 					}
 				});
 				client2 = redis.createClient(server_port, server_host);
 				client2.on('ready', function () {
 					if (list.debug_mode) {
-						log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+						log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 					}
 				});
 				cli = redis.createClient(server_port, server_host);
 				cli.on('ready', function () {
 					if (list.debug_mode) {
-						log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+						log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 					}
 				});
 
@@ -87,10 +87,10 @@ exports.List = (function () {
 					client2.end();
 					cli.end();
 					if (list.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -224,10 +224,10 @@ exports.List = (function () {
 							if ((res2 == (len - 1 - i))) {
 								loop.next();
 							} else {
-								callback(new Error("Check Numbered List Consistancy not equal for " + res2 + " ne " + (len - 1 - i) + ""), null);
+								callback(new Error('Check Numbered List Consistancy not equal for ' + res2 + ' ne ' + (len - 1 - i) + ''), null);
 							}
 						} else {
-							callback(new Error("Check Numbered List Consistancy not equal for " + res1 + " ne " + i + ""), null);
+							callback(new Error('Check Numbered List Consistancy not equal for ' + res1 + ' ne ' + i + ''), null);
 						}
 					});
 				});
@@ -255,10 +255,10 @@ exports.List = (function () {
 							if ((res2 == (len - 1 - rand))) {
 								loop.next();
 							} else {
-								callback(new Error("Check Numbered List Consistancy not equal for " + res2 + " ne " + (len - 1 - rand) + ""), null);
+								callback(new Error('Check Numbered List Consistancy not equal for ' + res2 + ' ne ' + (len - 1 - rand) + ''), null);
 							}
 						} else {
-							callback(new Error("Check Numbered List Consistancy not equal for " + res1 + " ne " + rand + ""), null);
+							callback(new Error('Check Numbered List Consistancy not equal for ' + res1 + ' ne ' + rand + ''), null);
 						}
 					});
 				});
@@ -286,9 +286,9 @@ exports.List = (function () {
 					});
 				});
 			}
-			var message = "Encoding: Expected:" + enc + ", Actual:" + res + " for key:" + key;
+			var message = 'Encoding: Expected:' + enc + ', Actual:' + res + ' for key:' + key;
 			try {
-				if (!assert.equal(res, enc, "Error: " + message) && (!assert.ifError(error))) {
+				if (!assert.equal(res, enc, 'Error: ' + message) && (!assert.ifError(error))) {
 					callback(null, true);
 				}
 			} catch (e) {
@@ -301,16 +301,16 @@ exports.List = (function () {
 	function assert_type(type, key) {
 		client.type(key, function (err, res) {
 			try {
-				var message = "Type: Expected: " + type + ", Actual: " + res + " for key: " + key;
-				if (!assert.equal(res, type, "Error: " + message) && (assert.ifError(err))) {}
+				var message = 'Type: Expected: ' + type + ', Actual: ' + res + ' for key: ' + key;
+				if (!assert.equal(res, type, 'Error: ' + message) && (assert.ifError(err))) {}
 			} catch (e) {
-				console.log("Error: " + message);
+				console.log('Error: ' + message);
 			}
 		});
 	}
 
 	tester.List1 = function (errorCallback) {
-		var test_case = "LPUSH, RPUSH, LLENGTH, LINDEX, LPOP - ziplist";
+		var test_case = 'LPUSH, RPUSH, LLENGTH, LINDEX, LPOP - ziplist';
 		var result_array = new Array();
 		// first lpush then rpush
 		client.lpush('myziplist1', 'a', function (err, res) {
@@ -453,7 +453,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List2 = function (errorCallback) {
-		var test_case = "LPUSH, RPUSH, LLENGTH, LINDEX, LPOP - regular list";
+		var test_case = 'LPUSH, RPUSH, LLENGTH, LINDEX, LPOP - regular list';
 		var result_array = new Array();
 		// first lpush then rpush
 		client.lpush('mylist1', list_common.linkedlist, function (err, res) {
@@ -603,7 +603,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List3 = function (errorCallback) {
-		var test_case = "Variadic RPUSH/LPUSH";
+		var test_case = 'Variadic RPUSH/LPUSH';
 		var result_array = new Array();
 		// first lpush then rpush
 		client.del('mylist', function (err, res) {
@@ -639,7 +639,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List4 = function (errorCallback) {
-		var test_case = "DEL a list - ziplist";
+		var test_case = 'DEL a list - ziplist';
 		var result_array = new Array();
 		client.del('myziplist2', function (err, res) {
 			if (err) {
@@ -669,7 +669,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List5 = function (errorCallback) {
-		var test_case = "DEL a list - regular list";
+		var test_case = 'DEL a list - regular list';
 		var result_array = new Array();
 		client.del('mylist2', function (err, res) {
 			if (err) {
@@ -699,7 +699,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List6 = function (errorCallback) {
-		var test_case = "BLPOP, BRPOP: single existing list - ziplist";
+		var test_case = 'BLPOP, BRPOP: single existing list - ziplist';
 		var result_array = new Array();
 		create_ziplist('blist', new Array('a', 'b', list_common.ziplist, 'c', 'd'), function (err, res) {
 			if (err) {
@@ -746,7 +746,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List7 = function (errorCallback) {
-		var test_case = "BLPOP, BRPOP: multiple existing lists - ziplist";
+		var test_case = 'BLPOP, BRPOP: multiple existing lists - ziplist';
 		var result_array = new Array();
 		create_ziplist('blist1', new Array('a', list_common.ziplist, 'c'), function (err, res) {
 			if (err) {
@@ -821,7 +821,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List8 = function (errorCallback) {
-		var test_case = "BLPOP, BRPOP: second list has an entry - ziplist";
+		var test_case = 'BLPOP, BRPOP: second list has an entry - ziplist';
 		var result_array = new Array();
 		create_ziplist('blist2', new Array('d', list_common.ziplist, 'f'), function (err, res) {
 			if (err) {
@@ -870,7 +870,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List9 = function (errorCallback) {
-		var test_case = "BRPOPLPUSH - ziplist";
+		var test_case = 'BRPOPLPUSH - ziplist';
 		var result_array = new Array();
 		create_ziplist('blist', new Array('a', 'b', list_common.ziplist, 'c', 'd'), function (err, res) {
 			if (err) {
@@ -911,7 +911,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List10 = function (errorCallback) {
-		var test_case = "BLPOP, BRPOP: single existing list - linkedlist";
+		var test_case = 'BLPOP, BRPOP: single existing list - linkedlist';
 		var result_array = new Array();
 		create_linkedlist('blist', new Array('a', 'b', list_common.linkedlist, 'c', 'd'), function (err, res) {
 			if (err) {
@@ -958,7 +958,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List11 = function (errorCallback) {
-		var test_case = "BLPOP, BRPOP: multiple existing lists - linkedlist";
+		var test_case = 'BLPOP, BRPOP: multiple existing lists - linkedlist';
 		var result_array = new Array();
 		create_linkedlist('blist1', new Array('a', list_common.linkedlist, 'c'), function (err, res) {
 			if (err) {
@@ -1033,7 +1033,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List12 = function (errorCallback) {
-		var test_case = "BLPOP, BRPOP: second list has an entry - linkedlist";
+		var test_case = 'BLPOP, BRPOP: second list has an entry - linkedlist';
 		var result_array = new Array();
 		create_linkedlist('blist2', new Array('d', list_common.linkedlist, 'f'), function (err, res) {
 			if (err) {
@@ -1084,7 +1084,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List13 = function (errorCallback) {
-		var test_case = "BRPOPLPUSH - linkedlist";
+		var test_case = 'BRPOPLPUSH - linkedlist';
 		var result_array = new Array();
 		create_linkedlist('blist', new Array('a', 'b', list_common.linkedlist, 'c', 'd'), function (err, res) {
 			if (err) {
@@ -1125,7 +1125,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List14 = function (errorCallback) {
-		var test_case = "BLPOP with variadic LPUSH";
+		var test_case = 'BLPOP with variadic LPUSH';
 		var result_array = new Array();
 		client.del('blist', 'target', function (err, res) {
 			if (err) {
@@ -1160,7 +1160,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List15 = function (errorCallback) {
-		var test_case = "BRPOPLPUSH with zero timeout should block indefinitely";
+		var test_case = 'BRPOPLPUSH with zero timeout should block indefinitely';
 		var result_array = new Array();
 		client.del('blist', 'target', function (err, res) {
 			if (err) {
@@ -1196,7 +1196,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List16 = function (errorCallback) {
-		var test_case = "BRPOPLPUSH with a client BLPOPing the target list";
+		var test_case = 'BRPOPLPUSH with a client BLPOPing the target list';
 		var result_array = new Array();
 		cli.del('blist', 'target', function (err, res) {
 			if (err) {
@@ -1238,7 +1238,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List17 = function (errorCallback) {
-		var test_case = "BRPOPLPUSH with wrong source type";
+		var test_case = 'BRPOPLPUSH with wrong source type';
 		var result_array = new Array();
 		cli.del('blist', 'target', function (err, res) {
 			if (err) {
@@ -1265,7 +1265,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List18 = function (errorCallback) {
-		var test_case = "BRPOPLPUSH with wrong destination type";
+		var test_case = 'BRPOPLPUSH with wrong destination type';
 		var flag = false;
 		cli.del('blist', 'target', function (err, res) {
 			if (err) {
@@ -1325,7 +1325,7 @@ exports.List = (function () {
 	};
 
 	tester.List19 = function (errorCallback) {
-		var test_case = "BRPOPLPUSH with multiple blocked clients";
+		var test_case = 'BRPOPLPUSH with multiple blocked clients';
 		var result_array = new Array();
 		cli.del('blist', 'target1', 'target2', function (err, res) {
 			if (err) {
@@ -1358,7 +1358,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List20 = function (errorCallback) {
-		var test_case = "Linked BRPOPLPUSH";
+		var test_case = 'Linked BRPOPLPUSH';
 		var result_array = new Array();
 		cli.del('list1', 'list2', 'list3', function (err, res) {
 			if (err) {
@@ -1405,7 +1405,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List21 = function (errorCallback) {
-		var test_case = "Circular BRPOPLPUSH";
+		var test_case = 'Circular BRPOPLPUSH';
 		var result_array = new Array();
 		cli.del('list1', 'list2', function (err, res) {
 			if (err) {
@@ -1444,7 +1444,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List22 = function (errorCallback) {
-		var test_case = "Self-referential BRPOPLPUSH";
+		var test_case = 'Self-referential BRPOPLPUSH';
 		cli.del('blist', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1471,7 +1471,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List23 = function (errorCallback) {
-		var test_case = "BRPOPLPUSH inside a transaction";
+		var test_case = 'BRPOPLPUSH inside a transaction';
 		cli.del('xlist', 'target', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1490,12 +1490,12 @@ exports.List = (function () {
 						}
 						try {
 							// reply from redis-server is
-							// 1) "foo"
-							// 2) "bar"
+							// 1) 'foo'
+							// 2) 'bar'
 							// 3) (nil)
 							// 4) (empty list or set)
-							// 5) 1) "bar"
-							// 2) "foo"
+							// 5) 1) 'bar'
+							// 2) 'foo'
 							if (!assert.deepEqual(replies, ['foo', 'bar', null, [],
 										['bar', 'foo']
 									], test_case)) {
@@ -1513,7 +1513,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List24 = function (errorCallback) {
-		var test_case = "BRPOPLPUSH timeout";
+		var test_case = 'BRPOPLPUSH timeout';
 		client1.brpoplpush('foo_list', 'bar_list', 1, function (error1, result1) {
 
 			setTimeout(function () {
@@ -1531,7 +1531,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List25 = function (errorCallback) {
-		var test_case = "BLPOP: with single empty list argument";
+		var test_case = 'BLPOP: with single empty list argument';
 		var result_array = new Array();
 		cli.del('blist1', function (err, res) {
 			if (err) {
@@ -1566,7 +1566,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List26 = function (errorCallback) {
-		var test_case = "BLPOP: with negative timeout";
+		var test_case = 'BLPOP: with negative timeout';
 		client1.blpop('blist1', -1, function (err, res) {
 			if (res) {
 				errorCallback(res);
@@ -1582,7 +1582,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List27 = function (errorCallback) {
-		var test_case = "BLPOP: with non-integer timeout";
+		var test_case = 'BLPOP: with non-integer timeout';
 		client1.blpop('blist1', 1.1, function (err, res) {
 			if (res) {
 				errorCallback(res);
@@ -1598,7 +1598,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List28 = function (errorCallback) {
-		var test_case = "BLPOP: with zero timeout should block indefinitely";
+		var test_case = 'BLPOP: with zero timeout should block indefinitely';
 		// To test this, use a timeout of 0 and wait a second.
 		// The blocking pop should still be waiting for a push.
 		var result_array = new Array();
@@ -1622,7 +1622,7 @@ exports.List = (function () {
 		}, 1000);
 	};
 	tester.List29 = function (errorCallback) {
-		var test_case = "BLPOP: second argument is not a list";
+		var test_case = 'BLPOP: second argument is not a list';
 		cli.del('blist1', 'blist2', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1648,7 +1648,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List30 = function (errorCallback) {
-		var test_case = "BLPOP: timeout";
+		var test_case = 'BLPOP: timeout';
 		cli.del('blist1', 'blist2', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1669,7 +1669,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List31 = function (errorCallback) {
-		var test_case = "BLPOP: arguments are empty";
+		var test_case = 'BLPOP: arguments are empty';
 		var result_array = new Array();
 		cli.del('blist1', 'blist2', function (err, res) {
 			if (err) {
@@ -1733,7 +1733,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List32 = function (errorCallback) {
-		var test_case = "BRPOP: with single empty list argument";
+		var test_case = 'BRPOP: with single empty list argument';
 		var result_array = new Array();
 		cli.del('blist1', function (err, res) {
 			if (err) {
@@ -1768,7 +1768,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List33 = function (errorCallback) {
-		var test_case = "BRPOP: with negative timeout";
+		var test_case = 'BRPOP: with negative timeout';
 		client1.brpop('blist1', -1, function (err, res) {
 			if (res) {
 				errorCallback(res);
@@ -1784,7 +1784,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List34 = function (errorCallback) {
-		var test_case = "BRPOP: with non-integer timeout";
+		var test_case = 'BRPOP: with non-integer timeout';
 		client1.blpop('blist1', 1.1, function (err, res) {
 			if (res) {
 				errorCallback(res);
@@ -1800,7 +1800,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List35 = function (errorCallback) {
-		var test_case = "BRPOP: with zero timeout should block indefinitely";
+		var test_case = 'BRPOP: with zero timeout should block indefinitely';
 		// To test this, use a timeout of 0 and wait a second.
 		// The blocking pop should still be waiting for a push.
 		var result_array = new Array();
@@ -1824,7 +1824,7 @@ exports.List = (function () {
 		}, 1000);
 	};
 	tester.List36 = function (errorCallback) {
-		var test_case = "BRPOP: second argument is not a list";
+		var test_case = 'BRPOP: second argument is not a list';
 		cli.del('blist1', 'blist2', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1850,7 +1850,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List37 = function (errorCallback) {
-		var test_case = "BRPOP: timeout";
+		var test_case = 'BRPOP: timeout';
 		cli.del('blist1', 'blist2', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1871,7 +1871,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List38 = function (errorCallback) {
-		var test_case = "BRPOP: arguments are empty";
+		var test_case = 'BRPOP: arguments are empty';
 		var result_array = new Array();
 		cli.del('blist1', 'blist2', function (err, res) {
 			if (err) {
@@ -1935,7 +1935,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List39 = function (errorCallback) {
-		var test_case = "BLPOP inside a transaction";
+		var test_case = 'BLPOP inside a transaction';
 		cli.del('xlist', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1969,7 +1969,7 @@ exports.List = (function () {
 	};
 
 	tester.List40 = function (errorCallback) {
-		var test_case = "LPUSHX, RPUSHX - generic";
+		var test_case = 'LPUSHX, RPUSHX - generic';
 		var result_array = new Array();
 		client.del('xlist', function (err, res) {
 			if (err) {
@@ -2011,7 +2011,7 @@ exports.List = (function () {
 	};
 
 	tester.List41 = function (errorCallback) {
-		var test_case = "LPUSHX, RPUSHX - ziplist";
+		var test_case = 'LPUSHX, RPUSHX - ziplist';
 		var result_array = new Array();
 		create_ziplist('xlist', new Array(list_common.ziplist, 'c'), function (err, res) {
 			if (err) {
@@ -2048,7 +2048,7 @@ exports.List = (function () {
 	};
 
 	tester.List42 = function (errorCallback) {
-		var test_case = "LINSERT - ziplist";
+		var test_case = 'LINSERT - ziplist';
 		var result_array = new Array();
 		create_ziplist('xlist', new Array('a', list_common.ziplist, 'c', 'd'), function (err, res) {
 			if (err) {
@@ -2138,7 +2138,7 @@ exports.List = (function () {
 	};
 
 	tester.List43 = function (errorCallback) {
-		var test_case = "LPUSHX, RPUSHX - linkedlist";
+		var test_case = 'LPUSHX, RPUSHX - linkedlist';
 		var result_array = new Array();
 		create_linkedlist('xlist', new Array(list_common.linkedlist, 'c'), function (err, res) {
 			if (err) {
@@ -2174,7 +2174,7 @@ exports.List = (function () {
 	};
 
 	tester.List44 = function (errorCallback) {
-		var test_case = "LINSERT - linkedlist";
+		var test_case = 'LINSERT - linkedlist';
 		var result_array = new Array();
 		create_linkedlist('xlist', new Array('a', list_common.linkedlist, 'c', 'd'), function (err, res) {
 			if (err) {
@@ -2264,7 +2264,7 @@ exports.List = (function () {
 	};
 
 	tester.List45 = function (errorCallback) {
-		var test_case = "LPUSHX, RPUSHX convert from ziplist to list";
+		var test_case = 'LPUSHX, RPUSHX convert from ziplist to list';
 		var result_array = new Array();
 		var large = list_common.linkedlist;
 		//convert when a large value is pushed
@@ -2344,7 +2344,7 @@ exports.List = (function () {
 	};
 
 	tester.List46 = function (errorCallback) {
-		var test_case = "LINSERT convert from ziplist to list";
+		var test_case = 'LINSERT convert from ziplist to list';
 		var result_array = new Array();
 		var large = list_common.linkedlist;
 		//convert when a large value is inserted
@@ -2456,8 +2456,8 @@ exports.List = (function () {
 		});
 	};
 	tester.List47_1 = function (errorCallback) {
-		var test_case = "LINDEX consistency test - ziplist";
-		var type = "ziplist";
+		var test_case = 'LINDEX consistency test - ziplist';
+		var type = 'ziplist';
 		var num = 250;
 		client.del('mylist', function (err, res) {
 			if (err) {
@@ -2495,8 +2495,8 @@ exports.List = (function () {
 	};
 
 	tester.List47_2 = function (errorCallback) {
-		var test_case = "LINDEX random access - ziplist";
-		var type = "ziplist";
+		var test_case = 'LINDEX random access - ziplist';
+		var type = 'ziplist';
 		assert_encoding(type, 'mylist', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2518,8 +2518,8 @@ exports.List = (function () {
 
 	};
 	tester.List47_3 = function (errorCallback) {
-		var test_case = "Check if list is still ok after a DEBUG RELOAD - ziplist";
-		var type = "ziplist";
+		var test_case = 'Check if list is still ok after a DEBUG RELOAD - ziplist';
+		var type = 'ziplist';
 		client.debug('reload', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2551,8 +2551,8 @@ exports.List = (function () {
 	};
 
 	tester.List47_4 = function (errorCallback) {
-		var test_case = "LINDEX consistency test - linkedlist";
-		var type = "linkedlist";
+		var test_case = 'LINDEX consistency test - linkedlist';
+		var type = 'linkedlist';
 		var num = 500;
 		client.del('mylist', function (err, res) {
 			if (err) {
@@ -2590,8 +2590,8 @@ exports.List = (function () {
 	};
 
 	tester.List47_5 = function (errorCallback) {
-		var test_case = "LINDEX random access - linkedlist";
-		var type = "linkedlist";
+		var test_case = 'LINDEX random access - linkedlist';
+		var type = 'linkedlist';
 		assert_encoding(type, 'mylist', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2613,8 +2613,8 @@ exports.List = (function () {
 	};
 
 	tester.List47_6 = function (errorCallback) {
-		var test_case = "Check if list is still ok after a DEBUG RELOAD - linkedlist";
-		var type = "linkedlist";
+		var test_case = 'Check if list is still ok after a DEBUG RELOAD - linkedlist';
+		var type = 'linkedlist';
 		client.debug('reload', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2646,7 +2646,7 @@ exports.List = (function () {
 	};
 
 	tester.List48 = function (errorCallback) {
-		var test_case = "LLEN against non-list value error";
+		var test_case = 'LLEN against non-list value error';
 		client.del('mylist', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2672,7 +2672,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List49 = function (errorCallback) {
-		var test_case = "LLEN against non existing key";
+		var test_case = 'LLEN against non existing key';
 		client.llen('not-a-key', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2688,7 +2688,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List50 = function (errorCallback) {
-		var test_case = "LINDEX against non-list value error";
+		var test_case = 'LINDEX against non-list value error';
 		client.lindex('mylist', 0, function (err, res) {
 			if (res) {
 				errorCallback(res);
@@ -2704,7 +2704,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List51 = function (errorCallback) {
-		var test_case = "LINDEX against non existing key";
+		var test_case = 'LINDEX against non existing key';
 		client.lindex('not-a-key', 10, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2720,7 +2720,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List52 = function (errorCallback) {
-		var test_case = "LPUSH against non-list value error";
+		var test_case = 'LPUSH against non-list value error';
 		client.lpush('mylist', 0, function (err, res) {
 			if (res) {
 				errorCallback(res);
@@ -2736,7 +2736,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List53 = function (errorCallback) {
-		var test_case = "RPUSH against non-list value error";
+		var test_case = 'RPUSH against non-list value error';
 		client.rpush('mylist', 0, function (err, res) {
 			if (res) {
 				errorCallback(res);
@@ -2752,7 +2752,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List54 = function (errorCallback) {
-		var test_case = "RPOPLPUSH base case - ziplist";
+		var test_case = 'RPOPLPUSH base case - ziplist';
 		var result_array = new Array();
 		var large = list_common.ziplist;
 		client.del('mylist1', 'mylist2', function (err, res) {
@@ -2807,7 +2807,7 @@ exports.List = (function () {
 	};
 
 	tester.List55 = function (errorCallback) {
-		var test_case = "RPOPLPUSH with the same list as src and dst - ziplist";
+		var test_case = 'RPOPLPUSH with the same list as src and dst - ziplist';
 		var result_array = new Array();
 		var large = list_common.ziplist;
 		create_ziplist('mylist', new Array('a', large, 'c'), function (err, res) {
@@ -2846,7 +2846,7 @@ exports.List = (function () {
 	};
 
 	tester.List56 = function (errorCallback) {
-		var test_case = "RPOPLPUSH with ziplist source and existing target ziplist";
+		var test_case = 'RPOPLPUSH with ziplist source and existing target ziplist';
 		var result_array = new Array();
 		var large = list_common.ziplist;
 		var otherlarge = list_common.ziplist;
@@ -2897,7 +2897,7 @@ exports.List = (function () {
 	};
 
 	tester.List57 = function (errorCallback) {
-		var test_case = "RPOPLPUSH with ziplist source and existing target linkedlist";
+		var test_case = 'RPOPLPUSH with ziplist source and existing target linkedlist';
 		var result_array = new Array();
 		var large = list_common.ziplist;
 		var otherlarge = list_common.linkedlist;
@@ -2948,7 +2948,7 @@ exports.List = (function () {
 	};
 
 	tester.List58 = function (errorCallback) {
-		var test_case = "RPOPLPUSH base case - linkedlist";
+		var test_case = 'RPOPLPUSH base case - linkedlist';
 		var result_array = new Array();
 		var large = list_common.linkedlist;
 		client.del('mylist1', 'mylist2', function (err, res) {
@@ -3003,7 +3003,7 @@ exports.List = (function () {
 	};
 
 	tester.List59 = function (errorCallback) {
-		var test_case = "RPOPLPUSH with the same list as src and dst - linkedlist";
+		var test_case = 'RPOPLPUSH with the same list as src and dst - linkedlist';
 		var result_array = new Array();
 		var large = list_common.linkedlist;
 		create_linkedlist('mylist', new Array('a', large, 'c'), function (err, res) {
@@ -3042,7 +3042,7 @@ exports.List = (function () {
 	};
 
 	tester.List60 = function (errorCallback) {
-		var test_case = "RPOPLPUSH with linkedlist source and existing target ziplist";
+		var test_case = 'RPOPLPUSH with linkedlist source and existing target ziplist';
 		var result_array = new Array();
 		var large = list_common.linkedlist;
 		var otherlarge = list_common.ziplist;
@@ -3098,7 +3098,7 @@ exports.List = (function () {
 	};
 
 	tester.List61 = function (errorCallback) {
-		var test_case = "RPOPLPUSH with linkedlist source and existing target linkedlist";
+		var test_case = 'RPOPLPUSH with linkedlist source and existing target linkedlist';
 		var result_array = new Array();
 		var large = list_common.linkedlist;
 		var otherlarge = list_common.linkedlist;
@@ -3154,7 +3154,7 @@ exports.List = (function () {
 	};
 
 	tester.List62 = function (errorCallback) {
-		var test_case = "RPOPLPUSH against non existing key";
+		var test_case = 'RPOPLPUSH against non existing key';
 		var result_array = new Array();
 		client.del('srclist', 'dstlist', function (err, res) {
 			if (err) {
@@ -3190,7 +3190,7 @@ exports.List = (function () {
 	};
 
 	tester.List63 = function (errorCallback) {
-		var test_case = "RPOPLPUSH against non list dst key";
+		var test_case = 'RPOPLPUSH against non list dst key';
 		client.del('srclist', 'dstlist', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -3220,7 +3220,7 @@ exports.List = (function () {
 	};
 
 	tester.List64 = function (errorCallback) {
-		var test_case = "RPOPLPUSH against non list src key";
+		var test_case = 'RPOPLPUSH against non list src key';
 		create_ziplist('srclist', new Array('a', 'b', 'c', 'd'), function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -3249,7 +3249,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List65 = function (errorCallback) {
-		var test_case = "RPOPLPUSH against non existing src key";
+		var test_case = 'RPOPLPUSH against non existing src key';
 		client.del('srclist', 'dstlist', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -3271,7 +3271,7 @@ exports.List = (function () {
 	};
 
 	tester.List66 = function (errorCallback) {
-		var test_case = "Basic LPOP/RPOP - ziplist";
+		var test_case = 'Basic LPOP/RPOP - ziplist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
 		create_ziplist('mylist', new Array(large, 1, 2), function (err, res) {
@@ -3328,7 +3328,7 @@ exports.List = (function () {
 	};
 
 	tester.List67 = function (errorCallback) {
-		var test_case = "Basic LPOP/RPOP - linkedlist";
+		var test_case = 'Basic LPOP/RPOP - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
 		create_linkedlist('mylist', new Array(large, 1, 2), function (err, res) {
@@ -3384,7 +3384,7 @@ exports.List = (function () {
 	};
 
 	tester.List68 = function (errorCallback) {
-		var test_case = "LPOP/RPOP against non list value";
+		var test_case = 'LPOP/RPOP against non list value';
 		client.set('notalist', 'foo', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -3411,7 +3411,7 @@ exports.List = (function () {
 	};
 
 	tester.List69 = function (errorCallback) {
-		var test_case = "LRANGE basics - ziplist";
+		var test_case = 'LRANGE basics - ziplist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
 		create_ziplist('mylist', new Array(large, 1, 2, 3, 4, 5, 6, 7, 8, 9), function (err, res) {
@@ -3452,7 +3452,7 @@ exports.List = (function () {
 	};
 
 	tester.List70 = function (errorCallback) {
-		var test_case = "LRANGE inverted indexes - ziplist";
+		var test_case = 'LRANGE inverted indexes - ziplist';
 		var large = list_common.ziplist;
 		create_ziplist('mylist', new Array(large, 1, 2, 3, 4, 5, 6, 7, 8, 9), function (err, res) {
 			if (err) {
@@ -3475,7 +3475,7 @@ exports.List = (function () {
 	};
 
 	tester.List71 = function (errorCallback) {
-		var test_case = "LRANGE out of range indexes including the full list - ziplist";
+		var test_case = 'LRANGE out of range indexes including the full list - ziplist';
 		var large = list_common.ziplist;
 		create_ziplist('mylist', new Array(large, 1, 2, 3), function (err, res) {
 			if (err) {
@@ -3498,7 +3498,7 @@ exports.List = (function () {
 	};
 
 	tester.List72 = function (errorCallback) {
-		var test_case = "LRANGE out of range negative end index - ziplist";
+		var test_case = 'LRANGE out of range negative end index - ziplist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
 		create_ziplist('mylist', new Array(large, 1, 2, 3), function (err, res) {
@@ -3532,7 +3532,7 @@ exports.List = (function () {
 	};
 
 	tester.List73 = function (errorCallback) {
-		var test_case = "LRANGE basics - linkedlist";
+		var test_case = 'LRANGE basics - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
 		create_linkedlist('mylist', new Array(large, 1, 2, 3, 4, 5, 6, 7, 8, 9), function (err, res) {
@@ -3572,7 +3572,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List74 = function (errorCallback) {
-		var test_case = "LRANGE inverted indexes - linkedlist";
+		var test_case = 'LRANGE inverted indexes - linkedlist';
 		var large = list_common.linkedlist;
 		create_linkedlist('mylist', new Array(large, 1, 2, 3, 4, 5, 6, 7, 8, 9), function (err, res) {
 			if (err) {
@@ -3595,7 +3595,7 @@ exports.List = (function () {
 	};
 
 	tester.List75 = function (errorCallback) {
-		var test_case = "LRANGE out of range indexes including the full list - linkedlist";
+		var test_case = 'LRANGE out of range indexes including the full list - linkedlist';
 		var large = list_common.linkedlist;
 		create_linkedlist('mylist', new Array(large, 1, 2, 3), function (err, res) {
 			if (err) {
@@ -3618,7 +3618,7 @@ exports.List = (function () {
 	};
 
 	tester.List76 = function (errorCallback) {
-		var test_case = "LRANGE out of range negative end index - linkedlist";
+		var test_case = 'LRANGE out of range negative end index - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
 		create_linkedlist('mylist', new Array(large, 1, 2, 3), function (err, res) {
@@ -3652,7 +3652,7 @@ exports.List = (function () {
 	};
 
 	tester.List77 = function (errorCallback) {
-		var test_case = "LRANGE against non existing key";
+		var test_case = 'LRANGE against non existing key';
 		client.lrange('nosuchkey', 0, 1, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -3670,10 +3670,10 @@ exports.List = (function () {
 	};
 
 	tester.List78 = function (errorCallback) {
-		var test_case = "LTRIM basics - zipist";
+		var test_case = 'LTRIM basics - zipist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
-		var type = "ziplist";
+		var type = 'ziplist';
 		trim_list(large, type, 0, 0, function (err, result) {
 			if (err) {
 				errorCallback(err);
@@ -3771,10 +3771,10 @@ exports.List = (function () {
 	};
 
 	tester.List79 = function (errorCallback) {
-		var test_case = "LTRIM out of range negative end index - zipist";
+		var test_case = 'LTRIM out of range negative end index - zipist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
-		var type = "ziplist";
+		var type = 'ziplist';
 		trim_list(large, type, 0, -5, function (err, result) {
 			if (err) {
 				errorCallback(err);
@@ -3801,10 +3801,10 @@ exports.List = (function () {
 	};
 
 	tester.List80 = function (errorCallback) {
-		var test_case = "LTRIM basics - linkedlist";
+		var test_case = 'LTRIM basics - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
-		var type = "linkedlist";
+		var type = 'linkedlist';
 		trim_list(large, type, 0, 0, function (err, result) {
 			if (err) {
 				errorCallback(err);
@@ -3901,10 +3901,10 @@ exports.List = (function () {
 	};
 
 	tester.List81 = function (errorCallback) {
-		var test_case = "LTRIM out of range negative end index - linkedlist";
+		var test_case = 'LTRIM out of range negative end index - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
-		var type = "linkedlist";
+		var type = 'linkedlist';
 		trim_list(large, type, 0, -5, function (err, result) {
 			if (err) {
 				errorCallback(err);
@@ -3931,7 +3931,7 @@ exports.List = (function () {
 	};
 
 	tester.List82 = function (errorCallback) {
-		var test_case = "LSET - ziplist";
+		var test_case = 'LSET - ziplist';
 		var large = list_common.ziplist;
 		create_ziplist('mylist', new Array(99, 98, large, 96, 95), function (err, res) {
 			if (err) {
@@ -3964,7 +3964,7 @@ exports.List = (function () {
 	};
 
 	tester.List83 = function (errorCallback) {
-		var test_case = "LSET out of range index - ziplist";
+		var test_case = 'LSET out of range index - ziplist';
 		client.lset('mylist', 10, 'foo', function (err, res) {
 			if (res) {
 				errorCallback(res);
@@ -3981,7 +3981,7 @@ exports.List = (function () {
 	};
 
 	tester.List84 = function (errorCallback) {
-		var test_case = "LSET - linkedlist";
+		var test_case = 'LSET - linkedlist';
 		var large = list_common.linkedlist;
 		create_linkedlist('mylist', new Array(99, 98, large, 96, 95), function (err, res) {
 			if (err) {
@@ -4014,7 +4014,7 @@ exports.List = (function () {
 	};
 
 	tester.List85 = function (errorCallback) {
-		var test_case = "LSET out of range index - linkedlist";
+		var test_case = 'LSET out of range index - linkedlist';
 		client.lset('mylist', 10, 'foo', function (err, res) {
 			if (res) {
 				errorCallback(res);
@@ -4031,7 +4031,7 @@ exports.List = (function () {
 	};
 
 	tester.List86 = function (errorCallback) {
-		var test_case = "LSET against non existing key";
+		var test_case = 'LSET against non existing key';
 		client.lset('nosuchkey', 10, 'foo', function (err, res) {
 			if (res) {
 				errorCallback(res);
@@ -4048,7 +4048,7 @@ exports.List = (function () {
 	};
 
 	tester.List87 = function (errorCallback) {
-		var test_case = "LSET against non list value";
+		var test_case = 'LSET against non list value';
 		client.set('nolist', 'foobar', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -4070,7 +4070,7 @@ exports.List = (function () {
 	};
 
 	tester.List88 = function (errorCallback) {
-		var test_case = "LREM remove all the occurrences - ziplist";
+		var test_case = 'LREM remove all the occurrences - ziplist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
 		create_ziplist('mylist', new Array(large, 'foo', 'bar', 'foobar', 'foobared', 'zap', 'bar', 'test', 'foo'), function (err, res) {
@@ -4101,7 +4101,7 @@ exports.List = (function () {
 	};
 
 	tester.List89 = function (errorCallback) {
-		var test_case = "LREM remove the first occurrence - ziplist";
+		var test_case = 'LREM remove the first occurrence - ziplist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
 		client.lrem('mylist', 1, 'foo', function (err, result) {
@@ -4127,7 +4127,7 @@ exports.List = (function () {
 	};
 
 	tester.List90 = function (errorCallback) {
-		var test_case = "LREM remove non existing element - ziplist";
+		var test_case = 'LREM remove non existing element - ziplist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
 		client.lrem('mylist', 1, 'nosuchelement', function (err, result) {
@@ -4153,7 +4153,7 @@ exports.List = (function () {
 	};
 
 	tester.List91 = function (errorCallback) {
-		var test_case = "LREM starting from tail with negative count - ziplist";
+		var test_case = 'LREM starting from tail with negative count - ziplist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
 		create_ziplist('mylist', new Array(large, 'foo', 'bar', 'foobar', 'foobared', 'zap', 'bar', 'test', 'foo', 'foo'), function (err, res) {
@@ -4184,7 +4184,7 @@ exports.List = (function () {
 	};
 
 	tester.List92 = function (errorCallback) {
-		var test_case = "LREM starting from tail with negative count (2) - ziplist";
+		var test_case = 'LREM starting from tail with negative count (2) - ziplist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
 		client.lrem('mylist', -2, 'foo', function (err, result) {
@@ -4210,7 +4210,7 @@ exports.List = (function () {
 	};
 
 	tester.List93 = function (errorCallback) {
-		var test_case = "LREM deleting objects that may be int encoded - ziplist";
+		var test_case = 'LREM deleting objects that may be int encoded - ziplist';
 		var large = list_common.ziplist;
 		var result_array = new Array();
 		create_ziplist('myotherlist', new Array(large, 1, 2, 3), function (err, res) {
@@ -4241,7 +4241,7 @@ exports.List = (function () {
 	};
 
 	tester.List94 = function (errorCallback) {
-		var test_case = "LREM remove all the occurrences - linkedlist";
+		var test_case = 'LREM remove all the occurrences - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
 		create_linkedlist('mylist', new Array(large, 'foo', 'bar', 'foobar', 'foobared', 'zap', 'bar', 'test', 'foo'), function (err, res) {
@@ -4272,7 +4272,7 @@ exports.List = (function () {
 	};
 
 	tester.List95 = function (errorCallback) {
-		var test_case = "LREM remove the first occurrence - linkedlist";
+		var test_case = 'LREM remove the first occurrence - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
 		client.lrem('mylist', 1, 'foo', function (err, result) {
@@ -4298,7 +4298,7 @@ exports.List = (function () {
 	};
 
 	tester.List96 = function (errorCallback) {
-		var test_case = "LREM remove non existing element - linkedlist";
+		var test_case = 'LREM remove non existing element - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
 		client.lrem('mylist', 1, 'nosuchelement', function (err, result) {
@@ -4324,7 +4324,7 @@ exports.List = (function () {
 	};
 
 	tester.List97 = function (errorCallback) {
-		var test_case = "LREM starting from tail with negative count - linkedlist";
+		var test_case = 'LREM starting from tail with negative count - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
 		create_linkedlist('mylist', new Array(large, 'foo', 'bar', 'foobar', 'foobared', 'zap', 'bar', 'test', 'foo', 'foo'), function (err, res) {
@@ -4355,7 +4355,7 @@ exports.List = (function () {
 	};
 
 	tester.List98 = function (errorCallback) {
-		var test_case = "LREM starting from tail with negative count (2) - linkedlist";
+		var test_case = 'LREM starting from tail with negative count (2) - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
 		client.lrem('mylist', -2, 'foo', function (err, result) {
@@ -4381,7 +4381,7 @@ exports.List = (function () {
 	};
 
 	tester.List99 = function (errorCallback) {
-		var test_case = "LREM deleting objects that may be int encoded - linkedlist";
+		var test_case = 'LREM deleting objects that may be int encoded - linkedlist';
 		var large = list_common.linkedlist;
 		var result_array = new Array();
 		create_linkedlist('myotherlist', new Array(large, 1, 2, 3), function (err, res) {
@@ -4412,7 +4412,7 @@ exports.List = (function () {
 	};
 
 	tester.List100 = function (errorCallback) {
-		var test_case = "Regression for bug 593 - chaining BRPOPLPUSH with other blocking cmds";
+		var test_case = 'Regression for bug 593 - chaining BRPOPLPUSH with other blocking cmds';
 		var result_array = new Array();
 		client1.brpoplpush('a', 'b', 0, function (error1, result1) {});
 		client1.brpoplpush('a', 'b', 0, function (error1, result1) {});
@@ -4441,7 +4441,7 @@ exports.List = (function () {
 
 	// 2.6 additions
 	tester.List101 = function (errorCallback) {
-		var test_case = "R/LPOP against empty list";
+		var test_case = 'R/LPOP against empty list';
 		var empty_array = new Array();
 
 		// pop an empty list
@@ -4461,7 +4461,7 @@ exports.List = (function () {
 	};
 
 	tester.List102 = function (errorCallback) {
-		var test_case = "BLPOP, LPUSH + DEL should not awake blocked client";
+		var test_case = 'BLPOP, LPUSH + DEL should not awake blocked client';
 		client.del('list1', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -4502,7 +4502,7 @@ exports.List = (function () {
 		});
 	};
 	tester.List103 = function (errorCallback) {
-		var test_case = "BLPOP, LPUSH + DEL + SET should not awake blocked client";
+		var test_case = 'BLPOP, LPUSH + DEL + SET should not awake blocked client';
 		client.del('list1', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -4542,7 +4542,7 @@ exports.List = (function () {
 	};
 
 	tester.List104 = function (errorCallback) {
-		var test_case = "BLPOP with same key multiple times should work (issue #801)";
+		var test_case = 'BLPOP with same key multiple times should work (issue #801)';
 		client.del('list1', 'list2', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -4611,7 +4611,7 @@ exports.List = (function () {
 	};
 
 	tester.List105 = function (errorCallback) {
-		var test_case = "MULTI/EXEC is isolated from the point of view of BLPOP";
+		var test_case = 'MULTI/EXEC is isolated from the point of view of BLPOP';
 		client.del('list1', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -4641,7 +4641,7 @@ exports.List = (function () {
 	};
 
 	tester.List106 = function (errorCallback) {
-		var test_case = "BRPOPLPUSH maintains order of elements after failure";
+		var test_case = 'BRPOPLPUSH maintains order of elements after failure';
 		var result_array = new Array();
 		client.del('blist', 'target', function (err, res) {
 			if (err) {
@@ -4689,7 +4689,7 @@ exports.List = (function () {
 	};
 
 	tester.List107 = function (errorCallback) {
-		var test_case = "LINSERT raise error on bad syntax";
+		var test_case = 'LINSERT raise error on bad syntax';
 		client.linsert('xlist', 'aft3r', 'aa', 42, function (err, res) {
 			try {
 				if (!assert(ut.match('syntax error', err), true, test_case)) {

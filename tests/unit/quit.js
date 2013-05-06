@@ -4,11 +4,11 @@ exports.Quit = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	quit = {},
-	name = "Quit",
-	client = "",
+	name = 'Quit',
+	client = '',
 	tester = {},
-	server_pid = "",
-	client_pid = "",
+	server_pid = '',
+	client_pid = '',
 	all_tests = {};
 
 	//public property
@@ -17,7 +17,7 @@ exports.Quit = (function () {
 	//public method
 	quit.start_test = function (cpid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "quit";
+			var tags = 'quit';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -34,7 +34,7 @@ exports.Quit = (function () {
 				// we already have a client while checking for the server, we dont need it now.
 				g.srv[cpid][server_pid]['client'].end();
 				if (quit.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + g.srv[cpid][server_pid]['host'] + ":" + g.srv[cpid][server_pid]['port']);
+					log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[cpid][server_pid]['host'] + ':' + g.srv[cpid][server_pid]['port']);
 				}
 				all_tests = Object.keys(tester);
 				testEmitter.emit('next');
@@ -70,13 +70,13 @@ exports.Quit = (function () {
 
 	//private methods
 	tester.quit1 = function (errorCallback) {
-		var test_case = "QUIT returns OK";
+		var test_case = 'QUIT returns OK';
 		ut.reconnect(redis, client_pid, server_pid, function (err, client) {
 			if (err) {
 				errorCallback(err);
 			}
 			if (quit.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+				log.notice(name + ':Client connected  and listening on socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 			}
 			client.write(ut.formatCommand(['quit']), function (err, result) {
 				if (err) {
@@ -94,7 +94,7 @@ exports.Quit = (function () {
 						ut.fail(e);
 					}
 					if (quit.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('next');
 				});
@@ -103,20 +103,20 @@ exports.Quit = (function () {
 	};
 
 	tester.quit2 = function (errorCallback) {
-		var test_case = "Pipelined commands after QUIT must not be executed";
+		var test_case = 'Pipelined commands after QUIT must not be executed';
 		ut.reconnect(redis, client_pid, server_pid, function (err, client) {
 			if (err) {
 				errorCallback(err);
 			}
 			if (quit.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+				log.notice(name + ':Client connected  and listening on socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 			}
 			client.write(ut.formatCommand(['quit']), function (err, result) {
 				if (err) {
 					errorCallback(err);
 				}
 				if (quit.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+					log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 				}
 				client.write(ut.formatCommand(['set', 'foo', 'bar']), function (error, res2) {
 					if (err) {
@@ -127,7 +127,7 @@ exports.Quit = (function () {
 							errorCallback(err);
 						}
 						if (quit.debug_mode) {
-							log.notice(name + ":Client connected  and listening on socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+							log.notice(name + ':Client connected  and listening on socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 						}
 						client.get('foo', function (err, res) {
 							if (err) {
@@ -142,7 +142,7 @@ exports.Quit = (function () {
 							}
 							client.end();
 							if (quit.debug_mode) {
-								log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+								log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 							}
 							testEmitter.emit('next');
 						});
@@ -152,20 +152,20 @@ exports.Quit = (function () {
 		});
 	};
 	tester.quit3 = function (errorCallback) {
-		var test_case = "Pipelined commands after QUIT that exceed read buffer size";
+		var test_case = 'Pipelined commands after QUIT that exceed read buffer size';
 		ut.reconnect(redis, client_pid, server_pid, function (err, client) {
 			if (err) {
 				errorCallback(err);
 			}
 			if (quit.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+				log.notice(name + ':Client connected  and listening on socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 			}
 			client.write(ut.formatCommand(['quit']), function (err, result) {
 				if (err) {
 					errorCallback(err);
 				}
 				if (quit.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+					log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 				}
 				client.write(ut.formatCommand(['set', 'foo', g.fillString(1000, 'x')]), function (error, res2) {
 					if (err) {
@@ -176,7 +176,7 @@ exports.Quit = (function () {
 							errorCallback(err);
 						}
 						if (quit.debug_mode) {
-							log.notice(name + ":Client connected  and listening on socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+							log.notice(name + ':Client connected  and listening on socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 						}
 						client.get('foo', function (err, res) {
 							if (err) {
@@ -191,7 +191,7 @@ exports.Quit = (function () {
 							}
 							client.end();
 							if (quit.debug_mode) {
-								log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+								log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 							}
 							testEmitter.emit('next');
 						});

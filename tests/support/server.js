@@ -9,15 +9,15 @@ function Server() {
 	this.overrides = {};
 	this.tags = {};
 	this.name = {};
-	this.stdout_file = "",
-	this.stderr_file = "";
-	this.stdout_stream = "";
-	this.stderr_stream = "";
-	this.config_file = "";
-	this.server = "";
-	this.client = "";
-	this.host = "";
-	this.port = "";
+	this.stdout_file = '',
+	this.stderr_file = '';
+	this.stdout_stream = '';
+	this.stderr_stream = '';
+	this.config_file = '';
+	this.server = '';
+	this.client = '';
+	this.host = '';
+	this.port = '';
 	//this.debug_mode = false;
 
 }
@@ -30,60 +30,60 @@ Server.prototype.start_server = function (cpid, options, s_callback) {
 	var that = this;
 	//setup defaults
 	try {
-		that.baseconfig = "default.conf";
+		that.baseconfig = 'default.conf';
 		//parse options
 		for (opt in options) {
 			switch (opt) {
-			case "config":
+			case 'config':
 				that.baseconfig = options[opt];
 				break;
-			case "overrides":
+			case 'overrides':
 				that.overrides = options[opt];
 				break;
-			case "tags":
+			case 'tags':
 				that.tags = options[opt];
 				break;
-			case "name":
+			case 'name':
 				that.name = options[opt];
 				break;
 			default:
-				console.log("Unkowen option:" + opt);
+				console.log('Unkowen option:' + opt);
 				process.exit(1);
 				break;
 			}
 		}
 		var fileContent = {};
-		var fn = "." + sep + "tests" + sep + "assets" + sep + that.baseconfig;
+		var fn = '.' + sep + 'tests' + sep + 'assets' + sep + that.baseconfig;
 		if (fs.existsSync(fn)) {
 			fileContent = fs.readFileSync(fn).toString();
 			var data = fileContent.split('\n');
 			for (line in data) {
-				if (data[line].length > 0 && data[line].charAt(0) != "#") {
+				if (data[line].length > 0 && data[line].charAt(0) != '#') {
 					if (data[line].trim() != '') {
-						var temp = "";
-						var elements = data[line].split(" ");
+						var temp = '';
+						var elements = data[line].split(' ');
 						var directive = elements[0];
 						var arguments = elements.slice(1);
 						if (that.list_directives.indexOf(directive) == -1) {
 							that.list_directives.push(directive);
-							that.config[directive] = "";
+							that.config[directive] = '';
 							for (var i = 0; i < arguments.length; i++)
-								that.config[directive] += " " + arguments[i];
+								that.config[directive] += ' ' + arguments[i];
 						} else {
-							temp = directive + "" + that.config[directive];
-							if (typeof that.config[directive] === "string") {
+							temp = directive + '' + that.config[directive];
+							if (typeof that.config[directive] === 'string') {
 								var arr = new Array();
 								arr.push(temp);
 								temp = directive;
 								for (var i = 0; i < arguments.length; i++)
-									temp += " " + arguments[i];
+									temp += ' ' + arguments[i];
 								arr.push(temp);
 								that.config[directive] = arr;
 							} else {
 								var obj = that.config[directive];
 								temp = directive;
 								for (var i = 0; i < arguments.length; i++)
-									temp += " " + arguments[i];
+									temp += ' ' + arguments[i];
 								obj.push(temp);
 								that.config[directive] = obj;
 							}
@@ -92,7 +92,7 @@ Server.prototype.start_server = function (cpid, options, s_callback) {
 				}
 			}
 		} else {
-			console.log("Not reading file ..");
+			console.log('Not reading file ..');
 			process.exit(1);
 		}
 
@@ -123,17 +123,17 @@ Server.prototype.start_server = function (cpid, options, s_callback) {
 					for (d in that.config)
 						count++;
 					//write new configuration to temporary file
-					that.config_file = that.tp.tmpfile(that.config['dir'], 'redis') + ".conf";
+					that.config_file = that.tp.tmpfile(that.config['dir'], 'redis') + '.conf';
 					var stream = fs.createWriteStream(that.config_file);
 					stream.once('open', function (fd) {
 						for (directive in that.config) {
 							total++;
 							if (typeof that.config[directive] === 'object') {
 								for (var i = 0; i < that.config[directive].length; i++)
-									stream.write(that.config[directive][i] + "\n");
+									stream.write(that.config[directive][i] + '\n');
 							} else {
 								if (that.config.hasOwnProperty(directive)) {
-									stream.write(directive + " " + that.config[directive] + "\n");
+									stream.write(directive + ' ' + that.config[directive] + '\n');
 								}
 							}
 							if (count === total) {
@@ -148,8 +148,8 @@ Server.prototype.start_server = function (cpid, options, s_callback) {
 				},
 				two : function (cb) {
 
-					that.stdout_file = that.tp.tmpfile(that.config['dir'], 'stdout') + ".file";
-					that.stderr_file = that.tp.tmpfile(that.config['dir'], 'stderr') + ".file";
+					that.stdout_file = that.tp.tmpfile(that.config['dir'], 'stdout') + '.file';
+					that.stderr_file = that.tp.tmpfile(that.config['dir'], 'stderr') + '.file';
 					that.stdout_stream = fs.createWriteStream(that.stdout_file);
 					that.stderr_stream = fs.createWriteStream(that.stderr_file);
 
@@ -166,9 +166,9 @@ Server.prototype.start_server = function (cpid, options, s_callback) {
 						}
 						g.srv[cpid][that.server.pid] = {};
 						if (debug_mode) {
-							log.notice(that.name + ":Redis Server started on socket: " + that.host + ":" + that.port);
-							log.notice(that.name + ":Stdout file at: " + that.stdout_file);
-							log.notice(that.name + ":Stderr file at: " + that.stderr_file);
+							log.notice(that.name + ':Redis Server started on socket: ' + that.host + ':' + that.port);
+							log.notice(that.name + ':Stdout file at: ' + that.stdout_file);
+							log.notice(that.name + ':Stderr file at: ' + that.stderr_file);
 						}
 						cb(null, true);
 					});
@@ -184,7 +184,7 @@ Server.prototype.start_server = function (cpid, options, s_callback) {
 						});
 						that.client.on('ready', function (r) {
 							if (debug_mode) {
-								log.notice(that.name + ":Client connected and listening on socket: " + that.host + ":" + that.port);
+								log.notice(that.name + ':Client connected and listening on socket: ' + that.host + ':' + that.port);
 							}
 							g.srv[cpid][that.server.pid]['client'] = that.client;
 							cb(null, true);
@@ -196,7 +196,7 @@ Server.prototype.start_server = function (cpid, options, s_callback) {
 						});
 						that.client.on('ready', function (r) {
 							if (debug_mode) {
-								log.notice(that.name + ":Client connected and listening on socket: " + that.host + ":" + that.port);
+								log.notice(that.name + ':Client connected and listening on socket: ' + that.host + ':' + that.port);
 							}
 							g.srv[cpid][that.server.pid]['client'] = that.client;
 							cb(null, true);
@@ -270,9 +270,9 @@ Server.prototype.kill_server = function (cpid, spid, k_callback) {
 		g.srv[cpid][spid]['stdout_stream'].destroySoon();
 		g.srv[cpid][spid]['stderr_stream'].end();
 		g.srv[cpid][spid]['stderr_stream'].destroySoon();
-		g.srv[cpid][spid]['server'].kill("SIGKILL");
+		g.srv[cpid][spid]['server'].kill('SIGKILL');
 		if (debug_mode) {
-			log.notice(g.srv[cpid][spid]['name'] + ":Redis Server killed on socket : " + g.srv[cpid][spid]['host'] + ":" + g.srv[cpid][spid]['port']);
+			log.notice(g.srv[cpid][spid]['name'] + ':Redis Server killed on socket : ' + g.srv[cpid][spid]['host'] + ':' + g.srv[cpid][spid]['port']);
 		}
 		delete g.srv[cpid][spid];
 		setTimeout(function () {
@@ -288,7 +288,7 @@ Server.prototype.is_alive = function (pid, a_callback) {
 			if (stdout.search(pid) !== -1) {
 				a_callback(null, 1);
 			} else
-				a_callback(new Error("Server Not started"), null);
+				a_callback(new Error('Server Not started'), null);
 		});
 };
 

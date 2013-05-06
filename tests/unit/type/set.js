@@ -4,10 +4,10 @@ exports.Set = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	set = {},
-	name = "Set",
-	client = "",
+	name = 'Set',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {};
 
 	//public property
@@ -16,7 +16,7 @@ exports.Set = (function () {
 	//public method
 	set.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "set";
+			var tags = 'set';
 			var overrides = {};
 			overrides['set-max-intset-entries'] = 512;
 			var args = {};
@@ -43,7 +43,7 @@ exports.Set = (function () {
 				} else {
 					client.end();
 					if (set.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -83,9 +83,9 @@ exports.Set = (function () {
 					});
 				});
 			}
-			var message = "Encoding: Expected:" + enc + ", Actual:" + res + " for key:" + key;
+			var message = 'Encoding: Expected:' + enc + ', Actual:' + res + ' for key:' + key;
 			try {
-				if (!assert.equal(res, enc, "Error: " + message) && (!assert.ifError(error))) {
+				if (!assert.equal(res, enc, 'Error: ' + message) && (!assert.ifError(error))) {
 					callback(null, true);
 				}
 			} catch (e) {
@@ -115,7 +115,7 @@ exports.Set = (function () {
 		async.series({
 			a : function (cb) {
 				g.asyncFor(1, 5 + 1, function (loop) {
-					var v = "set" + loop.iteration();
+					var v = 'set' + loop.iteration();
 					client.del(v, function (err, res) {
 						if (err) {
 							callback(err, null);
@@ -184,11 +184,11 @@ exports.Set = (function () {
 				//out while the tests are running -- an extra element is added to
 				//every set that determines its encoding.
 				if (type === 'hashtable')
-					large = "foo";
+					large = 'foo';
 				else
 					large = 200;
 				g.asyncFor(1, 5 + 1, function (loop) {
-					var v = "set" + loop.iteration();
+					var v = 'set' + loop.iteration();
 					client.sadd(v, large, function (err, res) {
 						if (err) {
 							callback(err, null);
@@ -205,7 +205,7 @@ exports.Set = (function () {
 	};
 
 	tester.set1 = function (errorCallback) {
-		var test_case = "SADD, SCARD, SISMEMBER, SMEMBERS basics - regular set";
+		var test_case = 'SADD, SCARD, SISMEMBER, SMEMBERS basics - regular set';
 		var result_array = new Array();
 		create_set('myset', ['foo'], function (err, res) {
 			if (err) {
@@ -270,7 +270,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set2 = function (errorCallback) {
-		var test_case = "SADD, SCARD, SISMEMBER, SMEMBERS basics - intset";
+		var test_case = 'SADD, SCARD, SISMEMBER, SMEMBERS basics - intset';
 		var result_array = new Array();
 		create_set('myset', [17], function (err, res) {
 			if (err) {
@@ -335,14 +335,14 @@ exports.Set = (function () {
 		});
 	};
 	tester.set3 = function (errorCallback) {
-		var test_case = "SADD against non set";
+		var test_case = 'SADD against non set';
 		client.lpush('mylist', 'foo', function (err, res) {
 			if (err) {
 				errorCallback(err);
 			}
 			client.sadd('mylist', 'bar', function (err, res) {
 				try {
-					if (!assert.ok(ut.match("kind", err), test_case)) {
+					if (!assert.ok(ut.match('kind', err), test_case)) {
 						ut.pass(test_case);
 						testEmitter.emit('next');
 					}
@@ -355,7 +355,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set4 = function (errorCallback) {
-		var test_case = "SADD a non-integer against an intset";
+		var test_case = 'SADD a non-integer against an intset';
 		var entry = new Array(1, 2, 3);
 		create_set('myset', entry, function (err, res) {
 			if (err) {
@@ -385,7 +385,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set5 = function (errorCallback) {
-		var test_case = "SADD an integer larger than 64 bits";
+		var test_case = 'SADD an integer larger than 64 bits';
 		var entry = new Array();
 		entry[0] = 213244124402402314402033402;
 		create_set('myset', entry, function (err, res) {
@@ -414,7 +414,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set6 = function (errorCallback) {
-		var test_case = "SADD overflows the maximum allowed integers in an intset";
+		var test_case = 'SADD overflows the maximum allowed integers in an intset';
 		client.del('myset', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -456,7 +456,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set7 = function (errorCallback) {
-		var test_case = "Variadic SADD";
+		var test_case = 'Variadic SADD';
 		var result_array = new Array();
 		client.del('myset', function (err, res) {
 			if (err) {
@@ -488,7 +488,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set8 = function (errorCallback) {
-		var test_case = "Set encoding after DEBUG RELOAD";
+		var test_case = 'Set encoding after DEBUG RELOAD';
 		client.del('myintset', 'myhashset', 'mylargeintset', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -523,13 +523,13 @@ exports.Set = (function () {
 				three : function (cb) {
 					g.asyncFor(0, 256, function (loop) {
 						var i = loop.iteration();
-						var v = "";
+						var v = '';
 						if (i <= 9)
-							v = "i00" + i;
+							v = 'i00' + i;
 						else if (i <= 99)
-							v = "i0" + i;
+							v = 'i0' + i;
 						else
-							v = "i" + i;
+							v = 'i' + i;
 						client.sadd('myhashset', v, function (err, res) {
 							if (err) {
 								errorCallback(err);
@@ -589,7 +589,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set9 = function (errorCallback) {
-		var test_case = "SREM basics - regular set";
+		var test_case = 'SREM basics - regular set';
 		var entry = new Array('foo', 'bar', 'ciao');
 		var result_array = new Array();
 		create_set('myset', entry, function (err, res) {
@@ -627,7 +627,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set10 = function (errorCallback) {
-		var test_case = "SREM basics - intset";
+		var test_case = 'SREM basics - intset';
 		var entry = new Array(3, 4, 5);
 		var result_array = new Array();
 		create_set('myset', entry, function (err, res) {
@@ -665,7 +665,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set11 = function (errorCallback) {
-		var test_case = "SREM with multiple arguments";
+		var test_case = 'SREM with multiple arguments';
 		var result_array = new Array();
 		client.del('myset', function (err, res) {
 			if (err) {
@@ -703,7 +703,7 @@ exports.Set = (function () {
 	};
 
 	tester.set12 = function (errorCallback) {
-		var test_case = "SREM variadic version with more args needed to destroy the key";
+		var test_case = 'SREM variadic version with more args needed to destroy the key';
 		client.del('myset', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -743,11 +743,11 @@ exports.Set = (function () {
 				}
 				async.series({
 					one : function (cb) {
-						var test_case = "Generated sets must be encoded as " + type;
-						var error = "";
+						var test_case = 'Generated sets must be encoded as ' + type;
+						var error = '';
 						g.asyncFor(1, 5 + 1, function (loop) {
 							var i = loop.iteration();
-							var v = "set" + i;
+							var v = 'set' + i;
 							assert_encoding(type, v, function (err, res) {
 								if (err) {
 									error = err;
@@ -757,7 +757,7 @@ exports.Set = (function () {
 							});
 						}, function () {
 							try {
-								if (!assert.equal(error, "", test_case + error)) {
+								if (!assert.equal(error, '', test_case + error)) {
 									ut.pass(test_case);
 									cb(null, null);
 								}
@@ -768,7 +768,7 @@ exports.Set = (function () {
 						});
 					},
 					two : function (cb) {
-						var test_case = "SINTER with two sets - " + type;
+						var test_case = 'SINTER with two sets - ' + type;
 						client.sinter('set1', 'set2', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -785,7 +785,7 @@ exports.Set = (function () {
 						});
 					},
 					three : function (cb) {
-						var test_case = "SINTERSTORE with two sets - " + type;
+						var test_case = 'SINTERSTORE with two sets - ' + type;
 						client.sinterstore('setres', 'set1', 'set2', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -812,7 +812,7 @@ exports.Set = (function () {
 						});
 					},
 					four : function (cb) {
-						var test_case = "SINTERSTORE with two sets, after a DEBUG RELOAD  - " + type;
+						var test_case = 'SINTERSTORE with two sets, after a DEBUG RELOAD  - ' + type;
 						client.debug('reload', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -844,7 +844,7 @@ exports.Set = (function () {
 						});
 					},
 					five : function (cb) {
-						var test_case = "SUNION with two sets - " + type;
+						var test_case = 'SUNION with two sets - ' + type;
 						client.smembers('set1', function (err, s1) {
 							if (err) {
 								cb(err, null);
@@ -872,7 +872,7 @@ exports.Set = (function () {
 						});
 					},
 					six : function (cb) {
-						var test_case = "SUNIONSTORE with two sets  - " + type;
+						var test_case = 'SUNIONSTORE with two sets  - ' + type;
 						client.sunionstore('setres', 'set1', 'set2', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -910,7 +910,7 @@ exports.Set = (function () {
 						});
 					},
 					seven : function (cb) {
-						var test_case = "SINTER against three sets - " + type;
+						var test_case = 'SINTER against three sets - ' + type;
 						client.sinter('set1', 'set2', 'set3', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -927,7 +927,7 @@ exports.Set = (function () {
 						});
 					},
 					eight : function (cb) {
-						var test_case = "SINTERSTORE with three sets - " + type;
+						var test_case = 'SINTERSTORE with three sets - ' + type;
 						client.sinterstore('setres', 'set1', 'set2', 'set3', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -949,7 +949,7 @@ exports.Set = (function () {
 						});
 					},
 					nine : function (cb) {
-						var test_case = "SUNION with non existing keys - " + type;
+						var test_case = 'SUNION with non existing keys - ' + type;
 						client.smembers('set1', function (err, s1) {
 							if (err) {
 								cb(err, null);
@@ -977,7 +977,7 @@ exports.Set = (function () {
 						});
 					},
 					ten : function (cb) {
-						var test_case = "SDIFF with two sets - " + type;
+						var test_case = 'SDIFF with two sets - ' + type;
 						client.sdiff('set1', 'set4', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -994,7 +994,7 @@ exports.Set = (function () {
 						});
 					},
 					eleven : function (cb) {
-						var test_case = "SDIFF with three sets - " + type;
+						var test_case = 'SDIFF with three sets - ' + type;
 						client.sdiff('set1', 'set4', 'set5', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -1012,7 +1012,7 @@ exports.Set = (function () {
 
 					},
 					twelve : function (cb) {
-						var test_case = "SDIFFSTORE with three sets - " + type;
+						var test_case = 'SDIFFSTORE with three sets - ' + type;
 						client.sdiffstore('setres', 'set1', 'set4', 'set5', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -1057,7 +1057,7 @@ exports.Set = (function () {
 	};
 
 	tester.set15 = function (errorCallback) {
-		var test_case = "SINTER against non-set should throw error";
+		var test_case = 'SINTER against non-set should throw error';
 		client.set('key1', 'x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1065,7 +1065,7 @@ exports.Set = (function () {
 			client.sinter('key1', 'noset', function (err, res) {
 
 				try {
-					if (!assert.ok(ut.match("wrong kind", err), test_case)) {
+					if (!assert.ok(ut.match('wrong kind', err), test_case)) {
 						ut.pass(test_case);
 						testEmitter.emit('next');
 					}
@@ -1077,14 +1077,14 @@ exports.Set = (function () {
 		});
 	}
 	tester.set16 = function (errorCallback) {
-		var test_case = "SUNION against non-set should throw error";
+		var test_case = 'SUNION against non-set should throw error';
 		client.set('key1', 'x', function (err, res) {
 			if (err) {
 				errorCallback(err);
 			}
 			client.sunion('key1', 'noset', function (err, res) {
 				try {
-					if (!assert.ok(ut.match("wrong kind", err), test_case)) {
+					if (!assert.ok(ut.match('wrong kind', err), test_case)) {
 						ut.pass(test_case);
 						testEmitter.emit('next');
 					}
@@ -1096,7 +1096,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set17 = function (errorCallback) {
-		var test_case = "SINTERSTORE against non existing keys should delete dstkey";
+		var test_case = 'SINTERSTORE against non existing keys should delete dstkey';
 		var result = new Array();
 		client.set('setres', 'xxx', function (err, res) {
 			if (err) {
@@ -1126,7 +1126,7 @@ exports.Set = (function () {
 		});
 	}
 	tester.set18 = function (errorCallback) {
-		var test_case = "SUNIONSTORE against non existing keys should delete dstkey";
+		var test_case = 'SUNIONSTORE against non existing keys should delete dstkey';
 		var result = new Array();
 		client.set('setres', 'xxx', function (err, res) {
 			if (err) {
@@ -1156,7 +1156,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set19 = function (errorCallback) {
-		var test_case = "SPOP basics - Hashtable";
+		var test_case = 'SPOP basics - Hashtable';
 		var Hcontent = ['a', 'b', 'c']
 		var result = new Array();
 		create_set('myset', Hcontent, function (err, res) {
@@ -1205,7 +1205,7 @@ exports.Set = (function () {
 
 	};
 	tester.set19_1 = function (errorCallback) {
-		var test_case = "SRANDMEMBER - Hashtable";
+		var test_case = 'SRANDMEMBER - Hashtable';
 		var Hcontent = ['a', 'b', 'c']
 		var myset = {};
 		create_set('myset', Hcontent, function (err, res) {
@@ -1240,7 +1240,7 @@ exports.Set = (function () {
 
 	};
 	tester.set20 = function (errorCallback) {
-		var test_case = "SPOP basics - Intset";
+		var test_case = 'SPOP basics - Intset';
 		var Icontent = [1, 2, 3]
 		var result = new Array();
 		create_set('myset', Icontent, function (err, res) {
@@ -1289,7 +1289,7 @@ exports.Set = (function () {
 
 	}
 	tester.set20_1 = function (errorCallback) {
-		var test_case = "SRANDMEMBER - Intset";
+		var test_case = 'SRANDMEMBER - Intset';
 		var Icontent = [1, 2, 3]
 		var myset = {};
 		create_set('myset', Icontent, function (err, res) {
@@ -1353,7 +1353,7 @@ exports.Set = (function () {
 	}
 	tester.set21 = function (errorCallback) {
 		//move a non-integer element to an intset should convert encoding
-		var test_case = "SMOVE basics - from regular set to intset";
+		var test_case = 'SMOVE basics - from regular set to intset';
 		var result = new Array();
 		setup_move(function (err, res) {
 			if (err) {
@@ -1423,7 +1423,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set22 = function (errorCallback) {
-		var test_case = "SMOVE basics - from intset to regular set";
+		var test_case = 'SMOVE basics - from intset to regular set';
 		var result = new Array();
 		setup_move(function (err, res) {
 			if (err) {
@@ -1459,7 +1459,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set23 = function (errorCallback) {
-		var test_case = "SMOVE non existing key";
+		var test_case = 'SMOVE non existing key';
 		var result = new Array();
 		setup_move(function (err, res) {
 			if (err) {
@@ -1495,7 +1495,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set24 = function (errorCallback) {
-		var test_case = "SMOVE non existing src set";
+		var test_case = 'SMOVE non existing src set';
 		var result = new Array();
 		setup_move(function (err, res) {
 			if (err) {
@@ -1522,7 +1522,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set25 = function (errorCallback) {
-		var test_case = "SMOVE from regular set to non existing destination set";
+		var test_case = 'SMOVE from regular set to non existing destination set';
 		var result = new Array();
 		setup_move(function (err, res) {
 			if (err) {
@@ -1563,7 +1563,7 @@ exports.Set = (function () {
 		});
 	}
 	tester.set26 = function (errorCallback) {
-		var test_case = "SMOVE from intset to non existing destination set";
+		var test_case = 'SMOVE from intset to non existing destination set';
 		var result = new Array();
 		setup_move(function (err, res) {
 			if (err) {
@@ -1604,14 +1604,14 @@ exports.Set = (function () {
 		});
 	};
 	tester.set27 = function (errorCallback) {
-		var test_case = "SMOVE wrong src key type";
+		var test_case = 'SMOVE wrong src key type';
 		client.set('x', 10, function (err, res) {
 			if (err) {
 				errorCallback(err);
 			}
 			client.smove('x', 'myset2', 'foo', function (err, res) {
 				try {
-					if (!assert.ok(ut.match("wrong kind", err), test_case)) {
+					if (!assert.ok(ut.match('wrong kind', err), test_case)) {
 						ut.pass(test_case);
 						testEmitter.emit('next');
 					}
@@ -1623,14 +1623,14 @@ exports.Set = (function () {
 		});
 	};
 	tester.set27 = function (errorCallback) {
-		var test_case = "SMOVE wrong dst key type";
+		var test_case = 'SMOVE wrong dst key type';
 		client.set('x', 10, function (err, res) {
 			if (err) {
 				errorCallback(err);
 			}
 			client.smove('myset2', 'x', 'foo', function (err, res) {
 				try {
-					if (!assert.ok(ut.match("wrong kind", err), test_case)) {
+					if (!assert.ok(ut.match('wrong kind', err), test_case)) {
 						ut.pass(test_case);
 						testEmitter.emit('next');
 					}
@@ -1642,8 +1642,8 @@ exports.Set = (function () {
 		});
 	};
 	tester.set28 = function (errorCallback) {
-		var test_case = "intsets implementation stress testing";
-		var error = "";
+		var test_case = 'intsets implementation stress testing';
+		var error = '';
 		g.asyncFor(0, 20, function (outerloop) {
 			var s = {};
 			client.del('s', function (err, res) {
@@ -1652,7 +1652,7 @@ exports.Set = (function () {
 				}
 				var len = g.randomInt(1024);
 				g.asyncFor(0, len, function (innerloop) {
-					var data = "";
+					var data = '';
 					var c = ut.randpath(new Array(1, 2, 3));
 					if (c == 1) {
 						data = g.randomInt(65536);
@@ -1688,10 +1688,10 @@ exports.Set = (function () {
 											errorCallback(err);
 										}
 										if (!s.hasOwnProperty(e)) {
-											console.log("Can't find " + e + " on local array");
-											console.log("Local array: " + sorted);
-											console.log("Remote array: " + s_sorted);
-											throw new Error("exception")
+											console.log('Can\'t find ' + e + ' on local array');
+											console.log('Local array: ' + sorted);
+											console.log('Remote array: ' + s_sorted);
+											throw new Error('exception')
 										}
 										delete s[e];
 										loop.next();
@@ -1702,7 +1702,7 @@ exports.Set = (function () {
 											errorCallback(err);
 										}
 										if (res !== 0) {
-											errors.push("Scard: " + res + " not equal to 0");
+											errors.push('Scard: ' + res + ' not equal to 0');
 											outerloop.break();
 										}
 										var size = 0;
@@ -1710,7 +1710,7 @@ exports.Set = (function () {
 											size++;
 										}
 										if (size !== 0) {
-											errors.push("Size: " + size + " not equal to 0");
+											errors.push('Size: ' + size + ' not equal to 0');
 											outerloop.break();
 										}
 										outerloop.next();
@@ -1735,7 +1735,7 @@ exports.Set = (function () {
 	};
 
 	tester.set29 = function (errorCallback) {
-		var test_case = "SDIFF with first set empty";
+		var test_case = 'SDIFF with first set empty';
 		client.del('set1', 'set2', 'set3', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1768,7 +1768,7 @@ exports.Set = (function () {
 	};
 
 	tester.set30 = function (errorCallback) {
-		var test_case = "SINTER should handle non existing key as empty";
+		var test_case = 'SINTER should handle non existing key as empty';
 		client.del('set1', 'set2', 'set3', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1797,7 +1797,7 @@ exports.Set = (function () {
 	};
 
 	tester.set30 = function (errorCallback) {
-		var test_case = "SINTER with same integer elements but different encoding";
+		var test_case = 'SINTER with same integer elements but different encoding';
 		client.del('set1', 'set2', 'set3', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1844,7 +1844,7 @@ exports.Set = (function () {
 	};
 
 	tester.set31 = function (errorCallback) {
-		var test_case = "SMOVE with identical source and destination";
+		var test_case = 'SMOVE with identical source and destination';
 		client.del('set', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1875,7 +1875,7 @@ exports.Set = (function () {
 		});
 	};
 	tester.set32 = function (errorCallback) {
-		var test_case = "SRANDMEMBER with <count> against non existing key";
+		var test_case = 'SRANDMEMBER with <count> against non existing key';
 		client.srandmember('nonexisting_key', 100, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1892,14 +1892,14 @@ exports.Set = (function () {
 	};
 
 	tester.set33 = function (errorCallback) {
-		var test_case = "SRANDMEMBER with <count> - Hashtable";
+		var test_case = 'SRANDMEMBER with <count> - Hashtable';
 		var Hcontent = [1, 5, 10, 50, 125, 50000, 33959417, 4775547, 65434162, 12098459, 427716, 483706, 2726473884, 72615637475,
 			'MARY', 'PATRICIA', 'LINDA', 'BARBARA', 'ELIZABETH', 'JENNIFER', 'MARIA', 'SUSAN', 'MARGARET', 'DOROTHY', 'LISA', 'NANCY',
 			'KAREN', 'BETTY', 'HELEN', 'SANDRA', 'DONNA', 'CAROL', 'RUTH', 'SHARON', 'MICHELLE', 'LAURA', 'SARAH', 'KIMBERLY',
 			'DEBORAH', 'JESSICA', 'SHIRLEY', 'CYNTHIA', 'ANGELA', 'MELISSA', 'BRENDA', 'AMY', 'ANNA', 'REBECCA', 'VIRGINIA', 'KATHLEEN'];
 		var myset = [],
 		Result = false,
-		ErrorMsg = "";
+		ErrorMsg = '';
 		var tempArray = [],
 		res_array = [];
 		create_set('myset', Hcontent, function (err, status) {
@@ -1974,7 +1974,7 @@ exports.Set = (function () {
 												loop.break();
 											} else {
 												Result = false;
-												Error = "Array not equal";
+												Error = 'Array not equal';
 												loop.next();
 											}
 										} else
@@ -2057,7 +2057,7 @@ exports.Set = (function () {
 								}
 								else{
 								Result = false;
-								Error = "Array not equal";
+								Error = 'Array not equal';
 								loop.next();
 								}
 								}
@@ -2099,11 +2099,11 @@ exports.Set = (function () {
 		});
 	};
 	tester.set34 = function (errorCallback) {
-		var test_case = "SRANDMEMBER with <count> - Intset";
+		var test_case = 'SRANDMEMBER with <count> - Intset';
 		var Icontent = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49];
 		var myset = [],
 		Result = false,
-		ErrorMsg = "";
+		ErrorMsg = '';
 		var tempArray = [],
 		res_array = [];
 		create_set('myset', Icontent, function (err, status) {
@@ -2178,7 +2178,7 @@ exports.Set = (function () {
 												loop.break();
 											} else {
 												Result = false;
-												Error = "Array not equal";
+												Error = 'Array not equal';
 												loop.next();
 											}
 										} else
@@ -2261,7 +2261,7 @@ exports.Set = (function () {
 								}
 								else{
 								Result = false;
-								Error = "Array not equal";
+								Error = 'Array not equal';
 								loop.next();
 								}
 								}

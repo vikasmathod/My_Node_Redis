@@ -73,7 +73,7 @@ exports.redis_cli = (function () {
 				} else {
 					client.end();
 					if (redis_cli.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -85,7 +85,7 @@ exports.redis_cli = (function () {
 	}
 
 	tester.cli1 = function (errorCallback) {
-		var test_case = "test_interactive_cli: INFO response should be printed raw";
+		var test_case = 'test_interactive_cli: INFO response should be printed raw';
 		var cli_console = child.exec(cmdCli);
 		cli_console.stdout.on('data', function (data) {
 			var patt = new RegExp(/[a-z0-9_]+:[a-z0-9_]+/);
@@ -99,12 +99,12 @@ exports.redis_cli = (function () {
 			testEmitter.emit('next');
 		});
 		setTimeout(function () {
-			run_command(cli_console, "info");
+			run_command(cli_console, 'info');
 		}, 500);
 	};
 
 	tester.cli2 = function (errorCallback) {
-		var test_case = "test_interactive_cli: Status reply";
+		var test_case = 'test_interactive_cli: Status reply';
 		var cli_console = child.exec(cmdCli);
 		cli_console.stdout.on('data', function (data) {
 			try {
@@ -117,12 +117,12 @@ exports.redis_cli = (function () {
 			testEmitter.emit('next');
 		});
 		setTimeout(function () {
-			run_command(cli_console, "set key foo");
+			run_command(cli_console, 'set key foo');
 		}, 500);
 	};
 
 	tester.cli3 = function (errorCallback) {
-		var test_case = "test_interactive_cli: Integer reply";
+		var test_case = 'test_interactive_cli: Integer reply';
 		var cli_console = child.exec(cmdCli);
 		cli_console.stdout.on('data', function (data) {
 			try {
@@ -135,12 +135,12 @@ exports.redis_cli = (function () {
 			testEmitter.emit('next');
 		});
 		setTimeout(function () {
-			run_command(cli_console, "incr counter");
+			run_command(cli_console, 'incr counter');
 		}, 500);
 	};
 
 	tester.cli4 = function (errorCallback) {
-		var test_case = "test_interactive_cli: Bulk reply";
+		var test_case = 'test_interactive_cli: Bulk reply';
 		var cli_console = child.exec(cmdCli);
 		cli_console.stdout.on('data', function (data) {
 			try {
@@ -154,12 +154,12 @@ exports.redis_cli = (function () {
 		});
 		setTimeout(function () {
 			client.set('key', 'foo');
-			run_command(cli_console, "get key");
+			run_command(cli_console, 'get key');
 		}, 500);
 	};
 
 	tester.cli5 = function (errorCallback) {
-		var test_case = "test_interactive_cli: Multi-bulk reply";
+		var test_case = 'test_interactive_cli: Multi-bulk reply';
 		var cli_console = child.exec(cmdCli);
 		cli_console.stdout.on('data', function (data) {
 			try {
@@ -174,13 +174,13 @@ exports.redis_cli = (function () {
 		setTimeout(function () {
 			client.rpush('list', 'foo');
 			client.rpush('list', 'bar');
-			run_command(cli_console, "lrange list 0 -1");
+			run_command(cli_console, 'lrange list 0 -1');
 		}, 500);
 	};
 
 	tester.cli6 = function (errorCallback) {
-		var test_case = "test_interactive_cli: Parsing quotes";
-		var strError = "";
+		var test_case = 'test_interactive_cli: Parsing quotes';
+		var strError = '';
 		async.series({
 			one : function (cb) {
 				var cli_console = child.exec(cmdCli);
@@ -340,7 +340,7 @@ exports.redis_cli = (function () {
 				}, 500);
 			}
 		}, function (err, results) {
-			if (strError == "")
+			if (strError === '')
 				ut.pass(test_case);
 			else
 				ut.fail(strError, true);
@@ -349,8 +349,8 @@ exports.redis_cli = (function () {
 	};
 
 	tester.cli7 = function (errorCallback) {
-		var test_case = "test_tty_cli: Status reply";
-		var cli_console = child.exec(cmdCli + " -n 0 set key bar");
+		var test_case = 'test_tty_cli: Status reply';
+		var cli_console = child.exec(cmdCli + ' -n 0 set key bar');
 		cli_console.stdout.on('data', function (data) {
 			try {
 				//trim the data cause of new line charecter
@@ -373,9 +373,9 @@ exports.redis_cli = (function () {
 	};
 
 	tester.cli8 = function (errorCallback) {
-		var test_case = "test_tty_cli: Integer reply";
+		var test_case = 'test_tty_cli: Integer reply';
 		client.del('counter');
-		var cli_console = child.exec(cmdCli + " -n 0 incr counter");
+		var cli_console = child.exec(cmdCli + ' -n 0 incr counter');
 		cli_console.stdout.on('data', function (data) {
 			try {
 				//trim the data cause of new line charecter
@@ -390,9 +390,9 @@ exports.redis_cli = (function () {
 	};
 
 	tester.cli9 = function (errorCallback) {
-		var test_case = "test_tty_cli: Bulk reply";
-		client.set('key', "tab\tnewline\n");
-		var cli_console = child.exec(cmdCli + " -n 0 get key");
+		var test_case = 'test_tty_cli: Bulk reply';
+		client.set('key', 'tab\tnewline\n');
+		var cli_console = child.exec(cmdCli + ' -n 0 get key');
 		cli_console.stdout.on('data', function (data) {
 			try {
 				//trim the data cause of new line charecter
@@ -407,11 +407,11 @@ exports.redis_cli = (function () {
 	};
 
 	tester.cli10 = function (errorCallback) {
-		var test_case = "test_tty_cli: Multi-bulk reply";
+		var test_case = 'test_tty_cli: Multi-bulk reply';
 		client.del('list');
 		client.rpush('list', 'foo');
 		client.rpush('list', 'bar');
-		var cli_console = child.exec(cmdCli + " -n 0 lrange list 0 -1");
+		var cli_console = child.exec(cmdCli + ' -n 0 lrange list 0 -1');
 		cli_console.stdout.on('data', function (data) {
 			try {
 				//trim the data cause of new line charecter
@@ -426,11 +426,11 @@ exports.redis_cli = (function () {
 	};
 
 	tester.cli11 = function (errorCallback) {
-		var test_case = "test_tty_cli: Read last argument from pipe";
-		var cli_console = child.exec("echo foo");
+		var test_case = 'test_tty_cli: Read last argument from pipe';
+		var cli_console = child.exec('echo foo');
 		cli_console.stdout.on('data', function (data) {
 			//trim the data cause of new line charecter
-			var cli_console1 = child.exec(cmdCli + " -n 0 set key " + data);
+			var cli_console1 = child.exec(cmdCli + ' -n 0 set key ' + data);
 			setTimeout(function () {
 				client.get('key', function (err, res) {
 					try {
@@ -447,7 +447,7 @@ exports.redis_cli = (function () {
 	};
 
 	tester.cli12 = function (errorCallback) {
-		var test_case = "test_tty_cli: Read last argument from file";
+		var test_case = 'test_tty_cli: Read last argument from file';
 		
 		if(process.platform === 'win32'){
 			ut.pass(test_case);
@@ -461,9 +461,9 @@ exports.redis_cli = (function () {
 				if (err) {
 					console.log(err);
 				}
-				var cli_console = child.exec("tail < tests/tmp/cli1.txt");
+				var cli_console = child.exec('tail < tests/tmp/cli1.txt');
 				cli_console.stdout.on('data', function (data) {
-					var cli_console1 = child.exec(cmdCli + " -n 0 set key " + data.trim());
+					var cli_console1 = child.exec(cmdCli + ' -n 0 set key ' + data.trim());
 					client.get('key', function (err, res) {
 						try {
 							if (!assert.equal(res, 'foo', test_case))

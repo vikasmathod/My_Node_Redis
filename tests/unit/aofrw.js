@@ -4,12 +4,12 @@ exports.Aofrw = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	aofrw = {},
-	name = "Aofrw",
-	client = "",
+	name = 'Aofrw',
+	client = '',
 	tester = {},
-	server_pid = "",
-	all_tests = "",
-	client_pid = "";
+	server_pid = '',
+	all_tests = '',
+	client_pid = '';
 
 	//public property
 	aofrw.debug_mode = false;
@@ -17,7 +17,7 @@ exports.Aofrw = (function () {
 	//public method
 	aofrw.start_test = function (cpid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "aofrw";
+			var tags = 'aofrw';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -53,7 +53,7 @@ exports.Aofrw = (function () {
 				} else {
 					client.end();
 					if (aofrw.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					} 
 					testEmitter.emit('end');
 				}
@@ -65,7 +65,7 @@ exports.Aofrw = (function () {
 	}
 
 	tester.Aofrw1 = function (errorCallback) {
-		var test_case = "Turning off AOF kills the background writing child if any";
+		var test_case = 'Turning off AOF kills the background writing child if any';
 		client.config('set', 'appendonly', 'yes', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -83,15 +83,15 @@ exports.Aofrw = (function () {
 					}
 					ut.wait_for_condition(50, 100, function (cb) {
 						var file = g.srv[client_pid][server_pid]['stdout'];
-						var strText = "";
+						var strText = '';
 						fs.readFile(file, function (err, result) {
 							if (err) {
 								errorCallback(err);
 							}
-							var resStrArray = result.toString().split("\n");
+							var resStrArray = result.toString().split('\n');
 							var resFlag = false;
 							for (var j = resStrArray.length; j > resStrArray.length - 5; j--) {
-								if (ut.match("Killing running AOF rewrite child", resStrArray[j])) {
+								if (ut.match('Killing running AOF rewrite child', resStrArray[j])) {
 									resFlag = true;
 									cb(true);
 									break;
@@ -115,16 +115,16 @@ exports.Aofrw = (function () {
 	tester.Aofrw2 = function (errorCallback) {
 		var dataTypes = ['string', 'int'];
 		var dataObjs = ['ziplist', 'linkedlist'];
-		var test_case = "";
+		var test_case = '';
 		var len = 0;
-		var data = "";
+		var data = '';
 		var iDtype = 0,
 		iDataObj = 0;
 		g.asyncFor(0, dataTypes.length, function (dTypeloop) {
 			iDtype = dTypeloop.iteration();
 			g.asyncFor(0, dataObjs.length, function (dObjloop) {
 				iDataObj = dObjloop.iteration();
-				test_case = "AOF rewrite of list with " + dataObjs[iDataObj] + " encoding, " + dataTypes[iDtype] + " data";
+				test_case = 'AOF rewrite of list with ' + dataObjs[iDataObj] + ' encoding, ' + dataTypes[iDtype] + ' data';
 				client.flushall(function (err, res) {
 					if (err) {
 						errorCallback(err);
@@ -162,7 +162,7 @@ exports.Aofrw = (function () {
 														console.log(err)
 													}
 													if (d1 != d2) {
-														ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
+														ut.fail('assertion:' + d1 + ' is not equal to ' + d2, true);
 														dObjloop.break();
 														dTypeloop.break();
 													} else {
@@ -197,16 +197,16 @@ exports.Aofrw = (function () {
 	tester.Aofrw3 = function (errorCallback) {
 		var dataTypes = ['string', 'int'];
 		var dataObjs = ['intset', 'hashtable'];
-		var test_case = "";
+		var test_case = '';
 		var len = 0;
-		var data = "";
+		var data = '';
 		var iDtype = 0,
 		iDataObj = 0;
 		g.asyncFor(0, dataTypes.length, function (dTypeloop) {
 			iDtype = dTypeloop.iteration();
 			g.asyncFor(0, dataObjs.length, function (dObjloop) {
 				iDataObj = dObjloop.iteration();
-				test_case = "AOF rewrite of set with " + dataObjs[iDataObj] + " encoding, " + dataTypes[iDtype] + " data";
+				test_case = 'AOF rewrite of set with ' + dataObjs[iDataObj] + ' encoding, ' + dataTypes[iDtype] + ' data';
 				client.flushall(function (err, res) {
 					if (err) {
 						errorCallback(err);
@@ -248,7 +248,7 @@ exports.Aofrw = (function () {
 														errorCallback(err);
 													}
 													if (d1 != d2) {
-														ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
+														ut.fail('assertion:' + d1 + ' is not equal to ' + d2, true);
 														dObjloop.break();
 														dTypeloop.break();
 													} else {
@@ -284,16 +284,16 @@ exports.Aofrw = (function () {
 	tester.Aofrw4 = function (errorCallback) {
 		var dataTypes = ['string', 'int'];
 		var dataObjs = ['ziplist', 'skiplist'];
-		var test_case = "";
+		var test_case = '';
 		var len = 0;
-		var data = "";
+		var data = '';
 		var iDtype = 0,
 		iDataObj = 0;
 		g.asyncFor(0, dataTypes.length, function (dTypeloop) {
 			iDtype = dTypeloop.iteration();
 			g.asyncFor(0, dataObjs.length, function (dObjloop) {
 				iDataObj = dObjloop.iteration();
-				test_case = "AOF rewrite of zset with " + dataObjs[iDataObj] + " encoding, " + dataTypes[iDtype] + " data";
+				test_case = 'AOF rewrite of zset with ' + dataObjs[iDataObj] + ' encoding, ' + dataTypes[iDtype] + ' data';
 				client.flushall(function (err, res) {
 					if (err) {
 						errorCallback(err);
@@ -328,7 +328,7 @@ exports.Aofrw = (function () {
 														errorCallback(err);
 													}
 													if (d1 != d2) {
-														ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
+														ut.fail('assertion:' + d1 + ' is not equal to ' + d2, true);
 														dObjloop.break();
 														dTypeloop.break();
 													} else {
@@ -364,16 +364,16 @@ exports.Aofrw = (function () {
 	tester.Aofrw5 = function (errorCallback) {
 		var dataTypes = ['string', 'int'];
 		var dataObjs = ['ziplist', 'hashtable'];
-		var test_case = "";
+		var test_case = '';
 		var len = 0;
-		var data = "";
+		var data = '';
 		var iDtype = 0,
 		iDataObj = 0;
 		g.asyncFor(0, dataTypes.length, function (dTypeloop) {
 			iDtype = dTypeloop.iteration();
 			g.asyncFor(0, dataObjs.length, function (dObjloop) {
 				iDataObj = dObjloop.iteration();
-				test_case = "AOF rewrite of hash with " + dataObjs[iDataObj] + " encoding, " + dataTypes[iDtype] + " data";
+				test_case = 'AOF rewrite of hash with ' + dataObjs[iDataObj] + ' encoding, ' + dataTypes[iDtype] + ' data';
 				client.flushall(function (err, res) {
 					if (err) {
 						errorCallback(err);
@@ -412,7 +412,7 @@ exports.Aofrw = (function () {
 														errorCallback(err);
 													}
 													if (d1 != d2) {
-														ut.fail("assertion:" + d1 + " is not equal to " + d2, true);
+														ut.fail('assertion:' + d1 + ' is not equal to ' + d2, true);
 														dObjloop.break();
 														dTypeloop.break();
 													} else {
@@ -452,14 +452,14 @@ exports.Aofrw = (function () {
 	};
 
 	tester.Aofrw6 = function (errorCallback) {
-		var test_case = "BGREWRITEAOF is delayed if BGSAVE is in progress";
+		var test_case = 'BGREWRITEAOF is delayed if BGSAVE is in progress';
 		var MultiCli = client.multi();
 		MultiCli.bgsave();
 		MultiCli.bgrewriteaof();
 		MultiCli.info('persistence');
 		MultiCli.exec(function (err, res) {
 			try {
-				if (!assert.equal(ut.match("scheduled", res[1]), true, test_case) && !assert.equal(ut.match("aof_rewrite_scheduled:1", res[2]), true, test_case))
+				if (!assert.equal(ut.match('scheduled', res[1]), true, test_case) && !assert.equal(ut.match('aof_rewrite_scheduled:1', res[2]), true, test_case))
 					ut.pass(test_case);
 			} catch (e) {
 				ut.fail(test_case);
@@ -472,7 +472,7 @@ exports.Aofrw = (function () {
 	};
 
 	tester.Aofrw7 = function (errorCallback) {
-		var test_case = "BGREWRITEAOF is refused if already in progress";
+		var test_case = 'BGREWRITEAOF is refused if already in progress';
 		client.multi().bgrewriteaof().exec(function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -483,10 +483,10 @@ exports.Aofrw = (function () {
 						errorCallback(err);
 					}
 					try {
-						if (!assert.equal(ut.match("already in progress", res.toString()), true, test_case)) {
+						if (!assert.equal(ut.match('already in progress', res.toString()), true, test_case)) {
 							g.asyncFor(0, -1, function (loop) {
 								client.info('persistence', function (err, res) {
-									if (!ut.match("aof_rewrite_scheduled:1", res.split("\r")[10])) {
+									if (!ut.match('aof_rewrite_scheduled:1', res.split('\r')[10])) {
 										loop.break();
 									} else
 										setTimeout(function () {

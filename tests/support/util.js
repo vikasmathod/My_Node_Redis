@@ -50,7 +50,7 @@ Utility.prototype.fail = function (msg, debug, logging) {
 		if (logging) {
 			var timestamp = new Date().getTime();
 			var hrt = process.hrtime()[1];
-			msg = " Message:" + msg.message + "\n\tName:" + msg.name + "\n\tActual:" + msg.actual + "\n\tExpected:" + msg.expected + "\n\tOperator:" + msg.operator;
+			msg = ' Message:' + msg.message + '\n\tName:' + msg.name + '\n\tActual:' + msg.actual + '\n\tExpected:' + msg.expected + '\n\tOperator:' + msg.operator;
 			log.error(msg);
 			Utility.fail_list[hrt] = msg;
 		}
@@ -72,9 +72,9 @@ Utility.prototype.getFailList = function () {
 };
 Utility.prototype.console_log = function (event, msg) {
 	if (event == 'pass') {
-		console.log("\x1b[32m [Pass] \x1b[0m- " + msg + "\n");
+		console.log('\x1b[32m [Pass] \x1b[0m- ' + msg + '\n');
 	} else {
-		console.log("\x1b[31m [Fail] \x1b[0m- " + msg + "\n");
+		console.log('\x1b[31m [Fail] \x1b[0m- ' + msg + '\n');
 	}
 };
 Utility.prototype.match = function (patt, str) {
@@ -96,7 +96,7 @@ Utility.prototype.randomValue = function () {
 	case 2:
 		//32 bit compressible signed/unsigned
 		var ch = that.randpath(new Array(1, 2));
-		if (ch == 1)
+		if (ch === 1)
 			data = g.randomInt(2000000000);
 		else
 			data = g.randomInt(4000000000);
@@ -108,9 +108,9 @@ Utility.prototype.randomValue = function () {
 	case 4:
 		// Random string
 		var ch = that.randpath(new Array(1, 2, 3));
-		if (ch == 1)
+		if (ch === 1)
 			data = that.randstring(0, 256, 'alpha');
-		else if (ch == 2)
+		else if (ch === 2)
 			data = that.randstring(0, 256, 'compr');
 		else
 			data = that.randstring(0, 256, 'binary');
@@ -129,7 +129,7 @@ Utility.prototype.randomKey = function () {
 	case 2:
 		//32 bit compressible signed/unsigned
 		var ch = that.randpath(new Array(1, 2));
-		if (ch == 1)
+		if (ch === 1)
 			key = g.randomInt(2000000000);
 		else
 			key = g.randomInt(4000000000);
@@ -141,7 +141,7 @@ Utility.prototype.randomKey = function () {
 	case 4:
 		// Random string
 		var ch = that.randpath(new Array(1, 2));
-		if (ch == 1)
+		if (ch === 1)
 			key = that.randstring(0, 256, 'alpha');
 		else
 			key = that.randstring(0, 256, 'compr');
@@ -153,7 +153,7 @@ Utility.prototype.randstring = function (min, max, type) {
 	var minval = 0,
 	maxval = 0;
 	var len = (Math.floor((Math.random() * (max - min + 1)) + 1) + min);
-	var output = "";
+	var output = '';
 	if (type === 'binary') {
 		minval = 0;
 		maxval = 255;
@@ -192,7 +192,7 @@ Utility.prototype.serverInfo = function (client, para, callback) {
 		}
 		var info = res.split('\r\n');
 		for (line in info) {
-			var data = info[line].split(":");
+			var data = info[line].split(':');
 			if (data[0] === para) {
 				result = data[1];
 				break;
@@ -201,7 +201,7 @@ Utility.prototype.serverInfo = function (client, para, callback) {
 		if (result != null)
 			callback(null, result);
 		else
-			callback(new Error(para + " is not seen in INFO."), null);
+			callback(new Error(para + ' is not seen in INFO.'), null);
 	});
 }
 Utility.prototype.getserverInfo = function (client, callback) {
@@ -219,7 +219,7 @@ Utility.prototype.waitForBgsave = function (client, callback) {
 			if (err) {
 				callback(err, null);
 			}
-			if (result == 1) {
+			if (result === 1) {
 				setTimeout(function () {
 					loop.next();
 				}, 1000);
@@ -271,13 +271,13 @@ Utility.prototype.wait_for_sync = function (client, callback) {
 };
 Utility.prototype.findKeyWithType = function (client, type, callback) {
 	var that = this;
-	var result = "";
+	var result = '';
 	g.asyncFor(0, 20, function (loop) {
 		client.randomkey(function (err, k) {
 			if (err) {
 				callback(err, null);
 			}
-			if (k != null || k != "") {
+			if (k != null || k != '') {
 				client.type(k, function (err, res) {
 					if (err) {
 						callback(err, null);
@@ -310,8 +310,8 @@ Utility.prototype.createComplexDataset = function (client, ops, useexpire, callb
 		var k2 = that.randomKey();
 		var f = that.randomValue();
 		var v = that.randomValue();
-		var d = "",
-		t = "";
+		var d = '',
+		t = '';
 		async.series({
 			zero : function (async_cb) {
 				if (useexpire != undefined && useexpire == 'useexpire') {
@@ -440,7 +440,7 @@ Utility.prototype.createComplexDataset = function (client, ops, useexpire, callb
 			},
 			four : function (async_cb) {
 				switch (t) {
-				case "string":
+				case 'string':
 					//nothing to do
 					break;
 				case 'list':
@@ -473,7 +473,7 @@ Utility.prototype.createComplexDataset = function (client, ops, useexpire, callb
 							if (err) {
 								callback(err, null);
 							}
-							if (res != null || res != "") {
+							if (res != null || res != '') {
 								var ch = that.randpath(new Array(1, 2, 3));
 								if (ch == 1) {
 									client.sunionstore(k2, k, res);
@@ -497,7 +497,7 @@ Utility.prototype.createComplexDataset = function (client, ops, useexpire, callb
 							if (err) {
 								callback(err, null);
 							}
-							if (res != null || res != "") {
+							if (res != null || res != '') {
 								var ch = that.randpath(new Array(1, 2));
 								if (ch == 1) {
 									client.zunionstore(k2, 2, k, res);
@@ -556,7 +556,7 @@ Utility.prototype.csvdump = function (client, callback) {
 							callback(err, null);
 						}
 						o.push(that.csvstring(res));
-						o.push("\n");
+						o.push('\n');
 					});
 				} else if (type === 'list') {
 					client.lrange(keys[i], 0, -1, function (err, res) {
@@ -610,12 +610,12 @@ Utility.prototype.csvstring = function (s) {
 	return ("\"" + s + "\"");
 };
 Utility.prototype.roundFloat = function (f) {
-	return sprintf("%.10f",parseFloat(f));
+	return sprintf('%.10f',parseFloat(f));
 };
 Utility.prototype.formatCommand = function (args) {
-	var cmd = "*" + args.length + "\r\n";
+	var cmd = '*' + args.length + '\r\n';
 	for (var i = 0; i < args.length; i++) {
-		cmd += "$" + Buffer.byteLength(args[i]) + "\r\n" + args[i] + "\r\n";
+		cmd += '$' + Buffer.byteLength(args[i]) + '\r\n' + args[i] + '\r\n';
 	}
 	return cmd;
 };
@@ -631,7 +631,7 @@ Utility.prototype.print_srv = function () {
 				if (g.srv[key].hasOwnProperty(k)) {
 					for (k1 in g.srv[key][k]) {
 						if (g.srv[key][k].hasOwnProperty(k1)) {
-							console.log(k1 + " = " + g.srv[key][k][k1]);
+							console.log(k1 + ' = ' + g.srv[key][k][k1]);
 						}
 					}
 				}

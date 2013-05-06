@@ -3,18 +3,18 @@ exports.Maxmemory = (function () {
 	var testEmitter = new events.EventEmitter(),
 	ut = new Utility(),
 	server = new Server(),
-	redis = require("redis"),
+	redis = require('redis'),
 	maxmem = {},
-	name = "Maxmemory",
-	client = "",
+	name = 'Maxmemory',
+	client = '',
 	tester = {},
-	client_pid = "",
-	server_pid = "",
+	client_pid = '',
+	server_pid = '',
 	all_tests = {},
-	server_host = "",
-	server_port = "",
-	policy = ["allkeys-random", "allkeys-lru", "volatile-lru", "volatile-random", "volatile-ttl"],
-	policy1 = ["volatile-lru", "volatile-random", "volatile-ttl"];
+	server_host = '',
+	server_port = '',
+	policy = ['allkeys-random', 'allkeys-lru', 'volatile-lru', 'volatile-random', 'volatile-ttl'],
+	policy1 = ['volatile-lru', 'volatile-random', 'volatile-ttl'];
 
 	//public property
 	maxmem.debug_mode = false;
@@ -22,7 +22,7 @@ exports.Maxmemory = (function () {
 	//public method
 	maxmem.start_test = function (cpid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "maxmemory";
+			var tags = 'maxmemory';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -39,7 +39,7 @@ exports.Maxmemory = (function () {
 				// we already have a client while checking for the server, we dont need it now.
 				g.srv[cpid][server_pid]['client'].end();
 				if (maxmem.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + g.srv[cpid][server_pid]['host'] + ":" + g.srv[cpid][server_pid]['port']);
+					log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[cpid][server_pid]['host'] + ':' + g.srv[cpid][server_pid]['port']);
 				}
 				all_tests = Object.keys(tester);
 				testEmitter.emit('next');
@@ -55,7 +55,7 @@ exports.Maxmemory = (function () {
 				} else {
 					client.end();
 					if (maxmem.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -82,14 +82,14 @@ exports.Maxmemory = (function () {
 		client = redis.createClient(server_port, server_host);
 		g.asyncFor(0, policy.length, function (outerloop) {
 			var i = outerloop.iteration();
-			var test_case = "maxmemory - is the memory limit honoured? - policy: " + policy[i];
+			var test_case = 'maxmemory - is the memory limit honoured? - policy: ' + policy[i];
 			//make sure to start with a blank instance
 			client.flushall(function (err, res) {
 				if (err) {
 					errorCallback(err);
 				}
 				//Get the current memory limit and calculate a new limit.We just add 100k to the current memory size so that it is fast for us to reach that limit.
-				ut.serverInfo(client, "used_memory", function (err, used) {
+				ut.serverInfo(client, 'used_memory', function (err, used) {
 					if (err) {
 						errorCallback(err);
 					}
@@ -129,7 +129,7 @@ exports.Maxmemory = (function () {
 									});
 								}, function () {
 
-									ut.serverInfo(client, "used_memory", function (err, used) {
+									ut.serverInfo(client, 'used_memory', function (err, used) {
 										if (err) {
 											errorCallback(err);
 										}
@@ -158,7 +158,7 @@ exports.Maxmemory = (function () {
 		}, function () {
 			client.end();
 			if (maxmem.debug_mode) {
-				log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+				log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 			}
 			testEmitter.emit('next');
 		});
@@ -168,14 +168,14 @@ exports.Maxmemory = (function () {
 		client = redis.createClient(server_port, server_host);
 		g.asyncFor(0, policy.length, function (outerloop) {
 			var i = outerloop.iteration();
-			var test_case = "maxmemory - only allkeys-* should remove non-volatile keys " + policy[i];
+			var test_case = 'maxmemory - only allkeys-* should remove non-volatile keys ' + policy[i];
 			//make sure to start with a blank instance
 			client.flushall(function (err, res) {
 				if (err) {
 					errorCallback(err);
 				}
 				//Get the current memory limit and calculate a new limit.We just add 100k to the current memory size so that it is fast for us to reach that limit.
-				ut.serverInfo(client, "used_memory", function (err, used) {
+				ut.serverInfo(client, 'used_memory', function (err, used) {
 					if (err) {
 						errorCallback(err);
 					}
@@ -253,7 +253,7 @@ exports.Maxmemory = (function () {
 		}, function () {
 			client.end();
 			if (maxmem.debug_mode) {
-				log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+				log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 			}
 			testEmitter.emit('next');
 		});
@@ -263,14 +263,14 @@ exports.Maxmemory = (function () {
 		client = redis.createClient(server_port, server_host);
 		g.asyncFor(0, policy1.length, function (outerloop) {
 			var i = outerloop.iteration();
-			var test_case = "policy " + policy1[i] + " should only remove volatile keys";
+			var test_case = 'policy ' + policy1[i] + ' should only remove volatile keys';
 			//make sure to start with a blank instance
 			client.flushall(function (err, res) {
 				if (err) {
 					errorCallback(err);
 				}
 				//Get the current memory limit and calculate a new limit.We just add 100k to the current memory size so that it is fast for us to reach that limit.
-				ut.serverInfo(client, "used_memory", function (err, used) {
+				ut.serverInfo(client, 'used_memory', function (err, used) {
 					if (err) {
 						errorCallback(err);
 					}
@@ -288,7 +288,7 @@ exports.Maxmemory = (function () {
 							g.asyncFor(0, -1, function (innerloop) {
 								// Odd keys are volatile
 								// Even keys are non volatile.
-								var key = "key:" + numkeys;
+								var key = 'key:' + numkeys;
 								if (numkeys % 2 == 0) {
 									client.setex(key, 10000, 'x', function (err, res) {
 										if (err) {
@@ -316,7 +316,7 @@ exports.Maxmemory = (function () {
 								var key_exists = false;
 								var loop1 = numkeys;
 								g.asyncFor(0, loop1, function (innerloop2) {
-									var key = "foo" + innerloop2.iteration();
+									var key = 'foo' + innerloop2.iteration();
 									client.setex(key, 10000, 'x', function (err, res) {
 										if (err) {
 											errorCallback(err);
@@ -332,7 +332,7 @@ exports.Maxmemory = (function () {
 									});
 									var loop2 = numkeys;
 									g.asyncFor(0, loop2, function (innerloop1) {
-										var key = "key:" + innerloop1.iteration();
+										var key = 'key:' + innerloop1.iteration();
 										client.exists(key, function (err, res) {
 											if (err) {
 												errorCallback(err);
@@ -360,7 +360,7 @@ exports.Maxmemory = (function () {
 		}, function () {
 			client.end();
 			if (maxmem.debug_mode) {
-				log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+				log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 			}
 			testEmitter.emit('next');
 		});

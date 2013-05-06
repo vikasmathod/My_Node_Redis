@@ -6,13 +6,13 @@ exports.Zset = (function () {
 	Zutil = require('../../support/zsetutil.js'),
 	zt = new Zutil();
 	zset = {},
-	name = "Zset",
-	client = "",
+	name = 'Zset',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {},
-	p_inf = "+inf",
-	n_inf = "-inf";
+	p_inf = '+inf',
+	n_inf = '-inf';
 
 	//public property
 	zset.debug_mode = false;
@@ -20,7 +20,7 @@ exports.Zset = (function () {
 	//public method
 	zset.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "zset";
+			var tags = 'zset';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -46,7 +46,7 @@ exports.Zset = (function () {
 				} else {
 					client.end();
 					if (zset.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -87,9 +87,9 @@ exports.Zset = (function () {
 					});
 				});
 			}
-			var message = "Encoding: Expected:" + enc + ", Actual:" + res + " for key:" + key;
+			var message = 'Encoding: Expected:' + enc + ', Actual:' + res + ' for key:' + key;
 			try {
-				if (!assert.equal(res, enc, "Error: " + message) && (!assert.ifError(error))) {
+				if (!assert.equal(res, enc, 'Error: ' + message) && (!assert.ifError(error))) {
 					callback(null, true);
 				}
 			} catch (e) {
@@ -139,7 +139,7 @@ exports.Zset = (function () {
 					callback(err, null);
 				}
 				if (res != 1) {
-					callback(new Error("key:zset does not exist"), null);
+					callback(new Error('key:zset does not exist'), null);
 				}
 				client.zremrangebyscore('zset', args, function (err, res) {
 					if (err) {
@@ -158,8 +158,8 @@ exports.Zset = (function () {
 	}
 
 	tester.zset1 = function (errorCallback) {
-		var enc = new Array("ziplist", "skiplist");
-		var m_error = "";
+		var enc = new Array('ziplist', 'skiplist');
+		var m_error = '';
 		g.asyncFor(0, enc.length, function (mloop) {
 			var itr = mloop.iteration();
 			zt.basics(client, enc[itr], function (err, res) {
@@ -168,7 +168,7 @@ exports.Zset = (function () {
 				}
 				async.series({
 					a : function (cb) {
-						var test_case = "Check encoding - " + enc[itr];
+						var test_case = 'Check encoding - ' + enc[itr];
 						client.del('ztmp', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -195,7 +195,7 @@ exports.Zset = (function () {
 						})
 					},
 					b : function (cb) {
-						var test_case = "ZSET basic ZADD and score update - " + enc[itr];
+						var test_case = 'ZSET basic ZADD and score update - ' + enc[itr];
 						var result = [];
 						if (err) {
 							cb(err, null);
@@ -248,10 +248,10 @@ exports.Zset = (function () {
 						});
 					},
 					c : function (cb) {
-						var test_case = "ZSET element can't be set to NaN with ZADD -" + enc[itr];
+						var test_case = 'ZSET element can\'t be set to NaN with ZADD -' + enc[itr];
 						client.zadd('myzset', 'nan', 'abc', function (err, res) {
 							try {
-								if (!assert.ok(ut.match("not a valid float", err), test_case)) {
+								if (!assert.ok(ut.match('not a valid float', err), test_case)) {
 									ut.pass(test_case);
 									cb(null, null);
 								}
@@ -262,10 +262,10 @@ exports.Zset = (function () {
 						});
 					},
 					d : function (cb) {
-						var test_case = "ZSET element can't be set to NaN with ZINCRBY";
+						var test_case = 'ZSET element can\'t be set to NaN with ZINCRBY';
 						client.zadd('myzset', 'nan', 'abc', function (err, res) {
 							try {
-								if (!assert.ok(ut.match("not a valid float", err), test_case)) {
+								if (!assert.ok(ut.match('not a valid float', err), test_case)) {
 									ut.pass(test_case);
 									cb(null, null);
 								}
@@ -276,14 +276,14 @@ exports.Zset = (function () {
 						})
 					},
 					e : function (cb) {
-						var test_case = "ZINCRBY calls leading to NaN result in error";
+						var test_case = 'ZINCRBY calls leading to NaN result in error';
 						client.zincrby('myzset', '+inf', 'abc', function (err, res) {
 							if (err) {
 								cb(err, null);
 							}
 							client.zincrby('myzset', '-inf', 'abc', function (err, res) {
 								try {
-									if (!assert.ok(ut.match("NaN", err), test_case)) {
+									if (!assert.ok(ut.match('NaN', err), test_case)) {
 										ut.pass(test_case);
 										cb(null, null);
 									}
@@ -295,7 +295,7 @@ exports.Zset = (function () {
 						})
 					},
 					f : function (cb) {
-						var test_case = "ZADD - Variadic version base case";
+						var test_case = 'ZADD - Variadic version base case';
 						var list = new Array();
 						client.del('myzset', function (err, res) {
 							if (err) {
@@ -325,7 +325,7 @@ exports.Zset = (function () {
 						})
 					},
 					g : function (cb) {
-						var test_case = "ZADD - Return value is the number of actually added items";
+						var test_case = 'ZADD - Return value is the number of actually added items';
 						var list = new Array();
 						client.zadd('myzset', 5, 'x', 20, 'b', 30, 'c', function (err, res) {
 							if (err) {
@@ -350,7 +350,7 @@ exports.Zset = (function () {
 						})
 					},
 					h : function (cb) {
-						var test_case = "ZADD - Variadic version does not add nothing on single parsing err";
+						var test_case = 'ZADD - Variadic version does not add nothing on single parsing err';
 						client.del('myzset', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -361,7 +361,7 @@ exports.Zset = (function () {
 										cb(err, null);
 									}
 									try {
-										if ((!assert.ok(ut.match("not a valid float", error), test_case)) && (!assert.equal(res, 0, test_case))) {
+										if ((!assert.ok(ut.match('not a valid float', error), test_case)) && (!assert.equal(res, 0, test_case))) {
 											ut.pass(test_case);
 											cb(null, null);
 										}
@@ -374,14 +374,14 @@ exports.Zset = (function () {
 						});
 					},
 					i : function (cb) {
-						var test_case = "ZADD - Variadic version will raise error on missing arg";
+						var test_case = 'ZADD - Variadic version will raise error on missing arg';
 						client.del('myzset', function (err, res) {
 							if (err) {
 								cb(err, null);
 							}
 							client.zadd('myzset', 10, 'a', 20, 'b', 30, 'c', 40, function (error, res) {
 								try {
-									if (!assert.ok(ut.match("ERR syntax", error), test_case)) {
+									if (!assert.ok(ut.match('ERR syntax', error), test_case)) {
 										ut.pass(test_case);
 										cb(null, null);
 									}
@@ -393,14 +393,14 @@ exports.Zset = (function () {
 						});
 					},
 					j : function (cb) {
-						var test_case = "ZINCRBY does not work variadic even if shares ZADD implementation";
+						var test_case = 'ZINCRBY does not work variadic even if shares ZADD implementation';
 						client.del('myzset', function (err, res) {
 							if (err) {
 								cb(err, null);
 							}
 							client.zincrby('myzset', 10, 'a', 20, 'b', 30, 'c', function (error, res) {
 								try {
-									if (!assert.ok(ut.match("wrong number of arguments", error), test_case)) {
+									if (!assert.ok(ut.match('wrong number of arguments', error), test_case)) {
 										ut.pass(test_case);
 										cb(null, null);
 									}
@@ -412,7 +412,7 @@ exports.Zset = (function () {
 						});
 					},
 					k : function (cb) {
-						var test_case = "ZCARD basics - " + enc[itr];
+						var test_case = 'ZCARD basics - ' + enc[itr];
 						client.zcard('ztmp', function (err, res1) {
 							if (err) {
 								cb(err, null);
@@ -434,7 +434,7 @@ exports.Zset = (function () {
 						})
 					},
 					l : function (cb) {
-						var test_case = "ZREM removes key after last element is removed";
+						var test_case = 'ZREM removes key after last element is removed';
 						var result = new Array();
 						client.del('ztmp', function (err, res) {
 							if (err) {
@@ -492,7 +492,7 @@ exports.Zset = (function () {
 						})
 					},
 					m : function (cb) {
-						var test_case = "ZREM variadic version";
+						var test_case = 'ZREM variadic version';
 						var result = new Array();
 						client.del('ztmp', function (err, res) {
 							if (err) {
@@ -539,7 +539,7 @@ exports.Zset = (function () {
 						})
 					},
 					n : function (cb) {
-						var test_case = "ZREM variadic version -- remove elements after key deletion";
+						var test_case = 'ZREM variadic version -- remove elements after key deletion';
 						client.del('ztmp', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -566,7 +566,7 @@ exports.Zset = (function () {
 						})
 					},
 					o : function (cb) {
-						var test_case = "ZRANGE basics - " + enc[itr];
+						var test_case = 'ZRANGE basics - ' + enc[itr];
 						client.del('ztmp', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -732,7 +732,7 @@ exports.Zset = (function () {
 						});
 					},
 					p : function (cb) {
-						var test_case = "ZREVRANGE basics - " + enc[itr];
+						var test_case = 'ZREVRANGE basics - ' + enc[itr];
 						client.del('ztmp', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -898,7 +898,7 @@ exports.Zset = (function () {
 						});
 					},
 					q : function (cb) {
-						var test_case = "ZRANK/ZREVRANK basics - " + enc[itr];
+						var test_case = 'ZRANK/ZREVRANK basics - ' + enc[itr];
 						client.del('zranktmp', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -994,7 +994,7 @@ exports.Zset = (function () {
 						});
 					},
 					r : function (cb) {
-						var test_case = "ZRANK - after deletion - " + enc[itr];
+						var test_case = 'ZRANK - after deletion - ' + enc[itr];
 						var result = new Array();
 						client.zrem('zranktmp', 'y', function (err, res) {
 							if (err) {
@@ -1024,7 +1024,7 @@ exports.Zset = (function () {
 						});
 					},
 					s : function (cb) {
-						var test_case = "ZINCRBY - can create a new sorted set - " + enc[itr];
+						var test_case = 'ZINCRBY - can create a new sorted set - ' + enc[itr];
 						var result = new Array();
 						client.del('zset', function (err, res) {
 							if (err) {
@@ -1059,7 +1059,7 @@ exports.Zset = (function () {
 						});
 					},
 					t : function (cb) {
-						var test_case = "ZINCRBY - increment and decrement - " + enc[itr];
+						var test_case = 'ZINCRBY - increment and decrement - ' + enc[itr];
 						var result = new Array();
 						client.zincrby('zset', 2, 'foo', function (err, res) {
 							if (err) {
@@ -1122,7 +1122,7 @@ exports.Zset = (function () {
 
 					},
 					u : function (cb) {
-						var test_case = "ZRANGEBYSCORE/ZREVRANGEBYSCORE/ZCOUNT basics";
+						var test_case = 'ZRANGEBYSCORE/ZREVRANGEBYSCORE/ZCOUNT basics';
 						create_default_zset(function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -1445,7 +1445,7 @@ exports.Zset = (function () {
 						});
 					},
 					v : function (cb) {
-						var test_case = "ZRANGEBYSCORE with WITHSCORES";
+						var test_case = 'ZRANGEBYSCORE with WITHSCORES';
 						create_default_zset(function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -1465,7 +1465,7 @@ exports.Zset = (function () {
 						});
 					},
 					w : function (cb) {
-						var test_case = "ZRANGEBYSCORE with LIMIT";
+						var test_case = 'ZRANGEBYSCORE with LIMIT';
 						create_default_zset(function (err, res) {
 							if (err) {
 								ut.fail(err, true);
@@ -1517,7 +1517,7 @@ exports.Zset = (function () {
 						});
 					},
 					x : function (cb) {
-						var test_case = "ZRANGEBYSCORE with LIMIT and WITHSCORES";
+						var test_case = 'ZRANGEBYSCORE with LIMIT and WITHSCORES';
 						create_default_zset(function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -1538,12 +1538,12 @@ exports.Zset = (function () {
 						});
 					},
 					y : function (cb) {
-						var test_case = "ZRANGEBYSCORE with non-value min or max";
+						var test_case = 'ZRANGEBYSCORE with non-value min or max';
 						client.zrangebyscore('fooz', 'str', 1, function (err1, res) {
 							client.zrangebyscore('fooz', 1, 'str', function (err2, res) {
 								client.zrangebyscore('fooz', 1, 'NaN', function (err3, res) {
 									try {
-										if ((!assert.ok(ut.match("not a float", err1), test_case)) && (!assert.ok(ut.match("not a float", err2), test_case)) && (!assert.ok(ut.match("not a float", err3), test_case))) {
+										if ((!assert.ok(ut.match('not a float', err1), test_case)) && (!assert.ok(ut.match('not a float', err2), test_case)) && (!assert.ok(ut.match('not a float', err3), test_case))) {
 											ut.pass(test_case);
 											cb(null, null);
 										}
@@ -1556,7 +1556,7 @@ exports.Zset = (function () {
 						});
 					},
 					z : function (cb) {
-						var test_case = "ZREMRANGEBYRANK basics";
+						var test_case = 'ZREMRANGEBYRANK basics';
 						async.series({
 							z1 : function (zcb) {
 								//inner range
@@ -1751,7 +1751,7 @@ exports.Zset = (function () {
 						});
 					},
 					aa : function (cb) {
-						var test_case = "ZUNIONSTORE against non-existing key doesn't set destination - " + enc[itr];
+						var test_case = 'ZUNIONSTORE against non-existing key doesn\'t set destination - ' + enc[itr];
 						client.del('zseta', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -1778,7 +1778,7 @@ exports.Zset = (function () {
 						});
 					},
 					ab : function (cb) {
-						var test_case = "ZUNIONSTORE with empty set - " + enc[itr];
+						var test_case = 'ZUNIONSTORE with empty set - ' + enc[itr];
 						client.del('zseta', 'zsetb', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -1815,7 +1815,7 @@ exports.Zset = (function () {
 						});
 					},
 					ac : function (cb) {
-						var test_case = "ZUNIONSTORE basics - " + enc[itr];
+						var test_case = 'ZUNIONSTORE basics - ' + enc[itr];
 						client.del('zseta', 'zsetb', 'zsetc', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -1872,7 +1872,7 @@ exports.Zset = (function () {
 						});
 					},
 					ad : function (cb) {
-						var test_case = "ZUNIONSTORE with weights - " + enc[itr];
+						var test_case = 'ZUNIONSTORE with weights - ' + enc[itr];
 						client.zunionstore('zsetc', 2, 'zseta', 'zsetb', 'weights', 2, 3, function (err, res1) {
 							if (err) {
 								cb(err, null);
@@ -1894,7 +1894,7 @@ exports.Zset = (function () {
 						});
 					},
 					ae : function (cb) {
-						var test_case = "ZUNIONSTORE with a regular set and weights - " + enc[itr];
+						var test_case = 'ZUNIONSTORE with a regular set and weights - ' + enc[itr];
 						client.del('seta', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -1936,7 +1936,7 @@ exports.Zset = (function () {
 						});
 					},
 					af : function (cb) {
-						var test_case = "ZUNIONSTORE with AGGREGATE MIN - " + enc[itr];
+						var test_case = 'ZUNIONSTORE with AGGREGATE MIN - ' + enc[itr];
 						client.zunionstore('zsetc', 2, 'zseta', 'zsetb', 'aggregate', 'min', function (err, res1) {
 							if (err) {
 								cb(err, null);
@@ -1958,7 +1958,7 @@ exports.Zset = (function () {
 						});
 					},
 					ag : function (cb) {
-						var test_case = "ZUNIONSTORE with AGGREGATE MAX - " + enc[itr];
+						var test_case = 'ZUNIONSTORE with AGGREGATE MAX - ' + enc[itr];
 						client.zunionstore('zsetc', 2, 'zseta', 'zsetb', 'aggregate', 'max', function (err, res1) {
 							if (err) {
 								cb(err, null);
@@ -1980,7 +1980,7 @@ exports.Zset = (function () {
 						});
 					},
 					ah : function (cb) {
-						var test_case = "ZINTERSTORE basics - " + enc[itr];
+						var test_case = 'ZINTERSTORE basics - ' + enc[itr];
 						client.zinterstore('zsetc', 2, 'zseta', 'zsetb', function (err, res1) {
 							if (err) {
 								cb(err, null);
@@ -2002,7 +2002,7 @@ exports.Zset = (function () {
 						});
 					},
 					ai : function (cb) {
-						var test_case = "ZINTERSTORE with weights - " + enc[itr];
+						var test_case = 'ZINTERSTORE with weights - ' + enc[itr];
 						client.zinterstore('zsetc', 2, 'zseta', 'zsetb', 'weights', 2, 3, function (err, res1) {
 							if (err) {
 								cb(err, null);
@@ -2024,7 +2024,7 @@ exports.Zset = (function () {
 						});
 					},
 					aj : function (cb) {
-						var test_case = "ZINTERSTORE with a regular set and weights - " + enc[itr];
+						var test_case = 'ZINTERSTORE with a regular set and weights - ' + enc[itr];
 						client.del('seta', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -2066,7 +2066,7 @@ exports.Zset = (function () {
 						});
 					},
 					ak : function (cb) {
-						var test_case = "ZINTERSTORE with AGGREGATE MIN - " + enc[itr];
+						var test_case = 'ZINTERSTORE with AGGREGATE MIN - ' + enc[itr];
 						client.zinterstore('zsetc', 2, 'zseta', 'zsetb', 'aggregate', 'min', function (err, res1) {
 							if (err) {
 								cb(err, null);
@@ -2088,7 +2088,7 @@ exports.Zset = (function () {
 						});
 					},
 					al : function (cb) {
-						var test_case = "ZINTERSTORE with AGGREGATE MAX - " + enc[itr];
+						var test_case = 'ZINTERSTORE with AGGREGATE MAX - ' + enc[itr];
 						client.zinterstore('zsetc', 2, 'zseta', 'zsetb', 'aggregate', 'max', function (err, res1) {
 							if (err) {
 								cb(err, null);
@@ -2111,12 +2111,12 @@ exports.Zset = (function () {
 					},
 					am : function (cb) {
 						var cmd = ['ZUNIONSTORE', 'ZINTERSTORE'];
-						var error = "";
+						var error = '';
 						g.asyncFor(0, cmd.length, function (loop) {
 							var i = loop.iteration();
 							async.series({
 								am1 : function (amcb) {
-									var test_case = cmd[i] + " with +inf/-inf scores - " + enc[itr];
+									var test_case = cmd[i] + ' with +inf/-inf scores - ' + enc[itr];
 									client.del('zsetinf1', 'zsetinf2', function (err, res) {
 										if (err) {
 											amcb(err, null);
@@ -2217,7 +2217,7 @@ exports.Zset = (function () {
 									});
 								},
 								am2 : function (amcb) {
-									var test_case = cmd[i] + " with NaN weights - " + enc[itr];
+									var test_case = cmd[i] + ' with NaN weights - ' + enc[itr];
 									client.del('zsetinf1', 'zsetinf1', function (err, res) {
 										if (err) {
 											amcb(err, null);
@@ -2232,7 +2232,7 @@ exports.Zset = (function () {
 												}
 												client[cmd[i]]('zsetinf3', 2, 'zsetinf1', 'zsetinf2', 'weights', 'nan', 'nan', function (err, res) {
 													try {
-														if (!assert.ok(ut.match("not a float", err), test_case)) {
+														if (!assert.ok(ut.match('not a float', err), test_case)) {
 															ut.pass(test_case);
 															amcb(null, null);
 														}
@@ -2253,7 +2253,7 @@ exports.Zset = (function () {
 								loop.next();
 							});
 						}, function () {
-							if (error != "")
+							if (error != '')
 								cb(error, null);
 							else
 								cb(null, null);
@@ -2270,7 +2270,7 @@ exports.Zset = (function () {
 				});
 			});
 		}, function () {
-			if (m_error != "") {
+			if (m_error != '') {
 				errorCallback(m_error);
 			} else {
 				testEmitter.emit('next');
@@ -2278,7 +2278,7 @@ exports.Zset = (function () {
 		});
 	};
 	tester.zset2 = function (errorCallback) {
-		var test_case = "ZINTERSTORE regression with two sets, intset+hashtable";
+		var test_case = 'ZINTERSTORE regression with two sets, intset+hashtable';
 		client.del('seta', 'setb', 'setc', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2310,7 +2310,7 @@ exports.Zset = (function () {
 		});
 	};
 	tester.zset3 = function (errorCallback) {
-		var test_case = "ZUNIONSTORE regression, should not create NaN in scores";
+		var test_case = 'ZUNIONSTORE regression, should not create NaN in scores';
 		client.zadd('z', n_inf, 'neginf', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -2337,9 +2337,9 @@ exports.Zset = (function () {
 		});
 	};
 	tester.zset4 = function (errorCallback) {
-		var stresser = new Array("ziplist", "skiplist");
-		var n_error = "",
-		elements = "";
+		var stresser = new Array('ziplist', 'skiplist');
+		var n_error = '',
+		elements = '';
 		g.asyncFor(0, stresser.length, function (nloop) {
 			var itr = nloop.iteration();
 			if (stresser[itr] == 'ziplist') {
@@ -2353,8 +2353,8 @@ exports.Zset = (function () {
 				}
 				async.series({
 					one : function (cb) {
-						var test_case = "ZSCORE - " + stresser[itr];
-						var error = "";
+						var test_case = 'ZSCORE - ' + stresser[itr];
+						var error = '';
 						client.del('zscoretest', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -2398,7 +2398,7 @@ exports.Zset = (function () {
 						});
 					},
 					two : function (cb) {
-						var test_case = "ZSCORE after a DEBUG RELOAD - " + stresser[itr];
+						var test_case = 'ZSCORE after a DEBUG RELOAD - ' + stresser[itr];
 						client.del('zscoretest', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -2447,7 +2447,7 @@ exports.Zset = (function () {
 						});
 					},
 					three : function (cb) {
-						var test_case = "ZSET sorting stresser - " + stresser[itr];
+						var test_case = 'ZSET sorting stresser - ' + stresser[itr];
 						var delta = 0,
 						score = 0;
 						g.asyncFor(0, 2, function (outerloop) {
@@ -2532,14 +2532,14 @@ exports.Zset = (function () {
 						});
 					},
 					four : function (cb) {
-						var test_case = "ZRANGEBYSCORE fuzzy test, 100 ranges in $elements element sorted set - " + stresser[itr];
+						var test_case = 'ZRANGEBYSCORE fuzzy test, 100 ranges in $elements element sorted set - ' + stresser[itr];
 						var error = [],
-						low = "",
-						lowx = "",
-						ok = "",
-						okx = "",
-						high = "",
-						highx = "";
+						low = '',
+						lowx = '',
+						ok = '',
+						okx = '',
+						high = '',
+						highx = '';
 						client.del('zset', function (err, res) {
 							if (err) {
 								cb(err, null);
@@ -2557,7 +2557,7 @@ exports.Zset = (function () {
 										cb(err, null);
 									}
 									g.asyncFor(0, 100, function (loop) {
-										var aur = "";
+										var aur = '';
 										var min = Math.random();
 										var max = Math.random();
 										if (min > max) {
@@ -2611,7 +2611,7 @@ exports.Zset = (function () {
 														fcb(err, null);
 													}
 													if (res !== low.length)
-														error.push("Error, len does not match zcount\n");
+														error.push('Error, len does not match zcount\n');
 													fcb(null, null);
 												});
 											},
@@ -2621,7 +2621,7 @@ exports.Zset = (function () {
 														fcb(err, null);
 													}
 													if (res !== ok.length)
-														error.push("Error, len does not match zcount\n");
+														error.push('Error, len does not match zcount\n');
 													fcb(null, null);
 												});
 											},
@@ -2631,7 +2631,7 @@ exports.Zset = (function () {
 														fcb(err, null);
 													}
 													if (res !== high.length)
-														error.push("Error, len does not match zcount\n");
+														error.push('Error, len does not match zcount\n');
 													fcb(null, null);
 												});
 											},
@@ -2641,7 +2641,7 @@ exports.Zset = (function () {
 														fcb(err, null);
 													}
 													if (res !== lowx.length)
-														error.push("Error, len does not match zcount\n");
+														error.push('Error, len does not match zcount\n');
 													fcb(null, null);
 												});
 											},
@@ -2651,7 +2651,7 @@ exports.Zset = (function () {
 														fcb(err, null);
 													}
 													if (res !== okx.length)
-														error.push("Error, len does not match zcount\n");
+														error.push('Error, len does not match zcount\n');
 													fcb(null, null);
 												});
 											},
@@ -2661,7 +2661,7 @@ exports.Zset = (function () {
 														fcb(err, null);
 													}
 													if (res !== highx.length)
-														error.push("Error, len does not match zcount\n");
+														error.push('Error, len does not match zcount\n');
 													fcb(null, null);
 												});
 											},
@@ -2673,7 +2673,7 @@ exports.Zset = (function () {
 															fcb(err, null);
 														}
 														if (res > min)
-															error.push("Error, score for " + x + " is " + res + " > " + min + "\n");
+															error.push('Error, score for ' + x + ' is ' + res + ' > ' + min + '\n');
 														loop.next();
 													});
 												}, function () {
@@ -2688,7 +2688,7 @@ exports.Zset = (function () {
 															fcb(err, null);
 														}
 														if (res >= min)
-															error.push("Error, score for " + x + " is " + res + " >= " + min + "\n");
+															error.push('Error, score for ' + x + ' is ' + res + ' >= ' + min + '\n');
 														loop.next();
 													});
 												}, function () {
@@ -2703,7 +2703,7 @@ exports.Zset = (function () {
 															fcb(err, null);
 														}
 														if (res < min || res > max)
-															error.push("Error, score for " + x + " is " + res + " outside " + min + "-" + max + " range\n");
+															error.push('Error, score for ' + x + ' is ' + res + ' outside ' + min + '-' + max + ' range\n');
 														loop.next();
 													});
 												}, function () {
@@ -2718,7 +2718,7 @@ exports.Zset = (function () {
 															fcb(err, null);
 														}
 														if (res <= min || res >= max)
-															error.push("Error, score for " + x + " is " + res + " outside " + min + "-" + max + " open range\n");
+															error.push('Error, score for ' + x + ' is ' + res + ' outside ' + min + '-' + max + ' open range\n');
 														loop.next();
 													});
 												}, function () {
@@ -2733,7 +2733,7 @@ exports.Zset = (function () {
 															fcb(err, null);
 														}
 														if (res < max)
-															error.push("Error, score for " + x + " is " + res + " < " + max + "\n");
+															error.push('Error, score for ' + x + ' is ' + res + ' < ' + max + '\n');
 														loop.next();
 													});
 												}, function () {
@@ -2748,7 +2748,7 @@ exports.Zset = (function () {
 															fcb(err, null);
 														}
 														if (res <= max)
-															error.push("Error, score for " + x + " is " + res + " <= " + max + "\n");
+															error.push('Error, score for ' + x + ' is ' + res + ' <= ' + max + '\n');
 														loop.next();
 													});
 												}, function () {
@@ -2777,7 +2777,7 @@ exports.Zset = (function () {
 						});
 					},
 					five : function (cb) {
-						var test_case = "ZSETs skiplist implementation backlink consistency test - " + stresser[itr];
+						var test_case = 'ZSETs skiplist implementation backlink consistency test - ' + stresser[itr];
 						var diff = 0;
 						g.asyncFor(0, elements, function (loop) {
 							client.zadd('myzset', Math.random(), 'Element-' + loop.iteration(), function (err, res) {
@@ -2824,7 +2824,7 @@ exports.Zset = (function () {
 
 					},
 					six : function (cb) {
-						var test_case = "ZSETs ZRANK augmented skip list stress testing - " + stresser[itr];
+						var test_case = 'ZSETs ZRANK augmented skip list stress testing - ' + stresser[itr];
 						var error = [],
 						i = 0;
 						client.del('myzset', function (err, res) {
@@ -2872,7 +2872,7 @@ exports.Zset = (function () {
 													var ele = res[0];
 													client.zrank('myzset', ele, function (err, rank) {
 														if (rank !== index) {
-															error.push(ele + " RANK is wrong! (" + rank + " != " + index + " )");
+															error.push(ele + ' RANK is wrong! (' + rank + ' != ' + index + ' )');
 															scb(error, null);
 														}
 														scb(null, null);
@@ -2891,7 +2891,7 @@ exports.Zset = (function () {
 								});
 							}, function () {
 								try {
-									if (!assert.equal(error, "", test_case)) {
+									if (!assert.equal(error, '', test_case)) {
 										ut.pass(test_case);
 										cb(null, null);
 									}
@@ -2912,7 +2912,7 @@ exports.Zset = (function () {
 			});
 
 		}, function () {
-			if (n_error !== "") {
+			if (n_error !== '') {
 				errorCallback(n_error);
 			} else {
 				testEmitter.emit('next');
@@ -2921,7 +2921,7 @@ exports.Zset = (function () {
 	};
 	// 2.6 addition
 	tester.zset5 = function (errorCallback) {
-		var test_case = "ZINTERSTORE #516 regression, mixed sets and ziplist zsets";
+		var test_case = 'ZINTERSTORE #516 regression, mixed sets and ziplist zsets';
 		client.sadd('one', 100, 101, 102, 103, function (err, res) {
 			if (err) {
 				errorCallback(err);

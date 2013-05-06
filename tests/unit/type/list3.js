@@ -5,10 +5,10 @@ exports.List3 = (function () {
 	server = new Server(),
 	list_common = require('./list-common.js'),
 	list3 = {},
-	name = "List3",
-	client = "",
+	name = 'List3',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {};
 
 	//public property
@@ -17,7 +17,7 @@ exports.List3 = (function () {
 	//public method
 	list3.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "list ziplist";
+			var tags = 'list ziplist';
 			var overrides = {};
 			overrides['list-max-ziplist-value'] = 200000;
 			overrides['list-max-ziplist-entries'] = 256;
@@ -45,7 +45,7 @@ exports.List3 = (function () {
 				} else {
 					client.end();
 					if (list3.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -68,11 +68,11 @@ exports.List3 = (function () {
 
 	//private methods
 	tester.List3_1 = function (errorCallback) {
-		var test_case = "Explicit regression for a list bug";
+		var test_case = 'Explicit regression for a list bug';
 		var result_array = [];
 		var mylist = [];
 		mylist[0] = 49376042582;
-		mylist[1] = "BkG2o\pIC]4YYJa9cJ4GWZalG[4tin;1D2whSkCOW`mX;SFXGyS8sedcff3fQI^tgPCC@^Nu1J6o]meM@Lko]t_jRyo<xSJ1oObDYd`ppZuW6P@fS278YaOx=s6lvdFlMbP0[SbkI^Kr\HBXtuFaA^mDx:yzS4a[skiiPWhT<nNfAf=aQVfclcuwDrfe;iVuKdNvB9kbfq>tK?tH[\EvWqS]b`o2OCtjg:?nUTwdjpcUm]y:pg5q24q7LlCOwQE^";
+		mylist[1] = 'BkG2o\pIC]4YYJa9cJ4GWZalG[4tin;1D2whSkCOW`mX;SFXGyS8sedcff3fQI^tgPCC@^Nu1J6o]meM@Lko]t_jRyo<xSJ1oObDYd`ppZuW6P@fS278YaOx=s6lvdFlMbP0[SbkI^Kr\HBXtuFaA^mDx:yzS4a[skiiPWhT<nNfAf=aQVfclcuwDrfe;iVuKdNvB9kbfq>tK?tH[\EvWqS]b`o2OCtjg:?nUTwdjpcUm]y:pg5q24q7LlCOwQE^';
 		client.del('lis', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -112,7 +112,7 @@ exports.List3 = (function () {
 	};
 
 	tester.List3_2 = function (errorCallback) {
-		var test_case = "ziplist implementation: value encoding and backlink";
+		var test_case = 'ziplist implementation: value encoding and backlink';
 		var pass_count = 0;
 		var iterations = 10;
 		var lis = [];
@@ -213,8 +213,8 @@ exports.List3 = (function () {
 		});
 	};
 	tester.List3_3 = function (errorCallback) {
-		var test_case = "ziplist implementation: encoding stress testing";
-		var msg = "";
+		var test_case = 'ziplist implementation: encoding stress testing';
+		var msg = '';
 		var len = 0;
 		var iterations = 200;
 		var rv = [];
@@ -289,7 +289,7 @@ exports.List3 = (function () {
 								}
 							});
 						}, function () {
-							if (msg == "")
+							if (msg == '')
 								outerloop.next();
 							else
 								outerloop.break();
@@ -298,7 +298,7 @@ exports.List3 = (function () {
 				});
 			});
 		}, function () {
-			if (msg == "") {
+			if (msg == '') {
 				ut.pass(test_case);
 			} else {
 				ut.fail(msg);

@@ -4,10 +4,10 @@ exports.Slowlog = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	slowlog = {},
-	name = "Slowlog",
-	client = "",
+	name = 'Slowlog',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {};
 
 	//public property
@@ -16,7 +16,7 @@ exports.Slowlog = (function () {
 	//public method
 	slowlog.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "slowlog";
+			var tags = 'slowlog';
 			var overrides = {};
 			overrides['slowlog-log-slower-than'] = 1000000;
 			var args = {};
@@ -43,7 +43,7 @@ exports.Slowlog = (function () {
 				} else {
 					client.end();
 					if (slowlog.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -66,7 +66,7 @@ exports.Slowlog = (function () {
 
 	//private methods
 	tester.slowlog1 = function (errorCallback) {
-		var test_case = "SLOWLOG - check that it starts with an empty log";
+		var test_case = 'SLOWLOG - check that it starts with an empty log';
 		client.slowlog('len', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -83,7 +83,7 @@ exports.Slowlog = (function () {
 		});
 	};
 	tester.slowlog2 = function () {
-		var test_case = "SLOWLOG - only logs commands taking more time than specified";
+		var test_case = 'SLOWLOG - only logs commands taking more time than specified';
 		var result = new Array();
 		client.config('set', 'slowlog-log-slower-than', 100000, function (err, res) {
 			if (err) {
@@ -123,7 +123,7 @@ exports.Slowlog = (function () {
 		});
 	};
 	tester.slowlog3 = function () {
-		var test_case = "SLOWLOG - max entries is correctly handled";
+		var test_case = 'SLOWLOG - max entries is correctly handled';
 		client.config('set', 'slowlog-log-slower-than', 0, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -157,7 +157,7 @@ exports.Slowlog = (function () {
 	};
 
 	tester.slowlog4 = function () {
-		var test_case = "SLOWLOG - GET optional argument to limit output len works";
+		var test_case = 'SLOWLOG - GET optional argument to limit output len works';
 		client.slowlog('get', 5, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -174,7 +174,7 @@ exports.Slowlog = (function () {
 		})
 	};
 	tester.slowlog5 = function () {
-		var test_case = "SLOWLOG - RESET subcommand works";
+		var test_case = 'SLOWLOG - RESET subcommand works';
 		client.config('set', 'slowlog-log-slower-than', 100000, function (err, res1) {
 			if (err) {
 				errorCallback(err);
@@ -202,7 +202,7 @@ exports.Slowlog = (function () {
 	};
 
 	tester.slowlog6 = function () {
-		var test_case = "SLOWLOG - logged entry sanity check";
+		var test_case = 'SLOWLOG - logged entry sanity check';
 		var e = new Array();
 		client.debug('sleep', 0.2, function (err, res) {
 			if (err) {
@@ -236,7 +236,7 @@ exports.Slowlog = (function () {
 	};
 
 	tester.slowlog7 = function () {
-		var test_case = "SLOWLOG - commands with too many arguments are trimmed";
+		var test_case = 'SLOWLOG - commands with too many arguments are trimmed';
 		var e = new Array();
 		client.config('set', 'slowlog-log-slower-than', 0, function (err, res) {
 			if (err) {
@@ -284,7 +284,7 @@ exports.Slowlog = (function () {
 	};
 
 	tester.slowlog8 = function () {
-		var test_case = "SLOWLOG - too long arguments are trimmed";
+		var test_case = 'SLOWLOG - too long arguments are trimmed';
 		var e = new Array();
 		var arguments = new Array();
 		client.config('set', 'slowlog-log-slower-than', 0, function (err, res) {

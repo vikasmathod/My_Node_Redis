@@ -1,6 +1,6 @@
 
 function TmpFile() {
-	TmpFile.tmproot = "." + sep + "tests" + sep + "tmp";
+	TmpFile.tmproot = '.' + sep + 'tests' + sep + 'tmp';
 }
 function dirExistsSync(d) {
 	try {
@@ -17,7 +17,7 @@ TmpFile.prototype.tmpdir = function (basename) {
 		fs.mkdirSync(TmpFile.tmproot);
 	}
 	++g.tmpcounter;
-	var name = TmpFile.tmproot + sep + basename + "_" + process.pid + "_" + (g.tmpcounter);
+	var name = TmpFile.tmproot + sep + basename + '_' + process.pid + '_' + (g.tmpcounter);
 	if (dirExistsSync(name)) {}
 	else {
 		fs.mkdirSync(name);
@@ -25,7 +25,7 @@ TmpFile.prototype.tmpdir = function (basename) {
 	return name;
 };
 TmpFile.prototype.tmpfile = function (dir, basename) {
-	var name = dir + sep + basename + "_" + process.pid + "_" + (g.tmpcounter);
+	var name = dir + sep + basename + '_' + process.pid + '_' + (g.tmpcounter);
 	return name;
 };
 module.exports = TmpFile;

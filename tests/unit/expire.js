@@ -4,10 +4,10 @@ exports.Expire = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	expire = {},
-	name = "Expire",
-	client = "",
+	name = 'Expire',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {};
 
 	//public property
@@ -16,7 +16,7 @@ exports.Expire = (function () {
 	//public method
 	expire.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "expire";
+			var tags = 'expire';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -42,7 +42,7 @@ exports.Expire = (function () {
 				} else {
 					client.end();
 					if (expire.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -70,7 +70,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire1 = function (errorCallback) {
-		var test_case = "EXPIRE - set timeouts multiple times";
+		var test_case = 'EXPIRE - set timeouts multiple times';
 		var result_array = new Array();
 		client.set('x', 'foobar', function (err, res) {
 			if (err) {
@@ -119,7 +119,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire2 = function (errorCallback) {
-		var test_case = "EXPIRE - It should be still possible to read 'x'";
+		var test_case = 'EXPIRE - It should be still possible to read \'x\'';
 		client.get('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -137,7 +137,7 @@ exports.Expire = (function () {
 	};
 	tester.expire3 = function (errorCallback) {
 		var result_array = new Array();
-		var test_case = "EXPIRE - After 6 seconds the key should no longer be here";
+		var test_case = 'EXPIRE - After 6 seconds the key should no longer be here';
 		setTimeout(function () {
 			client.get('x', function (err, l1) {
 				if (err) {
@@ -164,7 +164,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire4 = function (errorCallback) {
-		var test_case = "EXPIRE - write on expire should work";
+		var test_case = 'EXPIRE - write on expire should work';
 		client.del('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -202,7 +202,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire5 = function (errorCallback) {
-		var test_case = "EXPIREAT - Check for EXPIRE alike behavior";
+		var test_case = 'EXPIREAT - Check for EXPIRE alike behavior';
 		client.del('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -237,7 +237,7 @@ exports.Expire = (function () {
 
 	tester.expire6 = function (errorCallback) {
 		var result_array = new Array();
-		var test_case = "SETEX - Set + Expire combo operation. Check for TTL";
+		var test_case = 'SETEX - Set + Expire combo operation. Check for TTL';
 		client.setex('x', 12, 'test', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -263,7 +263,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire7 = function (errorCallback) {
-		var test_case = "SETEX - Check value";
+		var test_case = 'SETEX - Check value';
 		client.get('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -281,7 +281,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire8 = function (errorCallback) {
-		var test_case = "SETEX - Overwrite old key";
+		var test_case = 'SETEX - Overwrite old key';
 		client.setex('y', 1, 'foo', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -304,7 +304,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire9 = function (errorCallback) {
-		var test_case = "SETEX - Wait for the key to expire";
+		var test_case = 'SETEX - Wait for the key to expire';
 		setTimeout(function () {
 			client.get('y', function (err, res) {
 				if (err) {
@@ -324,7 +324,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire9_1 = function (errorCallback) {
-		var test_case = "SETEX - Wrong time parameter";
+		var test_case = 'SETEX - Wrong time parameter';
 		try {
 			client.setex('z', -10, 'foo', function (err, res) {
 				try {
@@ -338,13 +338,13 @@ exports.Expire = (function () {
 				}
 			});
 		} catch (e) {
-			console.log("e-" + err);
+			console.log('e-' + err);
 		}
 	};
 
 	tester.expire10 = function (errorCallback) {
 		var result_array = new Array();
-		var test_case = "PERSIST can undo an EXPIRE";
+		var test_case = 'PERSIST can undo an EXPIRE';
 		client.set('x', 'foo', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -392,7 +392,7 @@ exports.Expire = (function () {
 
 	tester.expire11 = function (errorCallback) {
 		var result_array = new Array();
-		var test_case = "PERSIST returns 0 against non existing or non volatile keys";
+		var test_case = 'PERSIST returns 0 against non existing or non volatile keys';
 		client.set('x', 'foo', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -422,7 +422,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire12 = function (errorCallback) {
-		var test_case = "AOF with EXPIRE and SETEX";
+		var test_case = 'AOF with EXPIRE and SETEX';
 		client.config('set', 'appendfsync', 'always', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -475,7 +475,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire13 = function (errorCallback) {
-		var test_case = "5 keys in, 5 keys out";
+		var test_case = '5 keys in, 5 keys out';
 		var result_array = new Array();
 		client.flushdb(function (err, res) {
 			if (err) {
@@ -529,7 +529,7 @@ exports.Expire = (function () {
 	};
 
 	tester.expire14 = function (errorCallback) {
-		var test_case = "PTTL returns millisecond time to live";
+		var test_case = 'PTTL returns millisecond time to live';
 		client.del('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -562,12 +562,12 @@ exports.Expire = (function () {
 	};
 
 	tester.expire15 = function (errorCallback) {
-		var test_case = "EXPIRE precision is now the millisecond";
+		var test_case = 'EXPIRE precision is now the millisecond';
 		//This test is very likely to do a false positive if the
 		//server is under pressure, so if it does not work give it a few more
 		//chances.
-		var Resa = "",
-		Resb = "";
+		var Resa = '',
+		Resb = '';
 		g.asyncFor(0, 9, function (loop) {
 			client.del('x');
 			client.setex('x', 1, 'somevalue');
@@ -599,9 +599,9 @@ exports.Expire = (function () {
 	}
 
 	tester.expire16 = function (errorCallback) {
-		var test_case = "Redis should actively expire keys incrementally";
-		var res1 = "1",
-		res2 = "";
+		var test_case = 'Redis should actively expire keys incrementally';
+		var res1 = '1',
+		res2 = '';
 		client.get('size1', function (err, res) {
 			res1 = res;
 		});
@@ -661,16 +661,16 @@ exports.Expire = (function () {
 	};
 
 	tester.expire17 = function (errorCallback) {
-		var test_case = "PEXPIRE/PSETEX/PEXPIREAT can set sub-second expires";
+		var test_case = 'PEXPIRE/PSETEX/PEXPIREAT can set sub-second expires';
 		//This test is very likely to do a false positive if the
 		//server is under pressure, so if it does not work give it a few more
 		//chances
-		var ResA = "",
-		ResB = "",
-		ResC = "",
-		ResD = "",
-		ResE = "",
-		ResF = "";
+		var ResA = '',
+		ResB = '',
+		ResC = '',
+		ResD = '',
+		ResE = '',
+		ResF = '';
 		g.asyncFor(0, 9, function (loop) {
 			client.del('x', 'y', 'z');
 			client.psetex('x', 100, 'somevalue');

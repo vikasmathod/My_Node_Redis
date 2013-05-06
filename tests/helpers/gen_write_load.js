@@ -1,5 +1,5 @@
 var redis = require('redis');
-var client = "";
+var client = '';
 var g = require('../support/global.js');
 var Utility = require('../support/util.js'),
 ut = new Utility();

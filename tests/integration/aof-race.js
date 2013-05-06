@@ -5,17 +5,17 @@ exports.AofRace = (function () {
 	server = new Server(),
 	tp = new(require('../support/tmpfile.js'));
 	aofrace = {},
-	name = "Aof-Race",
+	name = 'Aof-Race',
 	tester = {},
 	all_tests = {},
-	master = "",
-	server_path = "",
-	aof_path = "",
-	server_pid = "",
-	server_pid2 = "",
-	client_pid = "",
-	server_host = "",
-	server_port = "";
+	master = '',
+	server_path = '',
+	aof_path = '',
+	server_pid = '',
+	server_pid2 = '',
+	client_pid = '',
+	server_host = '',
+	server_port = '';
 
 	//public property
 	aofrace.debug_mode = false;
@@ -52,18 +52,18 @@ exports.AofRace = (function () {
 	//private methods
 	function create_aof() {
 		server_path = tp.tmpdir('server.aof');
-		aof_path = server_path + "/appendonly.aof";
+		aof_path = server_path + '/appendonly.aof';
 		var stream = fs.createWriteStream(aof_path, {
 				flags : 'w+'
 			});
 		return stream;
 	}
 	function start_server_aof(client_pid, dir, callback) {
-		var tags = "aofrace";
+		var tags = 'aofrace';
 		var overrides = {};
 		overrides['dir'] = dir;
-		overrides['appendonly'] = "yes";
-		overrides['appendfilename'] = "appendonly.aof";
+		overrides['appendonly'] = 'yes';
+		overrides['appendfilename'] = 'appendonly.aof';
 		var args = {};
 		args['name'] = name;
 		args['tags'] = tags;
@@ -80,7 +80,7 @@ exports.AofRace = (function () {
 	}
 
 	tester.AofRace = function (errorCallback) {
-		var test_case = "AOF Race Check";
+		var test_case = 'AOF Race Check';
 		try {
 			var st = create_aof();
 			st.end();
@@ -97,7 +97,7 @@ exports.AofRace = (function () {
 			var client = redis.createClient(server_port, server_host);
 			client.on('ready', function () {
 				if (aofrace.debug_mode) {
-					log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+					log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 				}
 			});
 			var cmd = '.' + sep + 'redis' + sep + 'src' + sep + REDIS_BENCHMARK + ' -q -p ' + server_port + ' -c 20 -n 20000 incr foo';
@@ -141,7 +141,7 @@ exports.AofRace = (function () {
 								var cli = redis.createClient(g.srv[client_pid][server_pid2]['port'], g.srv[client_pid][server_pid2]['host']);
 								cli.on('ready', function () {
 									if (aofrace.debug_mode) {
-										log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+										log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 									}
 								});
 								cli.get('foo', function (err, res) {
@@ -157,7 +157,7 @@ exports.AofRace = (function () {
 									}
 									cli.end();
 									if (aofrace.debug_mode) {
-										log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
+										log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
 									}
 									kill_server_aof(client_pid, server_pid2, function (err, res) {
 										if (err) {
@@ -177,7 +177,7 @@ exports.AofRace = (function () {
 						ut.fail(e, true);
 						client.end();
 						if (aofrace.debug_mode) {
-							log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+							log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 						}
 						kill_server_aof(client_pid, server_pid, function (err, res) {
 							if (err) {

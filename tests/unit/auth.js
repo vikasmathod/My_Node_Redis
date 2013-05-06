@@ -4,12 +4,12 @@ exports.Auth = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	auth = {},
-	name = "Auth",
-	client = "",
+	name = 'Auth',
+	client = '',
 	tester = {},
-	server_pid = "",
-	all_tests = "",
-	client_pid = "";
+	server_pid = '',
+	all_tests = '',
+	client_pid = '';
 
 	//public property
 	auth.debug_mode = false;
@@ -43,7 +43,7 @@ exports.Auth = (function () {
 	}
 	//private methods
 	function start_server_auth(client_pid, password, callback) {
-		var tags = "auth";
+		var tags = 'auth';
 		var overrides = {};
 		if (password !== null)
 			overrides['requirepass'] = password;
@@ -68,7 +68,7 @@ exports.Auth = (function () {
 		});
 	}
 	tester.Auth1 = function (errorCallback) {
-		var test_case = "AUTH fails if there is no password configured server side";
+		var test_case = 'AUTH fails if there is no password configured server side';
 		start_server_auth(client_pid, null, function (err, res) {
 			if (err) {
 				callback(err, null);
@@ -77,7 +77,7 @@ exports.Auth = (function () {
 			client = g.srv[client_pid][server_pid]['client'];
 			client.auth('foo', function (err, res) {
 				try {
-					if (!assert.ok(ut.match("no password", err), test_case)) {
+					if (!assert.ok(ut.match('no password', err), test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {
@@ -85,7 +85,7 @@ exports.Auth = (function () {
 				}
 				client.end();
 				if (auth.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+					log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 				}
 				kill_server_auth(client_pid, server_pid, function (err, res) {
 					if (err) {
@@ -97,7 +97,7 @@ exports.Auth = (function () {
 		});
 	};
 	tester.Auth2 = function (errorCallback) {
-		var test_case = "AUTH fails when a wrong password is given";
+		var test_case = 'AUTH fails when a wrong password is given';
 		start_server_auth(client_pid, 'foobar', function (err, res) {
 			if (err) {
 				errorCallback(err, null);
@@ -106,7 +106,7 @@ exports.Auth = (function () {
 			client = g.srv[client_pid][server_pid]['client'];
 			client.auth('wrong!', function (err, res) {
 				try {
-					if (!assert.ok(ut.match("ERR invalid password", err), test_case)) {
+					if (!assert.ok(ut.match('ERR invalid password', err), test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {
@@ -117,10 +117,10 @@ exports.Auth = (function () {
 		});
 	};
 	tester.Auth3 = function (errorCallback) {
-		var test_case = "Arbitrary command gives an error when AUTH is required";
+		var test_case = 'Arbitrary command gives an error when AUTH is required';
 		client.set('foo', 'bar', function (err, res) {
 			try {
-				if (!assert.ok(ut.match("ERR operation not permitted", err), test_case)) {
+				if (!assert.ok(ut.match('ERR operation not permitted', err), test_case)) {
 					ut.pass(test_case);
 				}
 			} catch (e) {
@@ -130,7 +130,7 @@ exports.Auth = (function () {
 		});
 	};
 	tester.Auth4 = function (errorCallback) {
-		var test_case = "AUTH succeeds when the right password is given";
+		var test_case = 'AUTH succeeds when the right password is given';
 		client.auth('foobar', function (err, res) {
 			if (err) {
 				errorCallback(err, null);
@@ -146,7 +146,7 @@ exports.Auth = (function () {
 		});
 	};
 	tester.Auth5 = function (errorCallback) {
-		var test_case = "Once AUTH succeeded we can actually send commands to the server";
+		var test_case = 'Once AUTH succeeded we can actually send commands to the server';
 		client.set('foo', 100, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -164,7 +164,7 @@ exports.Auth = (function () {
 				}
 				client.end();
 				if (auth.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+					log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 				}
 				//killing the server here.
 				kill_server_auth(client_pid, server_pid, function (err, res) {

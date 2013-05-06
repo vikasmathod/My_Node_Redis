@@ -4,15 +4,15 @@ exports.Replication3 = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	replication3 = {},
-	name = "Replication3",
+	name = 'Replication3',
 	tester = {},
 	all_tests = {},
-	master_host = "",
-	master_port = "",
-	master_cli = "",
-	slave_cli = "",
-	server_pid = "",
-	server_pid2 = "";
+	master_host = '',
+	master_port = '',
+	master_cli = '',
+	slave_cli = '',
+	server_pid = '',
+	server_pid2 = '';
 
 	//public property
 	replication3.debug_mode = false;
@@ -20,10 +20,10 @@ exports.Replication3 = (function () {
 	//public method
 	replication3.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "repl-3";
+			var tags = 'repl-3';
 			var overrides = {};
 			var args = {};
-			args['name'] = name + "(Master)";
+			args['name'] = name + '(Master)';
 			args['tags'] = tags;
 			server.start_server(client_pid, args, function (err, res) {
 				if (err) {
@@ -35,10 +35,10 @@ exports.Replication3 = (function () {
 					master_cli = g.srv[client_pid][server_pid]['client'];
 					master_host = g.srv[client_pid][server_pid]['host'];
 					master_port = g.srv[client_pid][server_pid]['port'];
-					var tags = "repl";
+					var tags = 'repl';
 					var overrides = {};
 					var args = {};
-					args['name'] = name + "(Slave0)";
+					args['name'] = name + '(Slave0)';
 					args['tags'] = tags;
 					args['overrides'] = overrides;
 					(new Server()).start_server(client_pid, args, function (err, res) {
@@ -64,8 +64,8 @@ exports.Replication3 = (function () {
 					slave_cli.end();
 					master_cli.end();
 					if (replication3.debug_mode) {
-						log.notice(g.srv[client_pid][server_pid2]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
-						log.notice(g.srv[client_pid][server_pid]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(g.srv[client_pid][server_pid2]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+						log.notice(g.srv[client_pid][server_pid]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -96,7 +96,7 @@ exports.Replication3 = (function () {
 	//private methods
 
 	tester.Repl31 = function (errorCallback) {
-		var test_case = "First server should have role slave after SLAVEOF";
+		var test_case = 'First server should have role slave after SLAVEOF';
 		slave_cli.slaveof(master_host, master_port, function (err, res) {
 			if (err) {
 				errorCallback(err)
@@ -120,7 +120,7 @@ exports.Replication3 = (function () {
 	};
 
 	tester.Repl32 = function (errorCallback) {
-		var test_case = "MASTER and SLAVE dataset should be identical after complex ops";
+		var test_case = 'MASTER and SLAVE dataset should be identical after complex ops';
 		var numops = 5000;
 		ut.createComplexDataset(master_cli, numops, 'useexpire', function (err, res) {
 			if (err) {
@@ -157,8 +157,8 @@ exports.Replication3 = (function () {
 											}
 											fs.writeFileSync('./tests/tmp/repldump_useexpire1.txt', csv1);
 											fs.writeFileSync('./tests/tmp/repldump_useexpire2.txt', csv2);
-											console.log("Master - Slave inconsistency");
-											console.log("Run diff -u against /tmp/repldump_useexpire*.txt for more info");
+											console.log('Master - Slave inconsistency');
+											console.log('Run diff -u against /tmp/repldump_useexpire*.txt for more info');
 											testEmitter.emit('next');
 										});
 									});

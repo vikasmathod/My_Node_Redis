@@ -63,14 +63,14 @@ exports.convert_zipmap = (function () {
 
 	tester.convert_zipmap1 = function (errorCallback) {
 
-		var test_case = "RDB load zipmap hash: converts to ziplist";
+		var test_case = 'RDB load zipmap hash: converts to ziplist';
 		var tags = 'convert_zipmap',
 		overrides = {},
 		args = {};
 		args['name'] = name;
 		args['tags'] = tags;
 		overrides['dir'] = server_path;
-		overrides['dbfilename'] = "hash-zipmap.rdb";
+		overrides['dbfilename'] = 'hash-zipmap.rdb';
 		args['overrides'] = overrides;
 		server.start_server(client_pid, args, function (err, res) {
 			if (err) {
@@ -97,7 +97,7 @@ exports.convert_zipmap = (function () {
 								errorCallback(err);
 							}
 							try {
-								if (!assert.ok(ut.match("ziplist", resHash), test_case) &&
+								if (!assert.ok(ut.match('ziplist', resHash), test_case) &&
 									!assert.equal(resLen, 2, test_case) && !assert.deepEqual(resGet, ['v1', 'v2'], test_case))
 									ut.pass(test_case);
 							} catch (e) {
@@ -118,14 +118,14 @@ exports.convert_zipmap = (function () {
 	};
 
 	tester.convert_zipmap2 = function (errorCallback) {
-		var test_case = "RDB load zipmap hash: converts to hash table when hash-max-ziplist-entries is exceeded";
+		var test_case = 'RDB load zipmap hash: converts to hash table when hash-max-ziplist-entries is exceeded';
 		var tags = 'convert_zipmap',
 		overrides = {},
 		args = {};
 		args['name'] = name;
 		args['tags'] = tags;
 		overrides['dir'] = server_path;
-		overrides['dbfilename'] = "hash-zipmap.rdb";
+		overrides['dbfilename'] = 'hash-zipmap.rdb';
 		overrides['hash-max-ziplist-entries'] = 1;
 		args['overrides'] = overrides;
 		server1.start_server(client_pid, args, function (err, res) {
@@ -153,7 +153,7 @@ exports.convert_zipmap = (function () {
 								errorCallback(err);
 							}
 							try {
-								if (!assert.ok(ut.match("hashtable", resHash), test_case) &&
+								if (!assert.ok(ut.match('hashtable', resHash), test_case) &&
 									!assert.equal(resLen, 2, test_case) && !assert.deepEqual(resGet, ['v1', 'v2'], test_case))
 									ut.pass(test_case);
 							} catch (e) {
@@ -174,14 +174,14 @@ exports.convert_zipmap = (function () {
 	};
 
 	tester.convert_zipmap3 = function (errorCallback) {
-		var test_case = "RDB load zipmap hash: converts to hash table when hash-max-ziplist-value is exceeded";
+		var test_case = 'RDB load zipmap hash: converts to hash table when hash-max-ziplist-value is exceeded';
 		var tags = 'convert_zipmap',
 		overrides = {},
 		args = {};
 		args['name'] = name;
 		args['tags'] = tags;
 		overrides['dir'] = server_path;
-		overrides['dbfilename'] = "hash-zipmap.rdb";
+		overrides['dbfilename'] = 'hash-zipmap.rdb';
 		overrides['hash-max-ziplist-value'] = 1;
 		args['overrides'] = overrides;
 		server2.start_server(client_pid, args, function (err, res) {
@@ -209,7 +209,7 @@ exports.convert_zipmap = (function () {
 								errorCallback(err);
 							}
 							try {
-								if (!assert.ok(ut.match("hashtable", resHash), test_case) &&
+								if (!assert.ok(ut.match('hashtable', resHash), test_case) &&
 									!assert.equal(resLen, 2, test_case) && !assert.deepEqual(resGet, ['v1', 'v2'], test_case))
 									ut.pass(test_case);
 							} catch (e) {

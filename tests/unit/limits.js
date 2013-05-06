@@ -4,21 +4,21 @@ exports.Limits = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	limits = {},
-	name = "Limits",
-	client = "",
+	name = 'Limits',
+	client = '',
 	tester = {},
-	server_pid = "",
-	all_tests = "",
-	server_host = "",
-	server_port = "",
-	client_pid = "";
+	server_pid = '',
+	all_tests = '',
+	server_host = '',
+	server_port = '',
+	client_pid = '';
 
 	//public property
 	limits.debug_mode = false;
 
 	limits.start_test = function (cpid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "limits";
+			var tags = 'limits';
 			var overrides = {};
 			overrides['maxclients'] = 10;
 			var args = {};
@@ -56,7 +56,7 @@ exports.Limits = (function () {
 				} else {
 					client.end();
 					if (limits.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -68,15 +68,15 @@ exports.Limits = (function () {
 	}
 
 	tester.limits1 = function (errorCallback) {
-		var test_case = "Check if maxclients works refusing connections";
+		var test_case = 'Check if maxclients works refusing connections';
 		var c = 0,
 		iLoopIndex = 0;
-		var newClient = "";
+		var newClient = '';
 		g.asyncFor(0, 12, function (loop) {
 			iLoopIndex = loop.iteration();
 			setTimeout(function () {
 				newClient = redis.createClient(server_port, server_host);
-				newClient.on("ready", function () {
+				newClient.on('ready', function () {
 					newClient.ping(function (err, res) {
 						if (err) {
 							loop.break();
@@ -85,7 +85,7 @@ exports.Limits = (function () {
 						loop.next();
 					});
 				});
-				newClient.on("error", function (err,res) {
+				newClient.on('error', function (err,res) {
 					loop.next();
 				});				
 			}, 100);

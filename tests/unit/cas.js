@@ -4,10 +4,10 @@ exports.Cas = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	cas = {},
-	name = "Cas",
-	client = "",
+	name = 'Cas',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {};
 
 	//public property
@@ -17,7 +17,7 @@ exports.Cas = (function () {
 	cas.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
 			// write logic to start the server here.
-			var tags = "Cas";
+			var tags = 'Cas';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -43,7 +43,7 @@ exports.Cas = (function () {
 				} else {
 					client.end();
 					if (cas.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -67,13 +67,13 @@ exports.Cas = (function () {
 	//private methods
 
 	tester.cas1 = function (errorCallback) {
-		var test_case = "DISCARD without MULTI";
+		var test_case = 'DISCARD without MULTI';
 		client.discard(function (err, res) {
 			if (res) {
 				errorCallback(res);
 			}
 			try {
-				if (!assert.ok(ut.match("DISCARD without MULTI", err), test_case)) {
+				if (!assert.ok(ut.match('DISCARD without MULTI', err), test_case)) {
 					ut.pass(test_case);
 					testEmitter.emit('next');
 				}
@@ -85,7 +85,7 @@ exports.Cas = (function () {
 	};
 
 	tester.cas2 = function (errorCallback) {
-		var test_case = "MULTI with AOF";
+		var test_case = 'MULTI with AOF';
 		client.set('x', 10, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -115,7 +115,7 @@ exports.Cas = (function () {
 					errorCallback(err);
 				}
 				try {
-					if (!assert.ok(ut.match("Background append only file rewriting started", replies[3]), test_case)) {
+					if (!assert.ok(ut.match('Background append only file rewriting started', replies[3]), test_case)) {
 						ut.pass(test_case);
 						testEmitter.emit('next');
 					}

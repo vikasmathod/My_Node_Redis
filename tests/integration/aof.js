@@ -5,16 +5,16 @@ exports.Aof = (function () {
 	server = new Server(),
 	tp = new(require('../support/tmpfile.js'));
 	aof = {},
-	name = "Aof",
+	name = 'Aof',
 	tester = {},
 	all_tests = {},
-	master = "",
-	server_path = "",
-	aof_path = "",
-	server_pid = "",
-	client_pid = "",
-	server_host = "",
-	server_port = "";
+	master = '',
+	server_path = '',
+	aof_path = '',
+	server_pid = '',
+	client_pid = '',
+	server_host = '',
+	server_port = '';
 
 	//public property
 	aof.debug_mode = false;
@@ -51,7 +51,7 @@ exports.Aof = (function () {
 	//private methods
 	function create_aof() {
 		server_path = tp.tmpdir('server.aof');
-		aof_path = server_path + "/appendonly.aof";
+		aof_path = server_path + '/appendonly.aof';
 		var stream = fs.createWriteStream(aof_path, {
 				flags : 'w+'
 			});
@@ -61,11 +61,11 @@ exports.Aof = (function () {
 		st.write(str);
 	}
 	function start_server_aof(client_pid, dir, callback) {
-		var tags = "aof";
+		var tags = 'aof';
 		var overrides = {};
 		overrides['dir'] = dir;
-		overrides['appendonly'] = "yes";
-		overrides['appendfilename'] = "appendonly.aof";
+		overrides['appendonly'] = 'yes';
+		overrides['appendfilename'] = 'appendonly.aof';
 		var args = {};
 		args['name'] = name;
 		args['tags'] = tags;
@@ -81,7 +81,7 @@ exports.Aof = (function () {
 		server.kill_server(client_pid, server_pid, callback);
 	}
 	tester.Aof1 = function (errorCallback) {
-		var test_case = "Unfinished MULTI: Server should have logged an error";
+		var test_case = 'Unfinished MULTI: Server should have logged an error';
 		try {
 			var st = create_aof();
 			append_to_aof(st, ut.formatCommand(['set', 'foo', 'hello']));
@@ -106,7 +106,7 @@ exports.Aof = (function () {
 					callback(err, null);
 				}
 				server_pid = res;
-				var pattern = "Unexpected end of file reading the append only file";
+				var pattern = 'Unexpected end of file reading the append only file';
 				var retry = 10;
 				g.asyncFor(0, retry, function (loop) {
 					retry = loop.iteration();
@@ -131,7 +131,7 @@ exports.Aof = (function () {
 							ut.pass(test_case);
 						}
 					} catch (e) {
-						console.log("assertion:expected error not found on config file");
+						console.log('assertion:expected error not found on config file');
 						ut.fail(e);
 					}
 					// no server to kill. Just delete the entry from dictionary.
@@ -142,7 +142,7 @@ exports.Aof = (function () {
 		}
 	};
 	tester.Aof2 = function (errorCallback) {
-		var test_case = "Short read: Server should have logged an error";
+		var test_case = 'Short read: Server should have logged an error';
 		try {
 			var st = create_aof();
 			append_to_aof(st, ut.formatCommand(['set', 'foo', 'hello']));
@@ -167,7 +167,7 @@ exports.Aof = (function () {
 					callback(err, null);
 				}
 				server_pid = res;
-				var pattern = "Bad file format reading the append only file";
+				var pattern = 'Bad file format reading the append only file';
 				var retry = 10;
 				g.asyncFor(0, retry, function (loop) {
 					retry = loop.iteration();
@@ -192,7 +192,7 @@ exports.Aof = (function () {
 							ut.pass(test_case);
 						}
 					} catch (e) {
-						console.log("assertion:expected error not found on config file");
+						console.log('assertion:expected error not found on config file');
 						ut.fail(e);
 					}
 					// no server to kill. Just delete the entry from dictionary.
@@ -204,7 +204,7 @@ exports.Aof = (function () {
 	};
 	tester.Aof3 = function (errorCallback) {
 		//Test that redis-check-aof indeed sees this AOF is not valid
-		var test_case = "Short read: Utility should confirm the AOF is not valid";
+		var test_case = 'Short read: Utility should confirm the AOF is not valid';
 		var cmd = '.' + sep + 'redis' + sep + 'src' + sep + REDIS_CHECK_AOF + ' ' + aof_path;
 		var child_check = child.exec(cmd,
 				function (error, stdout, stderr) {
@@ -221,7 +221,7 @@ exports.Aof = (function () {
 	};
 	tester.Aof4 = function (errorCallback) {
 		//Test that redis-check-aof indeed sees this AOF is not valid
-		var test_case = "Short read: Utility should be able to fix the AOF";
+		var test_case = 'Short read: Utility should be able to fix the AOF';
 		var cmd = '.' + sep + 'redis' + sep + 'src' + sep + REDIS_CHECK_AOF + ' --fix ' + aof_path;
 		var child_check = child.exec(cmd);
 		child_check.stdin.write('y');
@@ -248,7 +248,7 @@ exports.Aof = (function () {
 			server_port = g.srv[client_pid][server_pid]['port'];
 			async.series({
 				one : function (async_cb) {
-					var test_case = "Fixed AOF: Server should have been started";
+					var test_case = 'Fixed AOF: Server should have been started';
 					server.is_alive(g.srv[client_pid][server_pid]['pid'], function (err, res) {
 						if (err) {
 							async_cb(err, null);
@@ -265,11 +265,11 @@ exports.Aof = (function () {
 					});
 				},
 				two : function (async_cb) {
-					var test_case = "Fixed AOF: Keyspace should contain values that were parsable";
+					var test_case = 'Fixed AOF: Keyspace should contain values that were parsable';
 					var client = redis.createClient(server_port, server_host);
 					client.on('ready', function () {
 						if (aof.debug_mode) {
-							log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+							log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 						}
 					});
 					var result_array = new Array();
@@ -288,7 +288,7 @@ exports.Aof = (function () {
 									ut.pass(test_case);
 									client.end();
 									if (aof.debug_mode) {
-										log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+										log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 									}
 									async_cb(null, true);
 								}
@@ -296,7 +296,7 @@ exports.Aof = (function () {
 								ut.fail(e);
 								client.end();
 								if (aof.debug_mode) {
-									log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 								}
 								async_cb(e, null);
 							}
@@ -351,7 +351,7 @@ exports.Aof = (function () {
 				setTimeout(function () {
 					async.series({
 						one : function (async_cb) {
-							var test_case = "AOF+SPOP: Server should have been started";
+							var test_case = 'AOF+SPOP: Server should have been started';
 							server.is_alive(g.srv[client_pid][server_pid]['pid'], function (err, res) {
 								if (err) {
 									async_cb(err, null);
@@ -368,11 +368,11 @@ exports.Aof = (function () {
 							});
 						},
 						two : function (async_cb) {
-							var test_case = "AOF+SPOP: Set should have 1 member";
+							var test_case = 'AOF+SPOP: Set should have 1 member';
 							var client = redis.createClient(server_port, server_host);
 							client.on('ready', function () {
 								if (aof.debug_mode) {
-									log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+									log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 								}
 							});
 							client.scard('set', function (err, res) {
@@ -384,7 +384,7 @@ exports.Aof = (function () {
 										ut.pass(test_case);
 										client.end();
 										if (aof.debug_mode) {
-											log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+											log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 										}
 										async_cb(null, true);
 									}
@@ -392,7 +392,7 @@ exports.Aof = (function () {
 									ut.fail(e);
 									client.end();
 									if (aof.debug_mode) {
-										log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+										log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 									}
 									async_cb(e, null);
 								}
@@ -442,7 +442,7 @@ exports.Aof = (function () {
 				server_port = g.srv[client_pid][server_pid]['port'];
 				async.series({
 					one : function (async_cb) {
-						var test_case = "AOF+EXPIRE: Server should have been started";
+						var test_case = 'AOF+EXPIRE: Server should have been started';
 						server.is_alive(g.srv[client_pid][server_pid]['pid'], function (err, res) {
 							if (err) {
 								async_cb(err, null);
@@ -459,11 +459,11 @@ exports.Aof = (function () {
 						});
 					},
 					two : function (async_cb) {
-						var test_case = "AOF+EXPIRE: List should be empty";
+						var test_case = 'AOF+EXPIRE: List should be empty';
 						var client = redis.createClient(server_port, server_host);
 						client.on('ready', function () {
 							if (aof.debug_mode) {
-								log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+								log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 							}
 						});
 						client.llen('list', function (err, res) {
@@ -475,7 +475,7 @@ exports.Aof = (function () {
 									ut.pass(test_case);
 									client.end();
 									if (aof.debug_mode) {
-										log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+										log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 									}
 									async_cb(null, true);
 								}
@@ -483,7 +483,7 @@ exports.Aof = (function () {
 								ut.fail(e);
 								client.end();
 								if (aof.debug_mode) {
-									log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 								}
 								async_cb(e, null);
 							}
@@ -499,7 +499,7 @@ exports.Aof = (function () {
 		}
 	};
 	tester.Aof11 = function (errorCallback) {
-		var test_case = "Redis should not try to convert DEL into EXPIREAT for EXPIRE -1";
+		var test_case = 'Redis should not try to convert DEL into EXPIREAT for EXPIRE -1';
 		start_server_aof(client_pid, server_path, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -510,7 +510,7 @@ exports.Aof = (function () {
 			var client = redis.createClient(server_port, server_host);
 			client.on('ready', function () {
 				if (aof.debug_mode) {
-					log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+					log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 				}
 			});
 			client.set('x', 10, function (err, res) {
@@ -527,7 +527,7 @@ exports.Aof = (function () {
 					}
 					client.end();
 					if (aof.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 					}
 					kill_server_aof(client_pid, server_pid, function (err, res) {
 						if (err) {
@@ -541,7 +541,7 @@ exports.Aof = (function () {
 	};
 
 	tester.Aof12 = function (errorCallback) {
-		var test_case = "Switch to appendonly from YES to NO using CONFIG";
+		var test_case = 'Switch to appendonly from YES to NO using CONFIG';
 		var st = create_aof();
 		start_server_aof(client_pid, server_path, function (err, res) {
 			if (err) {
@@ -553,7 +553,7 @@ exports.Aof = (function () {
 			var client = redis.createClient(server_port, server_host);
 			client.on('ready', function () {
 				if (aof.debug_mode) {
-					log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+					log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 				}
 			});
 			client.set('john', 'doe', function (err, res) {
@@ -581,7 +581,7 @@ exports.Aof = (function () {
 							}
 							client.end();
 							if (aof.debug_mode) {
-								log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 							}
 							kill_server_aof(client_pid, server_pid, function (err, res) {
 								if (err) {
@@ -597,7 +597,7 @@ exports.Aof = (function () {
 	};
 
 	tester.Aof13 = function (errorCallback) {
-		var test_case = "Switch to appendonly from NO to YES using CONFIG";
+		var test_case = 'Switch to appendonly from NO to YES using CONFIG';
 		start_server_aof(client_pid, server_path, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -609,7 +609,7 @@ exports.Aof = (function () {
 			var result = [];
 			client.on('ready', function () {
 				if (aof.debug_mode) {
-					log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+					log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 				}
 			});
 			client.config('set', 'appendonly', 'yes', function (err, res) {
@@ -641,7 +641,7 @@ exports.Aof = (function () {
 							}
 							client.end();
 							if (aof.debug_mode) {
-								log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 							}
 							kill_server_aof(client_pid, server_pid, function (err, res) {
 								if (err) {

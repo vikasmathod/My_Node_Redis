@@ -2,7 +2,7 @@
 function ZsetUtility() {}
 
 ZsetUtility.prototype.basics = function (client, encoding, callback) {
-	if (encoding === "ziplist") {
+	if (encoding === 'ziplist') {
 		client.config('set', 'zset-max-ziplist-entries', 128, function (err, res) {
 			if (err) {
 				callback(err, null);
@@ -14,7 +14,7 @@ ZsetUtility.prototype.basics = function (client, encoding, callback) {
 				callback(null, true);
 			})
 		})
-	} else if (encoding === "skiplist") {
+	} else if (encoding === 'skiplist') {
 		client.config('set', 'zset-max-ziplist-entries', 0, function (err, res) {
 			if (err) {
 				callback(err, null);
@@ -27,11 +27,11 @@ ZsetUtility.prototype.basics = function (client, encoding, callback) {
 			})
 		})
 	} else {
-		callback(new Error("Unknown sorted set encoding"), null);
+		callback(new Error('Unknown sorted set encoding'), null);
 	}
 };
 ZsetUtility.prototype.stressers = function (client, encoding, callback) {
-	if (encoding === "ziplist") {
+	if (encoding === 'ziplist') {
 		// Little extra to allow proper fuzzing in the sorting stresser
 		client.config('set', 'zset-max-ziplist-entries', 256, function (err, res) {
 			if (err) {
@@ -44,7 +44,7 @@ ZsetUtility.prototype.stressers = function (client, encoding, callback) {
 				callback(null, true);
 			})
 		})
-	} else if (encoding === "skiplist") {
+	} else if (encoding === 'skiplist') {
 		client.config('set', 'zset-max-ziplist-entries', 0, function (err, res) {
 			if (err) {
 				callback(err, null);
@@ -57,7 +57,7 @@ ZsetUtility.prototype.stressers = function (client, encoding, callback) {
 			})
 		})
 	} else {
-		callback(new Error("Unknown sorted set encoding"), null);
+		callback(new Error('Unknown sorted set encoding'), null);
 		// need to exit here. no callback
 	}
 };

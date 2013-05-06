@@ -156,7 +156,7 @@ BgUtility.prototype.get_op = function (client, op, start, end, step, keyval, cb)
 			if (val == res)
 				loop.next();
 			else
-				cb(new Error("Value Not equal (" + val + "==" + res + ")"), null);
+				cb(new Error('Value Not equal (' + val + '==' + res + ')'), null);
 		});
 	}, function () {
 		cb(null, true);
@@ -212,7 +212,7 @@ BgUtility.prototype.check_op = function (client, op, start, end, step, keyval, c
 			if (val == res)
 				loop.next();
 			else
-				cb(new Error("Value Not equal (" + val + "==" + res + ")"), null);
+				cb(new Error('Value Not equal (' + val + '==' + res + ')'), null);
 		});
 	}, function () {
 		cb(null, true);
@@ -240,7 +240,7 @@ BgUtility.prototype.exists_op = function (client, op, start, end, step, keyval, 
 			if (val == res)
 				loop.next();
 			else
-				cb(new Error("Value Not equal (" + val + "==" + res + ")"), null);
+				cb(new Error('Value Not equal (' + val + '==' + res + ')'), null);
 		});
 	}, function () {
 		cb(null, true);
@@ -296,7 +296,7 @@ BgUtility.prototype.sismember_op = function (client, op, start, end, step, keyva
 			if (val == res)
 				loop.next();
 			else
-				cb(new Error("Value Not equal (" + val + "==" + res + ")"), null);
+				cb(new Error('Value Not equal (' + val + '==' + res + ')'), null);
 		});
 	}, function () {
 		cb(null, true);
@@ -355,10 +355,10 @@ BgUtility.prototype.sismember_op2 = function (client, op, start, end, step, keyv
 					if (vals[1] == res1) {
 						loop.next();
 					} else
-						cb(new Error("Value Not equal (" + vals[1] + "==" + res1 + ")"), null);
+						cb(new Error('Value Not equal (' + vals[1] + '==' + res1 + ')'), null);
 				});
 			} else
-				cb(new Error("Value Not equal (" + vals[0] + "==" + res0 + ")"), null);
+				cb(new Error('Value Not equal (' + vals[0] + '==' + res0 + ')'), null);
 		});
 	}, function () {
 		cb(null, true);

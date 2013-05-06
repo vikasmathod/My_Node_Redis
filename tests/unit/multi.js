@@ -53,7 +53,7 @@ exports.Multi = (function () {
 				} else {
 					client.end();
 					if (multi.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -65,7 +65,7 @@ exports.Multi = (function () {
 	}
 
 	tester.multi1 = function (errorCallback) {
-		var test_case = "MUTLI / EXEC basics";
+		var test_case = 'MUTLI / EXEC basics';
 		var v = new Array();
 		client.del('mylist');
 		client.rpush('mylist', 'a');
@@ -105,7 +105,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi2 = function (errorCallback) {
-		var test_case = "DISCARD";
+		var test_case = 'DISCARD';
 		var v = new Array();
 		client.del('mylist');
 		client.rpush('mylist', 'a');
@@ -145,15 +145,15 @@ exports.Multi = (function () {
 	};
 
 	tester.multi3 = function (errorCallback) {
-		var test_case = "Nested MULTI are not allowed";
-		var error = "";
+		var test_case = 'Nested MULTI are not allowed';
+		var error = '';
 		var multi = client.multi();
 		multi.multi(function (err, res) {
 			error = err;
 		});
 		multi.exec(function (err, res) {
 			try {
-				if (!assert.ok(ut.match("ERR MULTI", error), test_case)) {
+				if (!assert.ok(ut.match('ERR MULTI', error), test_case)) {
 					ut.pass(test_case);
 				}
 			} catch (e) {
@@ -165,7 +165,7 @@ exports.Multi = (function () {
 
 	tester.multi4 = function (errorCallback) {
 		var list = new Array();
-		var test_case = "MULTI where commands alter argc/argv";
+		var test_case = 'MULTI where commands alter argc/argv';
 		client.sadd('myset', 'a', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -196,15 +196,15 @@ exports.Multi = (function () {
 	};
 
 	tester.multi5 = function (errorCallback) {
-		var test_case = "WATCH inside MULTI is not allowed";
-		var error = "";
+		var test_case = 'WATCH inside MULTI is not allowed';
+		var error = '';
 		var multi = client.multi();
 		multi.watch('x', function (err, res) {
 			error = err;
 		});
 		multi.exec(function (err, res) {
 			try {
-				if (!assert.ok(ut.match("ERR WATCH", error), test_case)) {
+				if (!assert.ok(ut.match('ERR WATCH', error), test_case)) {
 					ut.pass(test_case);
 				}
 			} catch (e) {
@@ -215,7 +215,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi6 = function (errorCallback) {
-		var test_case = "EXEC fails if there are errors while queueing commands #1";
+		var test_case = 'EXEC fails if there are errors while queueing commands #1';
 		client.del('foo1', 'foo2');
 		client.write(ut.formatCommand(['multi']), function (err, res) {
 			if (err) {
@@ -256,7 +256,7 @@ exports.Multi = (function () {
 	}
 
 	tester.multi7 = function (errorCallback) {
-		var test_case = "EXEC fails if there are errors while queueing commands #2";
+		var test_case = 'EXEC fails if there are errors while queueing commands #2';
 		var newClient = redis.createClient(server_port, server_host);
 		client.del('foo1', 'foo2');
 		client.write(ut.formatCommand(['multi']), function (err, res) {
@@ -319,7 +319,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi8 = function (errorCallback) {
-		var test_case = "If EXEC aborts, the client MULTI state is cleared";
+		var test_case = 'If EXEC aborts, the client MULTI state is cleared';
 		client.del('foo1', 'foo2');
 		client.write(ut.formatCommand(['multi']), function (err, res) {
 			if (err) {
@@ -357,7 +357,7 @@ exports.Multi = (function () {
 	}
 
 	tester.multi9 = function (errorCallback) {
-		var test_case = "EXEC works on WATCHed key not modified";
+		var test_case = 'EXEC works on WATCHed key not modified';
 		client.watch('x', 'y', 'z');
 		client.watch('k');
 		var multiOp = client.multi();
@@ -374,7 +374,7 @@ exports.Multi = (function () {
 	}
 
 	tester.multi10 = function (errorCallback) {
-		var test_case = "EXEC fail on WATCHed key modified (1 key of 1 watched)";
+		var test_case = 'EXEC fail on WATCHed key modified (1 key of 1 watched)';
 		client.set('x', 30);
 		client.watch('x');
 		client.set('x', 40);
@@ -392,7 +392,7 @@ exports.Multi = (function () {
 	}
 
 	tester.multi11 = function (errorCallback) {
-		var test_case = "EXEC fail on WATCHed key modified (1 key of 5 watched)";
+		var test_case = 'EXEC fail on WATCHed key modified (1 key of 5 watched)';
 		client.set('x', 30, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -424,7 +424,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi12 = function (errorCallback) {
-		var test_case = "EXEC fail on WATCHed key modified by SORT with STORE even if the result is empty";
+		var test_case = 'EXEC fail on WATCHed key modified by SORT with STORE even if the result is empty';
 		client.flushdb();
 		client.lpush('foo', 'bar', function (err, res) {
 			if (err) {
@@ -451,7 +451,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi13 = function (errorCallback) {
-		var test_case = "After successful EXEC key is no longer watched";
+		var test_case = 'After successful EXEC key is no longer watched';
 		client.set('x', 30);
 		client.watch('x');
 		var multiOp = client.multi();
@@ -473,7 +473,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi14 = function (errorCallback) {
-		var test_case = "After failed EXEC key is no longer watched";
+		var test_case = 'After failed EXEC key is no longer watched';
 		client.set('x', 30, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -515,7 +515,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi15 = function (errorCallback) {
-		var test_case = "It is possible to UNWATCH";
+		var test_case = 'It is possible to UNWATCH';
 		client.set('x', 30, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -552,7 +552,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi16 = function (errorCallback) {
-		var test_case = "UNWATCH when there is nothing watched works as expected";
+		var test_case = 'UNWATCH when there is nothing watched works as expected';
 		client.unwatch(function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -569,7 +569,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi17 = function (errorCallback) {
-		var test_case = "FLUSHALL is able to touch the watched keys";
+		var test_case = 'FLUSHALL is able to touch the watched keys';
 		client.set('x', 30, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -601,7 +601,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi18 = function (errorCallback) {
-		var test_case = "FLUSHALL does not touch non affected keys";
+		var test_case = 'FLUSHALL does not touch non affected keys';
 		client.del('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -633,7 +633,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi19 = function (errorCallback) {
-		var test_case = "FLUSHDB is able to touch the watched keys";
+		var test_case = 'FLUSHDB is able to touch the watched keys';
 		client.set('x', '30', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -665,7 +665,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi20 = function (errorCallback) {
-		var test_case = "FLUSHDB does not touch non affected keys";
+		var test_case = 'FLUSHDB does not touch non affected keys';
 		client.del('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -697,7 +697,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi21 = function (errorCallback) {
-		var test_case = "WATCH is able to remember the DB a key belongs to";
+		var test_case = 'WATCH is able to remember the DB a key belongs to';
 		client.select(5, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -744,7 +744,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi22 = function (errorCallback) {
-		var test_case = "WATCH will consider touched keys target of EXPIRE";
+		var test_case = 'WATCH will consider touched keys target of EXPIRE';
 		client.del('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -781,7 +781,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi23 = function (errorCallback) {
-		var test_case = "WATCH will not consider touched expired keys";
+		var test_case = 'WATCH will not consider touched expired keys';
 		client.del('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -820,7 +820,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi24 = function (errorCallback) {
-		var test_case = "DISCARD should clear the WATCH dirty flag on the client";
+		var test_case = 'DISCARD should clear the WATCH dirty flag on the client';
 		client.watch('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -855,7 +855,7 @@ exports.Multi = (function () {
 	};
 
 	tester.multi25 = function (errorCallback) {
-		var test_case = "DISCARD should UNWATCH all the keys";
+		var test_case = 'DISCARD should UNWATCH all the keys';
 		client.watch('x', function (err, res) {
 			if (err) {
 				errorCallback(err);

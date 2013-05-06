@@ -49,7 +49,7 @@ log = new Log('debug', fs.createWriteStream('./tests/logs/results.log', { flags:
 var Test_helper = function () {
   //private properties
   var ut = new Utility(), tests = {}, all_start = 0, tests_pass = 0, tests_fail = 0, fail_list = {},
-  node_child = {}, __test_list = [], client_pid = "", finish_time = {},
+  node_child = {}, __test_list = [], client_pid = '', finish_time = {},
   start_client = false, counter = 0, test_array = [],
   numclients = 16,
   test_list = new Array(
@@ -94,13 +94,13 @@ var Test_helper = function () {
 
   //print help screen
   function print_help_screen() {
-    console.log("\nOptions\t\tDescription\n");
-    console.log("--list-tests\tList all the available test units.\n");
-    console.log("--help \t\tPrint the help screen.\n");
+    console.log('\nOptions\t\tDescription\n');
+    console.log('--list-tests\tList all the available test units.\n');
+    console.log('--help \t\tPrint the help screen.\n');
   };
   function list_tests() {
     for (var i = 0 ; i < test_list.length ; i++) {
-      console.log("Test units: " + test_list[i]);
+      console.log('Test units: ' + test_list[i]);
     }
   }
  /* With the parallel test running multiple Redis instances at the same time
@@ -110,7 +110,7 @@ var Test_helper = function () {
  parallelism, that is, clients == 1.*/
 	function is_a_slow_computer() {
 		var start  = new Date().getTime();
-		var elapsed = "";
+		var elapsed = '';
 		for(var i=0;i<1000000;j++){
 			i=i;
 		}
@@ -132,7 +132,7 @@ var Test_helper = function () {
       process.exit();
     }
     else {
-      console.log("Wrong Argument " + option);
+      console.log('Wrong Argument ' + option);
       process.exit(0);
     }
   }
@@ -154,7 +154,7 @@ var Test_helper = function () {
         throw err;
         process.exit(1);
       }
-      console.log("Cleanup Done!!");
+      console.log('Cleanup Done!!');
     });
     // distribute test
     var c = 0;
@@ -211,32 +211,32 @@ var Test_helper = function () {
 
   function print_result_cleanup() {
     util.print('\x1b[1m Test Summary \x1b[0m\n\n');
-    console.log("\tTotal Tests Passed:" + tests_pass + "\n");
-    console.log("\tTotal Tests Failed:" + tests_fail + "\n");
+    console.log('\tTotal Tests Passed:' + tests_pass + '\n');
+    console.log('\tTotal Tests Failed:' + tests_fail + '\n');
     if (tests_fail === 0) {
-      console.log("\t\x1b[42m All Tests Passed \\m\/ \x1b[0m \n");
+      console.log('\t\x1b[42m All Tests Passed \\m\/ \x1b[0m \n');
       cleanup(function (err) {
         if (err) {
           throw err;
           process.exit(1);
         }
-        console.log("Cleanup Done!!");
+        console.log('Cleanup Done!!');
         process.exit(0);
       });
     }
     else {
       for (hrt in fail_list) {
         if (fail_list.hasOwnProperty(hrt)) {
-          console.log("\t\x1b[41m Fail \x1b[0m- " + fail_list[hrt] + "\n");
+          console.log('\t\x1b[41m Fail \x1b[0m- ' + fail_list[hrt] + '\n');
         }
       }
-      console.log("\n See " + sep + "tests" + sep + "tmp directory for more.");
-      process.exit(1);
+      console.log('\n See ' + sep + 'tests' + sep + 'tmp directory for more.');
+      //process.exit(1);
     }
   }
 
   function cleanup(cb) {
-    rimraf("." + sep + "tests" + sep + "tmp", cb);
+    rimraf('.' + sep + 'tests' + sep + 'tmp', cb);
   }
 
   function check_sanity(numclients) {
@@ -249,37 +249,37 @@ var Test_helper = function () {
   function isEnvReady() {
     fs.lstat('./redis/src/' + REDIS_SERVER, function (err, stats) {
       if (err || !stats.isFile()) {
-        console.log("redis-server is not present in ./redis/src.\n");
+        console.log('redis-server is not present in ./redis/src.\n');
         process.exit(1);
       }
     });
     fs.lstat('./node_modules/async', function (err, stats) {
       if (err || !stats.isDirectory()) {
-        console.log("async is not present in node_modules. Please do npm install.\n");
+        console.log('async is not present in node_modules. Please do npm install.\n');
         process.exit(1);
       }
     });
     fs.lstat('./node_modules/redis', function (err, stats) {
       if (err || !stats.isDirectory()) {
-        console.log("node_redis is not present in node_modules. Please do npm install.\n");
+        console.log('node_redis is not present in node_modules. Please do npm install.\n');
         process.exit(1);
       }
     });
     fs.lstat('./node_modules/rimraf', function (err, stats) {
       if (err || !stats.isDirectory()) {
-        console.log("rimraf is not present in node_modules. Please do npm install\n.");
+        console.log('rimraf is not present in node_modules. Please do npm install\n.');
         process.exit(1);
       }
     });
     fs.lstat('./node_modules/portfinder', function (err, stats) {
       if (err || !stats.isDirectory()) {
-        console.log("portfinder is not present in node_modules. Please do npm install.\n");
+        console.log('portfinder is not present in node_modules. Please do npm install.\n');
         process.exit(1);
       }
     });
     fs.lstat('./node_modules/log', function (err, stats) {
       if (err || !stats.isDirectory()) {
-        console.log("log is not present in node_modules. Please do npm install.\n");
+        console.log('log is not present in node_modules. Please do npm install.\n');
         process.exit(1);
       }
     });
@@ -287,17 +287,17 @@ var Test_helper = function () {
   }
 
   process.on('uncaughtException', function (err) {
-    console.error("Uncaught exception: " + err.stack);
+    console.error('Uncaught exception: ' + err.stack);
     log.error(err.stack);
   });
 
   // for child nodes
   function run_tests(testFile) {
-    var path = "./tests/" + testFile + ".js";
+    var path = './tests/' + testFile + '.js';
     var testName = (testFile.substr(testFile.lastIndexOf('/') + 1)).toUpperCase();
     var handle = require(path);
     var module = Object.keys(handle); // a single module is exposed {module:{}}
-    log.notice("Starting " + testName);
+    log.notice('Starting ' + testName);
     process.stdout.write('\n\x1b[35m [Testing] \x1b[0m: ');
     process.stdout.write('\x1b[1m' + testName + '\x1b[0m\n\n');
     finish_time[testName] = new Date().getTime();
@@ -305,7 +305,7 @@ var Test_helper = function () {
     handle[module].start_test(client_pid, function (err, res) {
       if (res) {
         finish_time[testName] = (new Date().getTime() - finish_time[testName]) / 1000;
-        log.notice("Finished " + testName + " took " + finish_time[testName] + " seconds.");
+        log.notice('Finished ' + testName + ' took ' + finish_time[testName] + ' seconds.');
         process.stdout.write('\x1b[1m [Done] : ' + testName + ' in ' + finish_time[testName] + ' sec\x1b[0m\n');
         var tname = __test_list.shift();
         if (tname)

@@ -5,20 +5,20 @@ exports.Replication4 = (function () {
 	server = new Server(),
 	server1 = new Server(),
 	replication4 = {},
-	name = "Replication4",
+	name = 'Replication4',
 	tester = {},
 	all_tests = {},
-	master_host = "",
-	master_port = "",
-	client_pid = "",
-	monitor_cli = "",
-	master_cli = "",
-	slave_cli = "",
-	load_handle0 = "",
-	load_handle1 = "",
-	load_handle2 = "",
-	server_pid = "",
-	server_pid2 = "";
+	master_host = '',
+	master_port = '',
+	client_pid = '',
+	monitor_cli = '',
+	master_cli = '',
+	slave_cli = '',
+	load_handle0 = '',
+	load_handle1 = '',
+	load_handle2 = '',
+	server_pid = '',
+	server_pid2 = '';
 
 	//public property
 	replication4.debug_mode = false;
@@ -61,15 +61,15 @@ exports.Replication4 = (function () {
 
 	function stop_bg_complex_data(handle) {
 		try {
-			handle.kill("SIGKILL");
+			handle.kill('SIGKILL');
 		} catch (e) {}
 	}
 
 	tester.Repl41 = function (errorCallback) {
-		var tags = "repl-41";
+		var tags = 'repl-41';
 		var overrides = {};
 		var args = {};
-		args['name'] = name + "(Master)";
+		args['name'] = name + '(Master)';
 		args['tags'] = tags;
 		server.start_server(client_pid, args, function (err, res) {
 			if (err) {
@@ -84,14 +84,14 @@ exports.Replication4 = (function () {
 				monitor_cli = redis.createClient(master_port, master_port);
 				monitor_cli.on('ready', function () {
 					if (replication4.debug_mode) {
-						log.notice("Monitor client connected  and listening on socket: " + master_port + ":" + master_host);
+						log.notice('Monitor client connected  and listening on socket: ' + master_port + ':' + master_host);
 					}
 				});
-				var tags = "repl-mr12";
+				var tags = 'repl-mr12';
 				var overrides = {};
 				var args = {};
 				args['tags'] = tags;
-				args['name'] = name + "(Slave0)";
+				args['name'] = name + '(Slave0)';
 				args['overrides'] = overrides;
 				server1.start_server(client_pid, args, function (err, res) {
 					if (err) {
@@ -112,9 +112,9 @@ exports.Replication4 = (function () {
 						slave_cli.end();
 						master_cli.end();
 						if (replication4.debug_mode) {
-							log.notice("Monitor client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
-							log.notice(g.srv[client_pid][server_pid2]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
-							log.notice(g.srv[client_pid][server_pid]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+							log.notice('Monitor client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+							log.notice(g.srv[client_pid][server_pid2]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+							log.notice(g.srv[client_pid][server_pid]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 						}
 						kill_server(function (err, res) {
 							if (err) {
@@ -146,7 +146,7 @@ exports.Replication4 = (function () {
 		function start_actual_test(callback) {
 			async.series({
 				one : function (cb) {
-					var test_case = "First server should have role slave after SLAVEOF";
+					var test_case = 'First server should have role slave after SLAVEOF';
 					slave_cli.slaveof(master_host, master_port, function (err, res) {
 						if (err) {
 							cb(err, null);
@@ -169,7 +169,7 @@ exports.Replication4 = (function () {
 					});
 				},
 				two : function (cb) {
-					var test_case = "Test replication with parallel clients writing in differnet DBs";
+					var test_case = 'Test replication with parallel clients writing in differnet DBs';
 					setTimeout(function () {
 						stop_bg_complex_data(load_handle0);
 						stop_bg_complex_data(load_handle1);
@@ -201,7 +201,7 @@ exports.Replication4 = (function () {
 									cb(err, null);
 								}
 								if (res <= 0) {
-									cb(new Error("Master is inconsistent."), null);
+									cb(new Error('Master is inconsistent.'), null);
 								}
 								master_cli.debug('digest', function (err, digest) {
 									if (err) {
@@ -228,8 +228,8 @@ exports.Replication4 = (function () {
 													}
 													fs.writeFileSync('./tests/tmp/repldump1.txt', csv1);
 													fs.writeFileSync('./tests/tmp/repldump2.txt', csv2);
-													console.log("Master - Slave inconsistency");
-													console.log("Run diff -u against /tmp/repldump*.txt for more info");
+													console.log('Master - Slave inconsistency');
+													console.log('Run diff -u against /tmp/repldump*.txt for more info');
 													cb(err, null);
 												});
 											});

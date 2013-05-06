@@ -8,21 +8,21 @@ exports.Dump = (function () {
 	server4 = new Server(),
 	server5 = new Server();
 	var dump = {},
-	name = "Dump",
-	client = "",
-	server_host = "",
-	server_port = "",
+	name = 'Dump',
+	client = '',
+	server_host = '',
+	server_port = '',
 	tester = {},
-	server_pid = "",
-	all_tests = "",
-	client_pid = "";
+	server_pid = '',
+	all_tests = '',
+	client_pid = '';
 
 	//public property
 	dump.debug_mode = false;
 
 	dump.start_test = function (cpid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "dump";
+			var tags = 'dump';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -59,7 +59,7 @@ exports.Dump = (function () {
 				} else {
 					client.end();
 					if (dump.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -71,12 +71,12 @@ exports.Dump = (function () {
 	}
 
 	tester.dump1 = function (errorCallback) {
-		var test_case = "DUMP / RESTORE are able to serialize / unserialize a simple key";
-		var encoded = "";
+		var test_case = 'DUMP / RESTORE are able to serialize / unserialize a simple key';
+		var encoded = '';
 		var newClient = redis.createClient(server_port, server_host, {
 				return_buffers : true
 			});
-		newClient.on("error", function (err) {
+		newClient.on('error', function (err) {
 			newClient.end();
 		});
 		newClient.set('foo', 'bar');
@@ -116,11 +116,11 @@ exports.Dump = (function () {
 	};
 
 	tester.dump2 = function (errorCallback) {
-		var test_case = "RESTORE can set an arbitrary expire to the materialized key";
+		var test_case = 'RESTORE can set an arbitrary expire to the materialized key';
 		var newClient = redis.createClient(server_port, server_host, {
 				return_buffers : true
 			});
-		newClient.on("error", function (err) {
+		newClient.on('error', function (err) {
 			newClient.end();
 		});
 		newClient.set('foo', 'bar');
@@ -159,7 +159,7 @@ exports.Dump = (function () {
 	};
 	 
 	tester.dump3 = function (errorCallback) {
-		var test_case = "RESTORE returns an error of the key already exists";
+		var test_case = 'RESTORE returns an error of the key already exists';
 		client.set('foo', 'bar');
 		client.restore('foo', 0, '...', function (err, res) {
 			try {
@@ -173,7 +173,7 @@ exports.Dump = (function () {
 	};
 
 	tester.dump4 = function (errorCallback) {
-		var test_case = "DUMP of non existing key returns nil"
+		var test_case = 'DUMP of non existing key returns nil'
 			client.dump('nonexisting_key', function (err, res) {
 				if (err) {
 					errorCallback(err);
@@ -189,13 +189,13 @@ exports.Dump = (function () {
 	};
 
 	tester.dump5 = function (errorCallback) {
-		var test_case = "MIGRATE is able to migrate a key between two instances";
+		var test_case = 'MIGRATE is able to migrate a key between two instances';
 		var first = g.srv[client_pid][server_pid]['client'];
 		client.set('key', 'Some Value');
 
 		var args = {};
 		args['name'] = name;
-		args['tags'] = "repl";
+		args['tags'] = 'repl';
 		args['overrides'] = {};
 		server1.start_server(client_pid, args, function (err, res) {
 			if (err) {
@@ -252,7 +252,7 @@ exports.Dump = (function () {
 																	});
 																});
 															} else {
-																ut.fail("Key value: " + res + " do not match with expected value: Some Value", true);
+																ut.fail('Key value: ' + res + ' do not match with expected value: Some Value', true);
 																second.end();
 																server1.kill_server(client_pid, server_pid1, function (err, res) {
 
@@ -261,7 +261,7 @@ exports.Dump = (function () {
 															}
 														});
 													} else {
-														ut.fail("Key dosen't exists in second Client", true);
+														ut.fail('Key dosen\'t exists in second Client', true);
 														second.end();
 														server1.kill_server(client_pid, server_pid1, function (err, res) {
 
@@ -270,7 +270,7 @@ exports.Dump = (function () {
 													}
 												});
 											} else {
-												ut.fail("Key Exists in first Client", true);
+												ut.fail('Key Exists in first Client', true);
 												second.end();
 												server1.kill_server(client_pid, server_pid1, function (err, res) {
 
@@ -279,7 +279,7 @@ exports.Dump = (function () {
 											}
 										});
 									} else {
-										ut.fail("Error occured while performing migrate. check the logs", true);
+										ut.fail('Error occured while performing migrate. check the logs', true);
 										second.end();
 										server1.kill_server(client_pid, server_pid1, function (err, res) {
 
@@ -288,7 +288,7 @@ exports.Dump = (function () {
 									}
 								});
 							} else {
-								ut.fail("Key Exists in Second Client", true);
+								ut.fail('Key Exists in Second Client', true);
 								second.end();
 								server1.kill_server(client_pid, server_pid1, function (err, res) {
 
@@ -310,13 +310,13 @@ exports.Dump = (function () {
 	};
 
 	tester.dump6 = function (errorCallback) {
-		var test_case = "MIGRATE propagates TTL correctly";
+		var test_case = 'MIGRATE propagates TTL correctly';
 		var first = g.srv[client_pid][server_pid]['client'];
 		client.set('key', 'Some Value');
 
 		var args = {};
 		args['name'] = name;
-		args['tags'] = "repl";
+		args['tags'] = 'repl';
 		args['overrides'] = {};
 		server2.start_server(client_pid, args, function (err, res) {
 			if (err) {
@@ -365,14 +365,14 @@ exports.Dump = (function () {
 																	if (res >= 7 && res <= 10)
 																		ut.pass(test_case);
 																	else
-																		ut.fail("Value of ttl donot match " + res, true);
+																		ut.fail('Value of ttl donot match ' + res, true);
 																	second.end();
 																	server2.kill_server(client_pid, server_pid1, function (err, res) {
 																		testEmitter.emit('next');
 																	});
 																});
 															} else {
-																ut.fail("Key value: " + res + " do not match with expected value: Some Value", true);
+																ut.fail('Key value: ' + res + ' do not match with expected value: Some Value', true);
 																second.end();
 																server2.kill_server(client_pid, server_pid1, function (err, res) {
 																	testEmitter.emit('next');
@@ -380,7 +380,7 @@ exports.Dump = (function () {
 															}
 														});
 													} else {
-														ut.fail("Key dosen't exists in second Client", true);
+														ut.fail('Key dosen\'t exists in second Client', true);
 														second.end();
 														server2.kill_server(client_pid, server_pid1, function (err, res) {
 															testEmitter.emit('next');
@@ -388,7 +388,7 @@ exports.Dump = (function () {
 													}
 												});
 											} else {
-												ut.fail("Key Exists in first Client", true);
+												ut.fail('Key Exists in first Client', true);
 												second.end();
 												server2.kill_server(client_pid, server_pid1, function (err, res) {
 													testEmitter.emit('next');
@@ -396,7 +396,7 @@ exports.Dump = (function () {
 											}
 										});
 									} else {
-										ut.fail("Error occured while performing migrate. check the logs", true);
+										ut.fail('Error occured while performing migrate. check the logs', true);
 										second.end();
 										server2.kill_server(client_pid, server_pid1, function (err, res) {
 											testEmitter.emit('next');
@@ -404,7 +404,7 @@ exports.Dump = (function () {
 									}
 								});
 							} else {
-								ut.fail("Key Exists in second client", true);
+								ut.fail('Key Exists in second client', true);
 								second.end();
 								server2.kill_server(client_pid, server_pid1, function (err, res) {
 									testEmitter.emit('next');
@@ -412,7 +412,7 @@ exports.Dump = (function () {
 							}
 						});
 					} else {
-						ut.fail("Key donot exist in first client", true);
+						ut.fail('Key donot exist in first client', true);
 						second.end();
 						server2.kill_server(client_pid, server_pid1, function (err, res) {
 							testEmitter.emit('next');
@@ -430,11 +430,11 @@ exports.Dump = (function () {
 	};
 
 	tester.dump7 = function (errorCallback) {
-		var test_case = "MIGRATE can correctly transfer hashes";
+		var test_case = 'MIGRATE can correctly transfer hashes';
 		var first = g.srv[client_pid][server_pid]['client'];
 		client.del('key');
-		client.hmset('key', 'field1', "item 1", 'field2', "item 2", 'field3', "item 3",
-			'field4', "item 4", 'field5', "item 5", 'field6', "item 6", function (err, res) {
+		client.hmset('key', 'field1', 'item 1', 'field2', 'item 2', 'field3', 'item 3',
+			'field4', 'item 4', 'field5', 'item 5', 'field6', 'item 6', function (err, res) {
 			var args = {};
 			args['name'] = name;
 			args['tags'] = 'repl';
@@ -515,9 +515,9 @@ exports.Dump = (function () {
 	};
 
 	tester.dump8 = function (errorCallback) {
-		var test_case = "MIGRATE timeout actually works";
+		var test_case = 'MIGRATE timeout actually works';
 		var first = g.srv[client_pid][server_pid]['client'];
-		client.set('key', "Some Value");
+		client.set('key', 'Some Value');
 		var args = {};
 		args['name'] = name;
 		args['tags'] = 'repl';
@@ -546,7 +546,7 @@ exports.Dump = (function () {
 								newClient.debug('sleep', 5.0);
 								setTimeout(function () {
 									client.migrate(second_server_host, second_server_port, 'key', 0, 1000, function (err, res) {
-										if (!assert.equal(ut.match("IOERR", err), true, test_case)) {
+										if (!assert.equal(ut.match('IOERR', err), true, test_case)) {
 											ut.pass(test_case);
 											newClient.end();
 											second.end();
@@ -575,7 +575,7 @@ exports.Dump = (function () {
 	};
 
 	tester.dump9 = function (errorCallback) {
-		var test_case = "MIGRATE can correctly transfer large values";
+		var test_case = 'MIGRATE can correctly transfer large values';
 		var first = g.srv[client_pid][server_pid]['client'];
 		client.del('key');
 		g.asyncFor(0, 5000, function (loop) {
@@ -583,7 +583,7 @@ exports.Dump = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				client.rpush('key', ["item 1", "item 2", "item 3", "item 4", "item 5", "item 6", "item 7", "item 8", "item 9", "item 10"], function (err, res) {
+				client.rpush('key', ['item 1', 'item 2', 'item 3', 'item 4', 'item 5', 'item 6', 'item 7', 'item 8', 'item 9', 'item 10'], function (err, res) {
 					if (err) {
 						errorCallback(err);
 					}
@@ -595,7 +595,7 @@ exports.Dump = (function () {
 				if (res.toString().length > 1024 * 64) {
 					var args = {};
 					args['name'] = name;
-					args['tags'] = "repl";
+					args['tags'] = 'repl';
 					args['overrides'] = {};
 					server3.start_server(client_pid, args, function (err, res) {
 						if (err) {
@@ -655,7 +655,7 @@ exports.Dump = (function () {
 																				});
 																			});
 																		} else {
-																			ut.fail("ttl value donot match");
+																			ut.fail('ttl value donot match');
 																			second.end();
 																			server3.kill_server(client_pid, server_pid1, function (err, res) {
 																				if (err) {
@@ -666,7 +666,7 @@ exports.Dump = (function () {
 																		}
 																	});
 																} else {
-																	ut.fail("Key dosen't exists in second Client", true);
+																	ut.fail('Key dosen\'t exists in second Client', true);
 																	second.end();
 																	server3.kill_server(client_pid, server_pid1, function (err, res) {
 																		if (err) {
@@ -677,7 +677,7 @@ exports.Dump = (function () {
 																}
 															});
 														} else {
-															ut.fail("Key Exists in first Client", true);
+															ut.fail('Key Exists in first Client', true);
 															second.end();
 															server3.kill_server(client_pid, server_pid1, function (err, res) {
 																if (err) {
@@ -688,7 +688,7 @@ exports.Dump = (function () {
 														}
 													});
 												} else {
-													ut.fail("Error occured while performing migrate. check the logs", true);
+													ut.fail('Error occured while performing migrate. check the logs', true);
 													second.end();
 													server3.kill_server(client_pid, server_pid1, function (err, res) {
 														if (err) {
@@ -699,7 +699,7 @@ exports.Dump = (function () {
 												}
 											});
 										} else {
-											ut.fail("Key Exists in second client", true);
+											ut.fail('Key Exists in second client', true);
 											second.end();
 											server3.kill_server(client_pid, server_pid1, function (err, res) {
 												if (err) {
@@ -710,7 +710,7 @@ exports.Dump = (function () {
 										}
 									});
 								} else {
-									ut.fail("Key donot exist in first client", true);
+									ut.fail('Key donot exist in first client', true);
 									second.end();
 									server3.kill_server(client_pid, server_pid1, function (err, res) {
 										if (err) {
@@ -732,7 +732,7 @@ exports.Dump = (function () {
 						});
 					});
 				} else {
-					ut.fail("key length doesn't match", true);
+					ut.fail('key length doesn\'t match', true);
 					testEmitter.emit('next');
 				}
 			});

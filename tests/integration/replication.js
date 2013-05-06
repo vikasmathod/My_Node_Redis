@@ -11,28 +11,28 @@ exports.Replication = (function () {
 	server6 = new Server(),
 	server7 = new Server(),
 	replication = {},
-	name = "Replication",
+	name = 'Replication',
 	tester = {},
 	all_tests = {},
-	master_host = "",
-	master_port = "",
-	client_pid = "",
-	monitor_cli = "",
-	master = "",
-	client1 = "",
-	client2 = "",
-	client3 = "",
-	master_cli = "",
-	slave_cli = "",
-	load_handle0 = "",
-	load_handle1 = "",
-	load_handle2 = "",
-	load_handle3 = "",
-	load_handle4 = "",
-	server_pid = "",
-	server_pid2 = "",
-	server_pid3 = "",
-	server_pid4 = "";
+	master_host = '',
+	master_port = '',
+	client_pid = '',
+	monitor_cli = '',
+	master = '',
+	client1 = '',
+	client2 = '',
+	client3 = '',
+	master_cli = '',
+	slave_cli = '',
+	load_handle0 = '',
+	load_handle1 = '',
+	load_handle2 = '',
+	load_handle3 = '',
+	load_handle4 = '',
+	server_pid = '',
+	server_pid2 = '',
+	server_pid3 = '',
+	server_pid4 = '';
 
 	//public property
 	replication.debug_mode = false;
@@ -74,14 +74,14 @@ exports.Replication = (function () {
 	}
 	function stop_write_load(handle) {
 		try {
-			handle.kill("SIGKILL");
+			handle.kill('SIGKILL');
 		} catch (e) {}
 	}
 	tester.Repl1 = function (errorCallback) {
-		var tags = "repl-mr11";
+		var tags = 'repl-mr11';
 		var overrides = {};
 		var args = {};
-		args['name'] = name + "(Master)";
+		args['name'] = name + '(Master)';
 		args['tags'] = tags;
 		server4.start_server(client_pid, args, function (err, res) {
 			if (err) {
@@ -96,14 +96,14 @@ exports.Replication = (function () {
 				monitor_cli = redis.createClient(master_port, master_port);
 				monitor_cli.on('ready', function () {
 					if (replication.debug_mode) {
-						log.notice("Monitor client connected  and listening on socket: " + master_port + ":" + master_host);
+						log.notice('Monitor client connected  and listening on socket: ' + master_port + ':' + master_host);
 					}
 				});
-				var tags = "repl-mr12";
+				var tags = 'repl-mr12';
 				var overrides = {};
 				var args = {};
 				args['tags'] = tags;
-				args['name'] = name + "(Slave0)";
+				args['name'] = name + '(Slave0)';
 				args['overrides'] = overrides;
 				server5.start_server(client_pid, args, function (err, res) {
 					if (err) {
@@ -119,9 +119,9 @@ exports.Replication = (function () {
 						slave_cli.end();
 						master_cli.end();
 						if (replication.debug_mode) {
-							log.notice("Monitor client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
-							log.notice(g.srv[client_pid][server_pid2]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
-							log.notice(g.srv[client_pid][server_pid]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+							log.notice('Monitor client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+							log.notice(g.srv[client_pid][server_pid2]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+							log.notice(g.srv[client_pid][server_pid]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 						}
 						kill_server(function (err, res) {
 							if (err) {
@@ -151,7 +151,7 @@ exports.Replication = (function () {
 		function start_actual_test(callback) {
 			async.series({
 				one : function (cb) {
-					var test_case = "First server should have role slave after SLAVEOF";
+					var test_case = 'First server should have role slave after SLAVEOF';
 					// issuing monitor here to enable monitor on master.
 					monitor_cli.monitor(function (err, res) {
 						if (err) {
@@ -167,7 +167,7 @@ exports.Replication = (function () {
 								if (err) {
 									cb(err);
 								}
-								if (ut.match("role:slave", res) && ut.match("master_link_status:up", res)) {
+								if (ut.match('role:slave', res) && ut.match('master_link_status:up', res)) {
 									ut.pass(test_case);
 									callback(true);
 								} else {
@@ -177,16 +177,16 @@ exports.Replication = (function () {
 						}, function () {
 							cb(null, null);
 						}, function () {
-							cb(new Error("Can't turn the instance into a slave"), null);
+							cb(new Error('Can\'t turn the instance into a slave'), null);
 						});
 					});
 				},
 				two : function (cb) {
-					var test_case = "BRPOPLPUSH replication, when blocking against empty list";
+					var test_case = 'BRPOPLPUSH replication, when blocking against empty list';
 					var client = redis.createClient(master_port, master_host);
 					client.on('ready', function () {
 						if (replication.debug_mode) {
-							log.notice(name + ":Client connected  and listening on socket: " + master_port + ":" + master_host);
+							log.notice(name + ':Client connected  and listening on socket: ' + master_port + ':' + master_host);
 						}
 					});
 					client.brpoplpush('a', 'b', 5, function (err, res) {
@@ -218,7 +218,7 @@ exports.Replication = (function () {
 								client.quit();
 								client.on('end', function () {
 									if (replication.debug_mode) {
-										log.notice(name + ":Client disconnected listeting to socket : " + master_host + ":" + master_port);
+										log.notice(name + ':Client disconnected listeting to socket : ' + master_host + ':' + master_port);
 									}
 								});
 								cb(null, null);
@@ -232,7 +232,7 @@ exports.Replication = (function () {
 										if (err) {
 											cb(err);
 										}
-										cb(new Error("Master and slave have different digest: " + digest0 + " VS " + digest1), null);
+										cb(new Error('Master and slave have different digest: ' + digest0 + ' VS ' + digest1), null);
 									});
 								});
 							});
@@ -241,11 +241,11 @@ exports.Replication = (function () {
 					});
 				},
 				three : function (cb) {
-					var test_case = "BRPOPLPUSH replication, list exists";
+					var test_case = 'BRPOPLPUSH replication, list exists';
 					var client = redis.createClient(master_port, master_host);
 					client.on('ready', function () {
 						if (replication.debug_mode) {
-							log.notice(name + ":Client connected  and listening on socket: " + master_port + ":" + master_host);
+							log.notice(name + ':Client connected  and listening on socket: ' + master_port + ':' + master_host);
 						}
 					});
 					master_cli.lpush('c', 1, function (err, res) {
@@ -284,7 +284,7 @@ exports.Replication = (function () {
 												client.quit();
 												client.on('end', function () {
 													if (replication.debug_mode) {
-														log.notice(name + ":Client disconnected listeting to socket : " + master_host + ":" + master_port);
+														log.notice(name + ':Client disconnected listeting to socket : ' + master_host + ':' + master_port);
 
 													}
 												});
@@ -308,10 +308,10 @@ exports.Replication = (function () {
 	};
 
 	tester.Repl2 = function (errorCallback) {
-		var tags = "repl-mr21";
+		var tags = 'repl-mr21';
 		var overrides = {};
 		var args = {};
-		args['name'] = name + "(Master)";
+		args['name'] = name + '(Master)';
 		args['tags'] = tags;
 		server6.start_server(client_pid, args, function (err, res) {
 			if (err) {
@@ -328,10 +328,10 @@ exports.Replication = (function () {
 						errorCallback(err, null);
 					}
 					var overrides = {};
-					overrides['slave-read-only'] = "no";
-					var tags = "repl-mr22";
+					overrides['slave-read-only'] = 'no';
+					var tags = 'repl-mr22';
 					var args = {};
-					args['name'] = name + "(Slave0)";
+					args['name'] = name + '(Slave0)';
 					args['overrides'] = overrides;
 					args['tags'] = tags;
 					server7.start_server(client_pid, args, function (err, res) {
@@ -349,8 +349,8 @@ exports.Replication = (function () {
 							slave_cli.end();
 							master_cli.end();
 							if (replication.debug_mode) {
-								log.notice(g.srv[client_pid][server_pid2]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
-								log.notice(g.srv[client_pid][server_pid]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+								log.notice(g.srv[client_pid][server_pid2]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+								log.notice(g.srv[client_pid][server_pid]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 							}
 							kill_server(function (err, res) {
 								if (err) {
@@ -381,7 +381,7 @@ exports.Replication = (function () {
 		function start_actual_test(callback) {
 			async.series({
 				one : function (cb) {
-					var test_case = "Second server should have role master at first";
+					var test_case = 'Second server should have role master at first';
 					ut.serverInfo(slave_cli, 'role', function (err, res) {
 						if (err) {
 							cb(err)
@@ -397,7 +397,7 @@ exports.Replication = (function () {
 					});
 				},
 				two : function (cb) {
-					var test_case = "SET on the master should immediately propagate";
+					var test_case = 'SET on the master should immediately propagate';
 					slave_cli.set('mykey', 'bar', function (err, res) {
 						if (err) {
 							cb(err)
@@ -417,12 +417,12 @@ exports.Replication = (function () {
 						}, function () {
 							cb(null, true);
 						}, function () {
-							cb(new Error("SET on master did not propagated on slave"), null);
+							cb(new Error('SET on master did not propagated on slave'), null);
 						});
 					});
 				},
 				three : function (cb) {
-					var test_case = "SLAVEOF should start with link status 'down'";
+					var test_case = 'SLAVEOF should start with link status \'down\'';
 					slave_cli.slaveof(master_host, master_port, function (err, res) {
 						if (err) {
 							cb(err)
@@ -443,7 +443,7 @@ exports.Replication = (function () {
 					});
 				},
 				four : function (cb) {
-					var test_case = "The role should immediately be changed to 'slave'";
+					var test_case = 'The role should immediately be changed to \'slave\'';
 					ut.serverInfo(slave_cli, 'role', function (err, res) {
 						if (err) {
 							cb(err)
@@ -469,7 +469,7 @@ exports.Replication = (function () {
 					});
 				},
 				five : function (cb) {
-					var test_case = "Sync should have transferred keys from master";
+					var test_case = 'Sync should have transferred keys from master';
 					slave_cli.get('mykey', function (err, res) {
 						if (err) {
 							cb(err)
@@ -485,7 +485,7 @@ exports.Replication = (function () {
 					});
 				},
 				six : function (cb) {
-					var test_case = "The link status should be up";
+					var test_case = 'The link status should be up';
 					ut.serverInfo(slave_cli, 'master_link_status', function (err, res) {
 						if (err) {
 							cb(err)
@@ -501,7 +501,7 @@ exports.Replication = (function () {
 					});
 				},
 				seven : function (cb) {
-					var test_case = "FLUSHALL should replicate";
+					var test_case = 'FLUSHALL should replicate';
 					var result = [];
 					master_cli.flushall(function (err, res) {
 						if (err) {
@@ -543,11 +543,11 @@ exports.Replication = (function () {
 	};
 
 	tester.Repl3 = function (errorCallback) {
-		var test_case = "Connect multiple slaves at the same time (issue #141)";
-		var tags = "repl-mr31";
+		var test_case = 'Connect multiple slaves at the same time (issue #141)';
+		var tags = 'repl-mr31';
 		var overrides = {};
 		var args = {};
-		args['name'] = name + "(Master)";
+		args['name'] = name + '(Master)';
 		args['tags'] = tags;
 		args['overrides'] = overrides;
 		server.start_server(client_pid, args, function (err, res) {
@@ -566,9 +566,9 @@ exports.Replication = (function () {
 				load_handle4 = start_write_load(master_host, master_port, 4);
 				setTimeout(function () {
 					var overrides = {};
-					var tags = "repl-mr32";
+					var tags = 'repl-mr32';
 					var args = {};
-					args['name'] = name + "(Slave0)";
+					args['name'] = name + '(Slave0)';
 					args['tags'] = tags;
 					args['overrides'] = overrides;
 					server1.start_server(client_pid, args, function (err, res) {
@@ -579,9 +579,9 @@ exports.Replication = (function () {
 						client1 = g.srv[client_pid][server_pid2]['client'];
 						setTimeout(function () {
 							var overrides = {};
-							var tags = "repl-mr33";
+							var tags = 'repl-mr33';
 							var args = {};
-							args['name'] = name + "(Slave1)";
+							args['name'] = name + '(Slave1)';
 							args['tags'] = tags;
 							args['overrides'] = overrides;
 							server2.start_server(client_pid, args, function (err, res) {
@@ -592,9 +592,9 @@ exports.Replication = (function () {
 								client2 = g.srv[client_pid][server_pid3]['client'];
 								setTimeout(function () {
 									var overrides = {};
-									var tags = "repl-mr34";
+									var tags = 'repl-mr34';
 									var args = {};
-									args['name'] = name + "(Slave2)";
+									args['name'] = name + '(Slave2)';
 									args['tags'] = tags;
 									args['overrides'] = overrides;
 									server3.start_server(client_pid, args, function (err, res) {
@@ -658,7 +658,7 @@ exports.Replication = (function () {
 						if (err) {
 							callback(err)
 						}
-						// Wait for all the three slaves to reach the "online" state
+						// Wait for all the three slaves to reach the 'online' state
 						var retry = 500;
 						var count = 0;
 						g.asyncFor(0, retry, function (loop) {
@@ -667,8 +667,8 @@ exports.Replication = (function () {
 									callback(err)
 								}
 								// Don't know why this regex is not getting caught.
-								//var patt = "slave\d{1}\:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\,\d{0,5}\,online ";
-								var patt = "connected_slaves:3"
+								//var patt = 'slave\d{1}\:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\,\d{0,5}\,online ';
+								var patt = 'connected_slaves:3'
 									if (ut.match(patt, res)) {
 										loop.break();
 									} else {
@@ -679,8 +679,8 @@ exports.Replication = (function () {
 									}
 							});
 						}, function () {
-							if (count == retry) {
-								callback(new Error("Error:Slaves not up."));
+							if (count === retry) {
+								callback(new Error('Error:Slaves not up.'));
 							} else {
 								// no error observed should continue.
 							}
@@ -690,7 +690,7 @@ exports.Replication = (function () {
 							stop_write_load(load_handle3);
 							stop_write_load(load_handle4);
 							var retry = 10;
-							//Wait that slaves exit the "loading" state
+							//Wait that slaves exit the 'loading' state
 							ut.wait_for_condition(500, 100, function (cb) {
 								client1.info(function (err, info0) {
 									if (err) {
@@ -704,7 +704,7 @@ exports.Replication = (function () {
 											if (err) {
 												callback(err);
 											}
-											var patt = "loading:1";
+											var patt = 'loading:1';
 											if (!ut.match(patt, info0) && !ut.match(patt, info1) && !ut.match(patt, info2)) {
 												cb(true);
 											} else {
@@ -768,10 +768,10 @@ exports.Replication = (function () {
 																client1.end();
 																master.end();
 																if (replication.debug_mode) {
-																	log.notice(g.srv[client_pid][server_pid4]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid4]['host'] + ":" + g.srv[client_pid][server_pid4]['port']);
-																	log.notice(g.srv[client_pid][server_pid3]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid3]['host'] + ":" + g.srv[client_pid][server_pid3]['port']);
-																	log.notice(g.srv[client_pid][server_pid2]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
-																	log.notice(g.srv[client_pid][server_pid]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+																	log.notice(g.srv[client_pid][server_pid4]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid4]['host'] + ':' + g.srv[client_pid][server_pid4]['port']);
+																	log.notice(g.srv[client_pid][server_pid3]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid3]['host'] + ':' + g.srv[client_pid][server_pid3]['port']);
+																	log.notice(g.srv[client_pid][server_pid2]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+																	log.notice(g.srv[client_pid][server_pid]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 																}
 																callback(null, true);
 															}
@@ -784,10 +784,10 @@ exports.Replication = (function () {
 										});
 									}, 100);
 								}, function () {
-									cb(new Error("Different number of keys between masted and slave after too long time."), null);
+									cb(new Error('Different number of keys between masted and slave after too long time.'), null);
 								});
 							}, function () {
-								callback(new Error("Slaves still loading data after too much time"), null);
+								callback(new Error('Slaves still loading data after too much time'), null);
 							});
 						});
 					});

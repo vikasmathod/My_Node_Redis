@@ -14,14 +14,14 @@ exports.Introspection = (function () {
 	server9 = new Server(),
 	server10 = new Server(),
 	intro = {},
-	name = "Introspection",
-	client = "",
+	name = 'Introspection',
+	client = '',
 	tester = {},
-	server_pid = "",
-	client_pid = "",
+	server_pid = '',
+	client_pid = '',
 	all_tests = {},
-	server_host = "",
-	server_port = "";
+	server_host = '',
+	server_port = '';
 
 	//public property
 	intro.debug_mode = false;
@@ -57,8 +57,8 @@ exports.Introspection = (function () {
 	//private methods
 
 	tester.introspection1 = function (errorCallback) {
-		var test_case = "CLIENT LIST & KILL";
-		var tags = "introspection1";
+		var test_case = 'CLIENT LIST & KILL';
+		var tags = 'introspection1';
 		var overrides = {};
 		var args = {};
 		args['name'] = name;
@@ -74,16 +74,16 @@ exports.Introspection = (function () {
 			server_port = g.srv[client_pid][server_pid]['port'];
 			server_host = g.srv[client_pid][server_pid]['host'];
 			if (intro.debug_mode) {
-				log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 			}
 			client = redis.createClient(server_port, server_host, {
 					no_ready_check : true
 				});
 			if (intro.debug_mode) {
-				log.notice(name + ":Client connected listeting to socket : " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected listeting to socket : ' + server_host + ':' + server_port);
 			}
 			client.on('ready', function () {
-				var patt = "[addr=:.: fd=. age=. idle=. flags=N db=9 sub=0 psub=0 multi=0 qbuf=0  qbuf-free=. obl=0 oll=0 omem=0 events=r cmd=client.]";
+				var patt = '[addr=:.: fd=. age=. idle=. flags=N db=9 sub=0 psub=0 multi=0 qbuf=0  qbuf-free=. obl=0 oll=0 omem=0 events=r cmd=client.]';
 				client.client('list', function (err, result1) {
 					if (err) {
 						errorCallback(err);
@@ -105,7 +105,7 @@ exports.Introspection = (function () {
 											ut.pass(test_case);
 											// client should be disconnected using kill command
 											if (intro.debug_mode) {
-												log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+												log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 											}
 										}
 									} catch (e) {
@@ -125,7 +125,7 @@ exports.Introspection = (function () {
 						client.end();
 						// writing in catch since we do not want this to be executed with pass
 						if (intro.debug_mode) {
-							log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+							log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 						}
 						server.kill_server(client_pid, server_pid, function (err, res) {
 							if (err) {
@@ -140,27 +140,27 @@ exports.Introspection = (function () {
 	};
 
 	tester.introspection2 = function (errorCallback) {
-		var test_case = "CONFIG - Reading full set of config values";
-		var tags = "introspection2";
-		var file_loc = "." + sep + "tests" + sep + "tmp" + sep + "temp-conf.conf";
+		var test_case = 'CONFIG - Reading full set of config values';
+		var tags = 'introspection2';
+		var file_loc = '.' + sep + 'tests' + sep + 'tmp' + sep + 'temp-conf.conf';
 		var conf_stream = fs.createWriteStream(file_loc);
-		var str = "#bogus This will be skipped by the server \n\nzset-max-ziplist-value 64 \n";
+		var str = '#bogus This will be skipped by the server \n\nzset-max-ziplist-value 64 \n';
 		fs.writeFile(file_loc, str, function (err) {
 			if (err) {
 				errorCallback(err);
 			}
 			var overrides = {};
 			if (process.platform !== 'win32') {
-				overrides['unixsocket'] = "/tmp/redis.sock";
+				overrides['unixsocket'] = '/tmp/redis.sock';
 			}
-			overrides['include'] = ".." + sep + "temp-conf.conf";
+			overrides['include'] = '..' + sep + 'temp-conf.conf';
 			overrides['maxclients'] = 32;
-			overrides['maxmemory'] = "64MB";
-			overrides['syslog-enabled'] = "no";
-			overrides['syslog-ident'] = "redis";
-			overrides['syslog-facility'] = "local4";
-			overrides['rename-command'] = "CONFIG some_obscure_command";
-			overrides['maxmemory-policy'] = "volatile-ttl";
+			overrides['maxmemory'] = '64MB';
+			overrides['syslog-enabled'] = 'no';
+			overrides['syslog-ident'] = 'redis';
+			overrides['syslog-facility'] = 'local4';
+			overrides['rename-command'] = 'CONFIG some_obscure_command';
+			overrides['maxmemory-policy'] = 'volatile-ttl';
 			overrides['maxmemory-samples'] = 8;
 			overrides['zset-max-ziplist-entries'] = 256;
 			overrides['slowlog-max-len'] = 1024;
@@ -198,7 +198,7 @@ exports.Introspection = (function () {
 							}
 							client.end();
 							if (intro.debug_mode) {
-								log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 							}
 							server2.kill_server(client_pid, server_pid, function (err, res) {
 								if (err) {
@@ -214,8 +214,8 @@ exports.Introspection = (function () {
 	};
 
 	tester.introspection3 = function (errorCallback) {
-		var test_case = "Can't BGSAVE when AOF is in progress";
-		var tags = "introspection4";
+		var test_case = 'Can\'t BGSAVE when AOF is in progress';
+		var tags = 'introspection4';
 		var overrides = {};
 		var args = {};
 		args['name'] = name;
@@ -242,7 +242,7 @@ exports.Introspection = (function () {
 							errorCallback(res);
 						}
 						try {
-							if (!assert.ok(ut.match("Can't BGSAVE while AOF log rewriting", err), test_case)) {
+							if (!assert.ok(ut.match('Can\'t BGSAVE while AOF log rewriting', err), test_case)) {
 								ut.pass(test_case);
 							}
 						} catch (e) {
@@ -250,7 +250,7 @@ exports.Introspection = (function () {
 						}
 						client.end();
 						if (intro.debug_mode) {
-							log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+							log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 						}
 						server3.kill_server(client_pid, server_pid, function (err, res) {
 							if (err) {
@@ -265,8 +265,8 @@ exports.Introspection = (function () {
 	};
 
 	tester.introspection4 = function (errorCallback) {
-		var test_case = "Shutdown with BGSAVE";
-		var tags = "introspection4";
+		var test_case = 'Shutdown with BGSAVE';
+		var tags = 'introspection4';
 		var overrides = {};
 		var args = {};
 		args['name'] = name;
@@ -298,7 +298,7 @@ exports.Introspection = (function () {
 								errorCallback(err);
 							}
 							try {
-								if ((!assert.ok(ut.match("Redis is now ready to exit, bye", result), test_case)) && (!assert.ok(error, test_case))) {
+								if ((!assert.ok(ut.match('Redis is now ready to exit, bye', result), test_case)) && (!assert.ok(error, test_case))) {
 									ut.pass(test_case);
 								}
 							} catch (e) {
@@ -306,7 +306,7 @@ exports.Introspection = (function () {
 							}
 							client.end();
 							if (intro.debug_mode) {
-								log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 							}
 							testEmitter.emit('next');
 							// no server to kill. Server is gone due to shutdown
@@ -318,8 +318,8 @@ exports.Introspection = (function () {
 	};
 
 	tester.introspection5 = function (errorCallback) {
-		var test_case = "Shutdown with AOF";
-		var tags = "introspection4";
+		var test_case = 'Shutdown with AOF';
+		var tags = 'introspection4';
 		var overrides = {};
 		var args = {};
 		args['name'] = name;
@@ -355,7 +355,7 @@ exports.Introspection = (function () {
 									errorCallback(err);
 								}
 								try {
-									if ((!assert.ok(ut.match("Redis is now ready to exit, bye", result), test_case)) && (!assert.ok(error1, test_case)) && (!assert.ok(error2, test_case))) {
+									if ((!assert.ok(ut.match('Redis is now ready to exit, bye', result), test_case)) && (!assert.ok(error1, test_case)) && (!assert.ok(error2, test_case))) {
 										ut.pass(test_case);
 									}
 								} catch (e) {
@@ -363,7 +363,7 @@ exports.Introspection = (function () {
 								}
 								client.end();
 								if (intro.debug_mode) {
-									log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 								}
 								testEmitter.emit('next');
 								// no server to kill. Server is gone due to shutdown
@@ -376,8 +376,8 @@ exports.Introspection = (function () {
 	};
 
 	tester.introspection6 = function (errorCallback) {
-		var test_case = "Scheduled AOF when BGSAVE is in progress";
-		var tags = "introspection6";
+		var test_case = 'Scheduled AOF when BGSAVE is in progress';
+		var tags = 'introspection6';
 		var overrides = {};
 		overrides['appendonly'] = 'yes';
 		var args = {};
@@ -418,7 +418,7 @@ exports.Introspection = (function () {
 								}
 								client.end();
 								if (intro.debug_mode) {
-									log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 								}
 								server6.kill_server(client_pid, server_pid, function (err, res) {
 									if (err) {
@@ -435,8 +435,8 @@ exports.Introspection = (function () {
 	};
 
 	tester.introspection7 = function (errorCallback) {
-		var test_case = "BGSAVE on MASTER when SLAVE is attached.";
-		var tags = "introspection6";
+		var test_case = 'BGSAVE on MASTER when SLAVE is attached.';
+		var tags = 'introspection6';
 		var overrides = {};
 		var args = {};
 		args['name'] = name;
@@ -485,8 +485,8 @@ exports.Introspection = (function () {
 								master_cli.end();
 								slave_cli.end();
 								if (intro.debug_mode) {
-									log.notice(name + ":Master Client disconnected listeting to socket : " + master_host + ":" + master_port);
-									log.notice(name + ":Slave Client disconnected listeting to socket : " + slave_host + ":" + slave_port);
+									log.notice(name + ':Master Client disconnected listeting to socket : ' + master_host + ':' + master_port);
+									log.notice(name + ':Slave Client disconnected listeting to socket : ' + slave_host + ':' + slave_port);
 								}
 								server7_1.kill_server(client_pid, server_pid1, function (err, res) {
 									if (err) {
@@ -508,8 +508,8 @@ exports.Introspection = (function () {
 	};
 
 	tester.introspection8 = function (errorCallback) {
-		var test_case = "AOF Foreground rewrite";
-		var tags = "introspection8";
+		var test_case = 'AOF Foreground rewrite';
+		var tags = 'introspection8';
 		var overrides = {};
 		overrides['appendonly'] = 'yes';
 		var args = {};
@@ -559,7 +559,7 @@ exports.Introspection = (function () {
 											}
 											client.end();
 											if (intro.debug_mode) {
-												log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+												log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 											}
 											server8.kill_server(client_pid, server_pid, function (err, res) {
 												if (err) {
@@ -579,8 +579,8 @@ exports.Introspection = (function () {
 	};
 
 	tester.introspection9 = function (errorCallback) {
-		var test_case = "MONITOR can log executed commands"
-			var tags = "introspection9";
+		var test_case = 'MONITOR can log executed commands'
+			var tags = 'introspection9';
 		var overrides = {};
 		var responses = [];
 		var args = {};
@@ -596,18 +596,18 @@ exports.Introspection = (function () {
 			server_host = g.srv[client_pid][server_pid]['host'];
 			client = g.srv[client_pid][server_pid]['client'];
 			monitor_client = redis.createClient(server_port, server_host);
-			monitor_client.on("monitor", function (time, args) {
+			monitor_client.on('monitor', function (time, args) {
 				responses.push(args);
 			});
-			monitor_client.on("end", function (err, res) {
+			monitor_client.on('end', function (err, res) {
 				try {
-					if (!assert.equal(ut.match("set,foo,bar", responses.toString()), true, test_case))
+					if (!assert.equal(ut.match('set,foo,bar', responses.toString()), true, test_case))
 						ut.pass(test_case);
 				} catch (e) {
 					ut.fail(e, true);
 				}
 				if (intro.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+					log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 				}
 				testEmitter.emit('next');
 				monitor_client.end();
@@ -632,8 +632,8 @@ exports.Introspection = (function () {
 	};
 
 	tester.introspection10 = function (errorCallback) {
-		var test_case = "MONITOR can log commands issued by the scripting engine"
-			var tags = "introspection10";
+		var test_case = 'MONITOR can log commands issued by the scripting engine'
+			var tags = 'introspection10';
 		var overrides = {};
 		var responses = [];
 		var args = {};
@@ -649,12 +649,12 @@ exports.Introspection = (function () {
 			server_host = g.srv[client_pid][server_pid]['host'];
 			client = g.srv[client_pid][server_pid]['client'];
 			monitor_client = redis.createClient(server_port, server_host);
-			monitor_client.on("monitor", function (time, args) {
+			monitor_client.on('monitor', function (time, args) {
 				responses.push(args);
 			});
-			monitor_client.on("end", function (err, res) {
+			monitor_client.on('end', function (err, res) {
 				try {
-					if (responses[0][0] == 'eval' && !assert.equal(ut.match("foo,bar", responses.toString()), true, test_case)) {
+					if (responses[0][0] == 'eval' && !assert.equal(ut.match('foo,bar', responses.toString()), true, test_case)) {
 						ut.pass(test_case);
 					}
 				} catch (e) {
@@ -673,7 +673,7 @@ exports.Introspection = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				client.eval("redis.call('set',KEYS[1],ARGV[1])", 1, "foo", "bar", function (err, res) {
+				client.eval("redis.call('set',KEYS[1],ARGV[1])", 1, 'foo', 'bar', function (err, res) {
 					monitor_client.emit('monitor');
 					monitor_client.emit('end');
 				});

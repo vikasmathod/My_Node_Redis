@@ -5,11 +5,11 @@ exports.Deamon = (function () {
 	server = new Server(),
 	tp = new(require('../support/tmpfile.js'));
 	deamon = {},
-	name = "Daemonize",
+	name = 'Daemonize',
 	tester = {},
 	all_tests = {},
-	server_pid = "",
-	client_pid = "";
+	server_pid = '',
+	client_pid = '';
 
 	//public property
 	deamon.debug_mode = false;
@@ -45,7 +45,7 @@ exports.Deamon = (function () {
 
 	//private methods
 	function start_server(client_pid, option, callback) {
-		var tags = "daemonize";
+		var tags = 'daemonize';
 		var overrides = {};
 		overrides['daemonize'] = option;
 		var args = {};
@@ -64,14 +64,14 @@ exports.Deamon = (function () {
 		server.kill_server(client_pid, server_pid, callback);
 	}
 	tester.Daemon1 = function (errorCallback) {
-		var test_case = "Windows does not support daemonize: Warning is seen.";
-		var option = "yes";
+		var test_case = 'Windows does not support daemonize: Warning is seen.';
+		var option = 'yes';
 		start_server(client_pid, option, function (err, res) {
 			if (err) {
 				errorCallback(err, null);
 			}
 			server_pid = res;
-			var pattern = "Windows does not support daemonize. Start Redis as service";
+			var pattern = 'Windows does not support daemonize. Start Redis as service';
 			var retry = 10;
 			g.asyncFor(0, retry, function (loop) {
 				retry = loop.iteration();
@@ -96,7 +96,7 @@ exports.Deamon = (function () {
 						ut.pass(test_case);
 					}
 				} catch (e) {
-					console.log("assertion:expected warning not found on config file");
+					console.log('assertion:expected warning not found on config file');
 					ut.fail(e);
 				}
 				kill_server(client_pid, server_pid, function (err, res) {

@@ -4,10 +4,10 @@ exports.Hash = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	hash = {},
-	name = "Hash",
-	client = "",
+	name = 'Hash',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {},
 	bighash = {},
 	smallhash = {};
@@ -18,7 +18,7 @@ exports.Hash = (function () {
 	//public method
 	hash.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "hash";
+			var tags = 'hash';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -44,7 +44,7 @@ exports.Hash = (function () {
 				} else {
 					client.end();
 					if (hash.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -87,9 +87,9 @@ exports.Hash = (function () {
 					});
 				});
 			}
-			var message = "Encoding: Expected:" + enc + ", Actual:" + res + " for key:" + key;
+			var message = 'Encoding: Expected:' + enc + ', Actual:' + res + ' for key:' + key;
 			try {
-				if (!assert.equal(res, enc, "Error: " + message) && (!assert.ifError(error))) {
+				if (!assert.equal(res, enc, 'Error: ' + message) && (!assert.ifError(error))) {
 					callback(null, true);
 				}
 			} catch (e) {
@@ -99,7 +99,7 @@ exports.Hash = (function () {
 	}
 
 	tester.Hash1 = function (errorCallback) {
-		var test_case = "HSET/HLEN - Small hash creation";
+		var test_case = 'HSET/HLEN - Small hash creation';
 		g.asyncFor(0, 8, function (loop) {
 			var key = ut.randstring(0, 8, 'alpha');
 			var val = ut.randstring(0, 8, 'alpha');
@@ -135,7 +135,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash2 = function (errorCallback) {
-		var test_case = "Is the small hash encoded with a ziplist?";
+		var test_case = 'Is the small hash encoded with a ziplist?';
 		assert_encoding('ziplist', 'smallhash', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -155,7 +155,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash3 = function (errorCallback) {
-		var test_case = "HSET/HLEN - Big hash creation";
+		var test_case = 'HSET/HLEN - Big hash creation';
 		g.asyncFor(0, 1024, function (loop) {
 			var key = ut.randstring(0, 8, 'alpha');
 			var val = ut.randstring(0, 8, 'alpha');
@@ -190,7 +190,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash4 = function (errorCallback) {
-		var test_case = "Is the big hash encoded with a ziplist?";
+		var test_case = 'Is the big hash encoded with a ziplist?';
 		assert_encoding('hashtable', 'bighash', function (err, res) {
 			try {
 				if (!assert.ok(res, test_case)) {
@@ -206,7 +206,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash5 = function (errorCallback) {
-		var test_case = "HGET against the small hash";
+		var test_case = 'HGET against the small hash';
 		var error_array = new Array();
 		var c = 0;
 		var keys = Object.keys(smallhash);
@@ -217,7 +217,7 @@ exports.Hash = (function () {
 					errorCallback(err);
 				}
 				if (smallhash[keys[c]] !== res) {
-					var str = smallhash[keys[c]] + " != " + res;
+					var str = smallhash[keys[c]] + ' != ' + res;
 					error_array.push(str);
 				}
 				loop.next();
@@ -235,7 +235,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash6 = function (errorCallback) {
-		var test_case = "HGET against the big hash";
+		var test_case = 'HGET against the big hash';
 		var error_array = new Array();
 		var c = 0;
 		var keys = Object.keys(bighash);
@@ -246,7 +246,7 @@ exports.Hash = (function () {
 					errorCallback(err);
 				}
 				if (bighash[keys[c]] !== res) {
-					var str = bighash[keys[c]] + " != " + res;
+					var str = bighash[keys[c]] + ' != ' + res;
 					error_array.push(str);
 				}
 				loop.next();
@@ -264,7 +264,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash7 = function (errorCallback) {
-		var test_case = "HGET against non existing key";
+		var test_case = 'HGET against non existing key';
 		var rv = new Array();
 		client.hget('smallhash', '__123123123__', function (err, res) {
 			if (err) {
@@ -288,7 +288,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash8 = function (errorCallback) {
-		var test_case = "HSET in update and insert mode";
+		var test_case = 'HSET in update and insert mode';
 		var rv = new Array();
 		var k = Object.keys(smallhash)[0];
 		client.hset('smallhash', k, 'newval1', function (err, res) {
@@ -353,7 +353,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash9 = function (errorCallback) {
-		var test_case = "HSETNX target key missing - small hash";
+		var test_case = 'HSETNX target key missing - small hash';
 		client.hsetnx('smallhash', '__123123123__', 'foo', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -374,7 +374,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash10 = function (errorCallback) {
-		var test_case = "HSETNX target key exists - small hash";
+		var test_case = 'HSETNX target key exists - small hash';
 		client.hsetnx('smallhash', '__123123123__', 'bar', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -401,7 +401,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash11 = function (errorCallback) {
-		var test_case = "HSETNX target key missing - big hash";
+		var test_case = 'HSETNX target key missing - big hash';
 		client.hsetnx('bighash', '__123123123__', 'foo', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -422,7 +422,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash12 = function (errorCallback) {
-		var test_case = "HSETNX target key exists - big hash";
+		var test_case = 'HSETNX target key exists - big hash';
 		client.hsetnx('bighash', '__123123123__', 'bar', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -449,7 +449,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash13 = function (errorCallback) {
-		var test_case = "HMSET wrong number of args";
+		var test_case = 'HMSET wrong number of args';
 		client.hmset('smallhash', 'key1', 'val1', 'key2', function (err, res) {
 			if (!res) {
 				if (ut.match('wrong number', err)) {
@@ -464,7 +464,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash14 = function (errorCallback) {
-		var test_case = "HMSET - small hash";
+		var test_case = 'HMSET - small hash';
 		var args = new Array();
 		for (key in smallhash) {
 			var newval = ut.randstring(0, 8, 'alpha');
@@ -487,7 +487,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash15 = function (errorCallback) {
-		var test_case = "HMSET - big hash";
+		var test_case = 'HMSET - big hash';
 		var args = new Array();
 		for (key in bighash) {
 			var newval = ut.randstring(0, 8, 'alpha');
@@ -510,7 +510,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash16 = function (errorCallback) {
-		var test_case = "HMGET against non existing key and fields";
+		var test_case = 'HMGET against non existing key and fields';
 		var rv = new Array();
 		client.hmget('doesntexist', '__123123123__', '__456456456__', function (err, res) {
 			if (err) {
@@ -545,7 +545,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash17 = function (errorCallback) {
-		var test_case = "HMGET against wrong type";
+		var test_case = 'HMGET against wrong type';
 		client.set('wrongtype', 'somevalue', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -565,7 +565,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash18 = function (errorCallback) {
-		var test_case = "HMGET - small hash";
+		var test_case = 'HMGET - small hash';
 		var keys = new Array();
 		var vals = new Array();
 		var errors = new Array();
@@ -580,7 +580,7 @@ exports.Hash = (function () {
 			if (res.length == vals.length) {
 				for (k in res) {
 					if (res[k] != vals[k]) {
-						var str = vals[k] + " != " + res[k];
+						var str = vals[k] + ' != ' + res[k];
 						errors.push(str);
 					}
 				}
@@ -597,7 +597,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash19 = function (errorCallback) {
-		var test_case = "HMGET - big hash";
+		var test_case = 'HMGET - big hash';
 		var keys = new Array();
 		var vals = new Array();
 		var errors = new Array();
@@ -612,7 +612,7 @@ exports.Hash = (function () {
 			if (res.length == vals.length) {
 				for (k in res) {
 					if (res[k] != vals[k]) {
-						var str = vals[k] + " != " + res[k];
+						var str = vals[k] + ' != ' + res[k];
 						errors.push(str);
 					}
 				}
@@ -629,7 +629,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash20 = function (errorCallback) {
-		var test_case = "HKEYS - small hash";
+		var test_case = 'HKEYS - small hash';
 		var keys = Object.keys(smallhash);
 		client.hkeys('smallhash', function (err, res) {
 			if (err) {
@@ -649,7 +649,7 @@ exports.Hash = (function () {
 	};
 
 	tester.hash21 = function (errorcallback) {
-		var test_case = "hkeys - big hash";
+		var test_case = 'hkeys - big hash';
 		var keys = Object.keys(bighash);
 		client.hkeys('bighash', function (err, res) {
 			if (err) {
@@ -669,7 +669,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash22 = function (errorCallback) {
-		var test_case = "HVALS - small hash";
+		var test_case = 'HVALS - small hash';
 		var vals = new Array();
 		for (key in smallhash) {
 			vals.push(smallhash[key]);
@@ -692,7 +692,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash23 = function (errorCallback) {
-		var test_case = "HVALS - big hash";
+		var test_case = 'HVALS - big hash';
 		var vals = new Array();
 		for (key in bighash) {
 			vals.push(bighash[key]);
@@ -715,7 +715,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash24 = function (errorCallback) {
-		var test_case = "HGETALL - small hash";
+		var test_case = 'HGETALL - small hash';
 		var full = new Array();
 		var result = new Array();
 		for (key in smallhash) {
@@ -744,7 +744,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash25 = function (errorCallback) {
-		var test_case = "HGETALL - big hash";
+		var test_case = 'HGETALL - big hash';
 		var full = new Array();
 		var result = new Array();
 		for (key in bighash) {
@@ -773,9 +773,9 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash26 = function (errorCallback) {
-		var test_case = "HDEL and return value";
+		var test_case = 'HDEL and return value';
 		var rv = new Array();
-		var k = "";
+		var k = '';
 		client.hdel('smallhash', 'nokey', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -839,7 +839,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash27 = function (errorCallback) {
-		var test_case = "HDEL - more than a single value";
+		var test_case = 'HDEL - more than a single value';
 		var rv = new Array();
 		client.del('myhash', function (err, res) {
 			if (err) {
@@ -882,7 +882,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash28 = function (errorCallback) {
-		var test_case = "HDEL - hash becomes empty before deleting all specified fields";
+		var test_case = 'HDEL - hash becomes empty before deleting all specified fields';
 		var rv = new Array();
 		client.del('myhash', function (err, res) {
 			if (err) {
@@ -917,7 +917,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash29 = function (errorCallback) {
-		var test_case = "HEXISTS";
+		var test_case = 'HEXISTS';
 		var rv = new Array();
 		var k = Object.keys(smallhash)[0];
 		client.hexists('smallhash', k, function (err, res) {
@@ -955,7 +955,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash30 = function (errorCallback) {
-		var test_case = "Is a ziplist encoded Hash promoted on big payload?";
+		var test_case = 'Is a ziplist encoded Hash promoted on big payload?';
 		var str = g.fillString(1024, 'a');
 		client.hset('smallhash', 'foo', str, function (err, res) {
 			if (err) {
@@ -978,7 +978,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash31 = function (errorCallback) {
-		var test_case = "HINCRBY against non existing database key";
+		var test_case = 'HINCRBY against non existing database key';
 		client.del('htest', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -999,7 +999,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash32 = function (errorCallback) {
-		var test_case = "HINCRBY against non existing hash key";
+		var test_case = 'HINCRBY against non existing hash key';
 		var rv = new Array();
 		client.hdel('smallhash', 'tmp', function (err, res) {
 			if (err) {
@@ -1046,7 +1046,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash33 = function (errorCallback) {
-		var test_case = "HINCRBY against hash key created by hincrby itself";
+		var test_case = 'HINCRBY against hash key created by hincrby itself';
 		var rv = new Array();
 		client.hincrby('smallhash', 'tmp', 3, function (err, res) {
 			if (err) {
@@ -1083,7 +1083,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash34 = function (errorCallback) {
-		var test_case = "HINCRBY against hash key originally set with HSET";
+		var test_case = 'HINCRBY against hash key originally set with HSET';
 		var rv = new Array();
 		client.hset('smallhash', 'tmp', 100, function (err, res) {
 			if (err) {
@@ -1117,7 +1117,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash35 = function (errorCallback) {
-		var test_case = "HINCRBY over 32bit value";
+		var test_case = 'HINCRBY over 32bit value';
 		var rv = new Array();
 		client.hset('smallhash', 'tmp', 17179869184, function (err, res) {
 			if (err) {
@@ -1151,7 +1151,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash36 = function (errorCallback) {
-		var test_case = "HINCRBY over 32bit value with over 32bit increment";
+		var test_case = 'HINCRBY over 32bit value with over 32bit increment';
 		var rv = new Array();
 		client.hset('smallhash', 'tmp', 17179869184, function (err, res) {
 			if (err) {
@@ -1185,7 +1185,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash37 = function (errorCallback) {
-		var test_case = "HINCRBY fails against hash value with spaces (left)";
+		var test_case = 'HINCRBY fails against hash value with spaces (left)';
 		client.hset('smallhash', 'str', ' 11', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1210,7 +1210,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash38 = function (errorCallback) {
-		var test_case = "HINCRBY can detect overflows";
+		var test_case = 'HINCRBY can detect overflows';
 		client.hset('hash', 'n', '-9223372036854775484', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1233,7 +1233,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash39 = function (errorCallback) {
-		var test_case = "Hash ziplist regression test for large keys";
+		var test_case = 'Hash ziplist regression test for large keys';
 		var str = g.fillString(336, 'k');
 		client.hset('hash', str, 'a', function (err, res) {
 			if (err) {
@@ -1257,7 +1257,7 @@ exports.Hash = (function () {
 		});
 	};
 	tester.Hash40 = function (errorCallback) {
-		var test_case = "HINCRBY fails against hash value with spaces (right)";
+		var test_case = 'HINCRBY fails against hash value with spaces (right)';
 		client.hset('smallhash', 'str', '11 ', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1283,7 +1283,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash41 = function (errorCallback) {
-		var test_case = "HINCRBYFLOAT against non existing database key";
+		var test_case = 'HINCRBYFLOAT against non existing database key';
 		client.del('htest');
 		client.hincrbyfloat('htest', 'foo', 2.5, function (err, res) {
 			if (err) {
@@ -1300,7 +1300,7 @@ exports.Hash = (function () {
 	}
 
 	tester.Hash42 = function (errorCallback) {
-		var test_case = "HINCRBYFLOAT against non existing hash key"
+		var test_case = 'HINCRBYFLOAT against non existing hash key'
 			var array = [];
 		client.hdel('smallhash', 'tmp');
 		client.hdel('bighash', 'tmp');
@@ -1338,7 +1338,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash43 = function (errorCallback) {
-		var test_case = "HINCRBYFLOAT against hash key created by hincrby itself"
+		var test_case = 'HINCRBYFLOAT against hash key created by hincrby itself'
 			var array = [];
 		client.hincrbyfloat('smallhash', 'tmp', 3.5, function (err, res) {
 			if (err) {
@@ -1374,7 +1374,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash44 = function (errorCallback) {
-		var test_case = "HINCRBYFLOAT against hash key originally set with HSET"
+		var test_case = 'HINCRBYFLOAT against hash key originally set with HSET'
 			var array = [];
 		client.hset('smallhash', 'tmp', 100);
 		client.hset('bighash', 'tmp', 100);
@@ -1400,7 +1400,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash45 = function (errorCallback) {
-		var test_case = "HINCRBYFLOAT over 32bit value"
+		var test_case = 'HINCRBYFLOAT over 32bit value'
 			var array = [];
 		client.hset('smallhash', 'tmp', 17179869184);
 		client.hset('bighash', 'tmp', 17179869184);
@@ -1426,7 +1426,7 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash46 = function (errorCallback) {
-		var test_case = "HINCRBYFLOAT over 32bit value with over 32bit increment"
+		var test_case = 'HINCRBYFLOAT over 32bit value with over 32bit increment'
 			var array = [];
 		client.hset('smallhash', 'tmp', 17179869184);
 		client.hset('bighash', 'tmp', 17179869184);
@@ -1452,10 +1452,10 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash47 = function (errorCallback) {
-		var test_case = "HINCRBYFLOAT fails against hash value with spaces (left)"
+		var test_case = 'HINCRBYFLOAT fails against hash value with spaces (left)'
 			var array = [];
-		client.hset('smallhash', 'str', " 11");
-		client.hset('bighash', 'str', " 11");
+		client.hset('smallhash', 'str', ' 11');
+		client.hset('bighash', 'str', ' 11');
 		client.hincrbyfloat('smallhash', 'str', 1, function (smallErr, res) {
 			client.hincrbyfloat('bighash', 'str', 1, function (bigErr, res) {
 				try {
@@ -1471,10 +1471,10 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash48 = function (errorCallback) {
-		var test_case = "HINCRBYFLOAT fails against hash value with spaces (right)"
+		var test_case = 'HINCRBYFLOAT fails against hash value with spaces (right)'
 			var array = [];
-		client.hset('smallhash', 'str', "11 ");
-		client.hset('bighash', 'str', " 11 ");
+		client.hset('smallhash', 'str', '11 ');
+		client.hset('bighash', 'str', ' 11 ');
 		client.hincrbyfloat('smallhash', 'str', 1, function (smallErr, res) {
 			client.hincrbyfloat('bighash', 'str', 1, function (bigErr, res) {
 				try {
@@ -1492,16 +1492,16 @@ exports.Hash = (function () {
 	tester.Hash49 = function (errorCallback) {
 		var size = [10, 512],
 		index = 0,
-		test_case = "",
+		test_case = '',
 		tcPassFlg = true;
 		var hashField = [],
 		hashVal = [],
-		Randfield = "",
-		RandVal = "",
+		Randfield = '',
+		RandVal = '',
 		i = 0;
 		g.asyncFor(0, size.length, function (loop) {
 			index = loop.iteration();
-			test_case = "Hash fuzzing #1 - " + size[index] + " fields";
+			test_case = 'Hash fuzzing #1 - ' + size[index] + ' fields';
 			g.asyncFor(0, 9, function (innerLoop) {
 				client.del('hash', function (err, res) {
 					if (err) {
@@ -1512,7 +1512,7 @@ exports.Hash = (function () {
 					g.asyncFor(0, size[index], function (secLoop) {
 						Randfield = Math.random() * 100;
 						RandVal = Math.random() * 100;
-						client.hset("hash", Randfield, RandVal, function (err, res) {
+						client.hset('hash', Randfield, RandVal, function (err, res) {
 							hashField.push(Randfield);
 							hashVal.push(RandVal);
 							secLoop.next();
@@ -1539,7 +1539,7 @@ exports.Hash = (function () {
 										tcPassFlg = false;
 								});
 							} else
-								ut.fail("Hashtable Verification Failed", true);
+								ut.fail('Hashtable Verification Failed', true);
 							innerLoop.next();
 						});
 					});
@@ -1549,7 +1549,7 @@ exports.Hash = (function () {
 					ut.pass(test_case);
 					loop.next();
 				} else {
-					ut.fail("Testcase Failed", true);
+					ut.fail('Testcase Failed', true);
 					loop.break();
 				}
 
@@ -1562,16 +1562,16 @@ exports.Hash = (function () {
 	tester.Hash50 = function (errorCallback) {
 		var size = [10, 512],
 		index = 0,
-		test_case = "",
+		test_case = '',
 		tcPassFlg = true;
 		var hashField = [],
 		hashVal = [],
-		Randfield = "",
-		RandVal = "",
+		Randfield = '',
+		RandVal = '',
 		i = 0;
 		g.asyncFor(0, size.length, function (loop) {
 			index = loop.iteration();
-			test_case = "Hash fuzzing #2 - " + size[index] + " fields";
+			test_case = 'Hash fuzzing #2 - ' + size[index] + ' fields';
 			g.asyncFor(0, 9, function (innerLoop) {
 				client.del('hash', function (err, res) {
 					if (err) {
@@ -1585,7 +1585,7 @@ exports.Hash = (function () {
 						case 1: {
 								Randfield = Math.random() * 100;
 								RandVal = Math.random() * 100;
-								client.hset("hash", Randfield, RandVal, function (err, res) {
+								client.hset('hash', Randfield, RandVal, function (err, res) {
 									hashField.push(Randfield);
 									hashVal.push(RandVal);
 									secLoop.next();
@@ -1595,7 +1595,7 @@ exports.Hash = (function () {
 						case 2: {
 								Randfield = ut.randomSignedInt(512);
 								RandVal = ut.randomSignedInt(512);
-								client.hset("hash", Randfield, RandVal, function (err, res) {
+								client.hset('hash', Randfield, RandVal, function (err, res) {
 									hashField.push(Randfield);
 									hashVal.push(RandVal);
 									secLoop.next();
@@ -1646,7 +1646,7 @@ exports.Hash = (function () {
 										tcPassFlg = false;
 								});
 							} else
-								ut.fail("Hashtable Verification Failed", true);
+								ut.fail('Hashtable Verification Failed', true);
 							innerLoop.next();
 						});
 					});
@@ -1656,7 +1656,7 @@ exports.Hash = (function () {
 					ut.pass(test_case);
 					loop.next();
 				} else {
-					ut.fail("Testcase Failed", true);
+					ut.fail('Testcase Failed', true);
 					loop.break();
 				}
 			});
@@ -1666,9 +1666,9 @@ exports.Hash = (function () {
 	};
 
 	tester.Hash51 = function (errorCallback) {
-		var test_case = "Stress test the hash ziplist -> hashtable encoding conversion"
+		var test_case = 'Stress test the hash ziplist -> hashtable encoding conversion'
 			var tcPassFlg = true;
-		error = "";
+		error = '';
 		client.config('set', 'hash-max-ziplist-entries', 32, function (err, res) {
 			g.asyncFor(0, 100, function (loop) {
 				client.del('myhash', function (err, res) {

@@ -11,29 +11,29 @@ exports.ReplicationStress = (function () {
 	server6 = new Server(),
 	server7 = new Server(),
 	replication_stress = {},
-	name = "Replication-Stress",
+	name = 'Replication-Stress',
 	tester = {},
 	all_tests = {},
-	master_host = "",
-	master_port = "",
-	client_pid = "",
-	monitor_cli = "",
-	master = "",
-	client1 = "",
-	client2 = "",
-	client3 = "",
-	master_cli = "",
-	slave_cli = "",
-	load_handle0 = "",
-	load_handle1 = "",
-	load_handle2 = "",
-	load_handle3 = "",
-	load_handle4 = "",
-	server_pid = "",
-	server_pid2 = "",
-	server_pid3 = "",
-	server_pid4 = "",
-	error = "";
+	master_host = '',
+	master_port = '',
+	client_pid = '',
+	monitor_cli = '',
+	master = '',
+	client1 = '',
+	client2 = '',
+	client3 = '',
+	master_cli = '',
+	slave_cli = '',
+	load_handle0 = '',
+	load_handle1 = '',
+	load_handle2 = '',
+	load_handle3 = '',
+	load_handle4 = '',
+	server_pid = '',
+	server_pid2 = '',
+	server_pid3 = '',
+	server_pid4 = '',
+	error = '';
 
 	//public property
 	replication_stress.debug_mode = false;
@@ -75,15 +75,15 @@ exports.ReplicationStress = (function () {
 	}
 	function stop_write_load(handle) {
 		try {
-			handle.kill("SIGKILL");
+			handle.kill('SIGKILL');
 		} catch (e) {}
 	}
 	tester.Repl3 = function (errorCallback) {
-		var test_case = "Replication Stress with two Slaves for n iterations";
-		var tags = "repl-mr31";
+		var test_case = 'Replication Stress with two Slaves for n iterations';
+		var tags = 'repl-mr31';
 		var overrides = {};
 		var args = {};
-		args['name'] = name + "(Master)";
+		args['name'] = name + '(Master)';
 		args['tags'] = tags;
 		args['overrides'] = overrides;
 		server.start_server(client_pid, args, function (err, res) {
@@ -96,9 +96,9 @@ exports.ReplicationStress = (function () {
 				master_host = g.srv[client_pid][server_pid]['host'];
 				master_port = g.srv[client_pid][server_pid]['port'];
 				var overrides = {};
-				var tags = "repl-mr32";
+				var tags = 'repl-mr32';
 				var args = {};
-				args['name'] = name + "(Slave0)";
+				args['name'] = name + '(Slave0)';
 				args['tags'] = tags;
 				args['overrides'] = overrides;
 				server1.start_server(client_pid, args, function (err, res) {
@@ -109,9 +109,9 @@ exports.ReplicationStress = (function () {
 					client1 = g.srv[client_pid][server_pid2]['client'];
 					setTimeout(function () {
 						var overrides = {};
-						var tags = "repl-mr33";
+						var tags = 'repl-mr33';
 						var args = {};
-						args['name'] = name + "(Slave1)";
+						args['name'] = name + '(Slave1)';
 						args['tags'] = tags;
 						args['overrides'] = overrides;
 						server2.start_server(client_pid, args, function (err, res) {
@@ -167,7 +167,7 @@ exports.ReplicationStress = (function () {
 						if (err) {
 							callback(err)
 						}
-						// Wait for all the three slaves to reach the "online" state
+						// Wait for all the three slaves to reach the 'online' state
 						var retry = 100;
 						var count = 0;
 						g.asyncFor(0, retry, function (loop) {
@@ -175,7 +175,7 @@ exports.ReplicationStress = (function () {
 								if (err) {
 									callback(err)
 								}
-								var patt = "slave0 online slave1 online";
+								var patt = 'slave0 online slave1 online';
 								if (ut.match(patt, res)) {
 									loop.break();
 								} else {
@@ -186,8 +186,8 @@ exports.ReplicationStress = (function () {
 								}
 							});
 						}, function () {
-							if (count == retry) {
-								callback(new Error("Error:Slaves not up"));
+							if (count === retry) {
+								callback(new Error('Error:Slaves not up'));
 							} else {
 								// no error observed should continue.
 							}
@@ -224,7 +224,7 @@ exports.ReplicationStress = (function () {
 												if ((!assert.notEqual(digest, '0000000000000000000000000000000000000000', test_case))
 													 && (!assert.deepEqual(digest, digest0, test_case))
 													 && (!assert.deepEqual(digest, digest1, test_case))) {
-													console.log("Master - Slave0 Slave1 digest equal for iteration #" + mainloop.iteration() + "\n");
+													console.log('Master - Slave0 Slave1 digest equal for iteration #' + mainloop.iteration() + '\n');
 													master.flushall(function (err, res) {
 														mainloop.next();
 													});
@@ -249,9 +249,9 @@ exports.ReplicationStress = (function () {
 					client1.end();
 					master.end();
 					if (replication_stress.debug_mode) {
-						log.notice(g.srv[client_pid][server_pid3]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid3]['host'] + ":" + g.srv[client_pid][server_pid3]['port']);
-						log.notice(g.srv[client_pid][server_pid2]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid2]['host'] + ":" + g.srv[client_pid][server_pid2]['port']);
-						log.notice(g.srv[client_pid][server_pid]['name'] + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(g.srv[client_pid][server_pid3]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid3]['host'] + ':' + g.srv[client_pid][server_pid3]['port']);
+						log.notice(g.srv[client_pid][server_pid2]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+						log.notice(g.srv[client_pid][server_pid]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					callback(null, true);
 				}

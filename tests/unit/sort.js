@@ -4,10 +4,10 @@ exports.Sort = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	sort = {},
-	name = "Sort",
-	client = "",
+	name = 'Sort',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {},
 	result = [],
 	local_result = [],
@@ -19,7 +19,7 @@ exports.Sort = (function () {
 	//public method
 	sort.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "sort";
+			var tags = 'sort';
 			var overrides = {};
 			overrides['list-max-ziplist-entries'] = 32;
 			overrides['list-max-ziplist-value'] = 16;
@@ -48,7 +48,7 @@ exports.Sort = (function () {
 				} else {
 					client.end();
 					if (sort.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -150,9 +150,9 @@ exports.Sort = (function () {
 					});
 				});
 			}
-			var message = "Encoding: Expected:" + enc + ", Actual:" + res + " for key:" + key;
+			var message = 'Encoding: Expected:' + enc + ', Actual:' + res + ' for key:' + key;
 			try {
-				if (!assert.equal(res, enc, "Error: " + message) && (!assert.ifError(error))) {
+				if (!assert.equal(res, enc, 'Error: ' + message) && (!assert.ifError(error))) {
 					callback(null, true);
 				}
 			} catch (e) {
@@ -162,7 +162,7 @@ exports.Sort = (function () {
 	}
 
 	tester.Sort1 = function (errorCallback) {
-		var test_case = "Ziplist: SORT BY key";
+		var test_case = 'Ziplist: SORT BY key';
 		create_random_dataset(16, 'lpush', 'tosort', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -191,7 +191,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort1_1 = function (errorCallback) {
-		var test_case = "Ziplist: SORT BY key with limit";
+		var test_case = 'Ziplist: SORT BY key with limit';
 		create_random_dataset(16, 'lpush', 'tosort', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -214,7 +214,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort2 = function (errorCallback) {
-		var test_case = "Ziplist: SORT BY hash field";
+		var test_case = 'Ziplist: SORT BY hash field';
 		create_random_dataset(16, 'lpush', 'tosort', function (err, local_result) {
 			if (err) {
 				errorCallback(err);
@@ -236,7 +236,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort3 = function (errorCallback) {
-		var test_case = "Linked list: SORT BY key";
+		var test_case = 'Linked list: SORT BY key';
 		local_result = [];
 		create_random_dataset(1000, 'lpush', 'tosort', function (err, res) {
 			if (err) {
@@ -265,7 +265,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort3_1 = function (errorCallback) {
-		var test_case = "Linked list: SORT BY key with limit";
+		var test_case = 'Linked list: SORT BY key with limit';
 		create_random_dataset(1000, 'lpush', 'tosort', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -289,7 +289,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort4 = function (errorCallback) {
-		var test_case = "Linked list: SORT BY hash field";
+		var test_case = 'Linked list: SORT BY hash field';
 		create_random_dataset(1000, 'lpush', 'tosort', function (err, local_result) {
 			if (err) {
 				errorCallback(err);
@@ -310,7 +310,7 @@ exports.Sort = (function () {
 		});
 	};
 	tester.Sort5 = function (errorCallback) {
-		var test_case = "Big Linked list: SORT BY key";
+		var test_case = 'Big Linked list: SORT BY key';
 		local_result = [];
 		create_random_dataset(10000, 'lpush', 'tosort', function (err, res) {
 			if (err) {
@@ -339,7 +339,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort5_1 = function (errorCallback) {
-		var test_case = "Big Linked list: SORT BY key with limit";
+		var test_case = 'Big Linked list: SORT BY key with limit';
 		create_random_dataset(10000, 'lpush', 'tosort', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -362,7 +362,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort6 = function (errorCallback) {
-		var test_case = "Big Linked list: SORT BY hash field";
+		var test_case = 'Big Linked list: SORT BY hash field';
 		create_random_dataset(10000, 'lpush', 'tosort', function (err, local_result) {
 			if (err) {
 				errorCallback(err);
@@ -384,7 +384,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort7 = function (errorCallback) {
-		var test_case = "Intset: SORT BY key";
+		var test_case = 'Intset: SORT BY key';
 		local_result = [];
 		create_random_dataset(16, 'sadd', 'tosort', function (err, res) {
 			if (err) {
@@ -413,7 +413,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort8 = function (errorCallback) {
-		var test_case = "Intset: SORT BY hash field";
+		var test_case = 'Intset: SORT BY hash field';
 		client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
 			if (err) {
 				errorCallback(err);
@@ -430,7 +430,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort9 = function (errorCallback) {
-		var test_case = "Hash table: SORT BY key";
+		var test_case = 'Hash table: SORT BY key';
 		local_result = [];
 		create_random_dataset(1000, 'sadd', 'tosort', function (err, res) {
 			if (err) {
@@ -459,7 +459,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort10 = function (errorCallback) {
-		var test_case = "Hash table: SORT BY hash field";
+		var test_case = 'Hash table: SORT BY hash field';
 		client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
 			if (err) {
 				errorCallback(err);
@@ -476,7 +476,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort11 = function (errorCallback) {
-		var test_case = "Big Hash table: SORT BY key";
+		var test_case = 'Big Hash table: SORT BY key';
 		local_result = [];
 		create_random_dataset(10000, 'sadd', 'tosort', function (err, res) {
 			if (err) {
@@ -505,7 +505,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort12 = function (errorCallback) {
-		var test_case = "Big Hash table: SORT BY hash field";
+		var test_case = 'Big Hash table: SORT BY hash field';
 		client.sort('tosort', 'by', 'wobj_*->weight', function (err, sorted) {
 			if (err) {
 				errorCallback(err);
@@ -522,7 +522,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort13 = function (errorCallback) {
-		var test_case = "SORT GET #";
+		var test_case = 'SORT GET #';
 		create_random_dataset(16, 'lpush', 'tosort', function (err, result) {
 			if (err) {
 				errorCallback(err);
@@ -546,7 +546,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort14 = function (errorCallback) {
-		var test_case = "SORT GET <const>";
+		var test_case = 'SORT GET <const>';
 		client.sort('tosort', 'get', 'foo', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -573,7 +573,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort15 = function (errorCallback) {
-		var test_case = "SORT GET (key and hash) with sanity check";
+		var test_case = 'SORT GET (key and hash) with sanity check';
 		var result_array1 = new Array();
 		var result_array2 = new Array();
 		var flag1 = false;
@@ -625,7 +625,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort16 = function (errorCallback) {
-		var test_case = "SORT BY key STORE";
+		var test_case = 'SORT BY key STORE';
 		local_result = [];
 		client.sort('tosort', 'by', 'weight_*', 'store', 'sort-res', function (err, res1) {
 			if (err) {
@@ -658,7 +658,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort17 = function (errorCallback) {
-		var test_case = "SORT BY hash field STORE";
+		var test_case = 'SORT BY hash field STORE';
 		client.sort('tosort', 'by', 'wobj_*->weight', 'store', 'sort-res', function (err, res1) {
 			if (err) {
 				errorCallback(err);
@@ -690,7 +690,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort18 = function (errorCallback) {
-		var test_case = "SORT DESC";
+		var test_case = 'SORT DESC';
 		local_result = global_result.slice(0).sort(function (a, b) {
 				return b - a
 			});
@@ -710,7 +710,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort19 = function (errorCallback) {
-		var test_case = "SORT ALPHA against integer encoded strings";
+		var test_case = 'SORT ALPHA against integer encoded strings';
 		var result_array = new Array();
 		client.del('mylist', function (err, res) {
 			if (err) {
@@ -750,7 +750,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort20 = function (errorCallback) {
-		var test_case = "SORT sorted set";
+		var test_case = 'SORT sorted set';
 		client.del('zset', function (err) {
 			if (err) {
 				errorCallback(error);
@@ -797,7 +797,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort21 = function (errorCallback) {
-		var test_case = "SORT sorted set: +inf and -inf handling";
+		var test_case = 'SORT sorted set: +inf and -inf handling';
 		client.del('zset', function (err) {
 			if (err) {
 				errorCallback(error);
@@ -849,7 +849,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort22 = function (errorCallback) {
-		var test_case = "SORT regression for issue #19, sorting floats";
+		var test_case = 'SORT regression for issue #19, sorting floats';
 		client.flushdb();
 		var floats = new Array();
 		floats[0] = parseFloat('1.1');
@@ -881,7 +881,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort23 = function (errorCallback) {
-		var test_case = "SORT with STORE returns zero if result is empty (github isse 224)";
+		var test_case = 'SORT with STORE returns zero if result is empty (github isse 224)';
 		client.flushdb();
 		client.sort('foo', 'store', 'bar', function (err, res) {
 			if (err) {
@@ -899,7 +899,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort24 = function (errorCallback) {
-		var test_case = "SORT with STORE does not create empty lists (github issue 224)";
+		var test_case = 'SORT with STORE does not create empty lists (github issue 224)';
 		client.flushdb();
 		client.lpush('foo', 'bar', function (err, res) {
 			if (err) {
@@ -927,7 +927,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort25 = function (errorCallback) {
-		var test_case = "SORT speed, 100 element list BY key, 1000 times";
+		var test_case = 'SORT speed, 100 element list BY key, 1000 times';
 		var num = 100;
 		var flag = 0;
 		var error = null;
@@ -958,7 +958,7 @@ exports.Sort = (function () {
 				} else {
 					var elapsed = new Date() - start;
 					if (flag == 1000) {
-						ut.pass(test_case + " with Time to sort: " + elapsed);
+						ut.pass(test_case + ' with Time to sort: ' + elapsed);
 						testEmitter.emit('next');
 					}
 				}
@@ -967,7 +967,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort26 = function (errorCallback) {
-		var test_case = "SORT speed, 100 element list BY hash field, 1000 times";
+		var test_case = 'SORT speed, 100 element list BY hash field, 1000 times';
 		var num = 100;
 		var flag = 0;
 		var error = null;
@@ -998,7 +998,7 @@ exports.Sort = (function () {
 				} else {
 					var elapsed = new Date() - start;
 					if (flag == 1000) {
-						ut.pass(test_case + " with Time to sort: " + elapsed);
+						ut.pass(test_case + ' with Time to sort: ' + elapsed);
 						testEmitter.emit('next');
 					}
 				}
@@ -1007,7 +1007,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort27 = function (errorCallback) {
-		var test_case = "SORT speed, 100 element list directly, 1000 times";
+		var test_case = 'SORT speed, 100 element list directly, 1000 times';
 		var num = 100;
 		var flag = 0;
 		var error = null;
@@ -1038,7 +1038,7 @@ exports.Sort = (function () {
 				} else {
 					var elapsed = new Date() - start;
 					if (flag == 1000) {
-						ut.pass(test_case + " with Time to sort: " + elapsed);
+						ut.pass(test_case + ' with Time to sort: ' + elapsed);
 						testEmitter.emit('next');
 					}
 				}
@@ -1047,7 +1047,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort28 = function (errorCallback) {
-		var test_case = "SORT speed, 100 element list BY <const>, 1000 times";
+		var test_case = 'SORT speed, 100 element list BY <const>, 1000 times';
 		var num = 100;
 		var flag = 0;
 		var error = null;
@@ -1078,7 +1078,7 @@ exports.Sort = (function () {
 				} else {
 					var elapsed = new Date() - start;
 					if (flag == 1000) {
-						ut.pass(test_case + " with Time to sort: " + elapsed);
+						ut.pass(test_case + ' with Time to sort: ' + elapsed);
 						testEmitter.emit('next');
 					}
 				}
@@ -1088,7 +1088,7 @@ exports.Sort = (function () {
 
 	// Redis-2.6 additions
 	tester.Sort29 = function (errorCallback) {
-		var test_case = "SORT sorted set BY nosort should retain ordering";
+		var test_case = 'SORT sorted set BY nosort should retain ordering';
 		client.del('zset', function (err) {
 			if (err) {
 				errorCallback(error);
@@ -1136,7 +1136,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort30 = function (errorCallback) {
-		var test_case = "SORT sorted set BY nosort + LIMIT";
+		var test_case = 'SORT sorted set BY nosort + LIMIT';
 		var result_array = new Array();
 		client.del('zset', function (err) {
 			if (err) {
@@ -1217,7 +1217,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort31 = function (errorCallback) {
-		var test_case = "SORT with STORE removes key if result is empty (github issue 227)";
+		var test_case = 'SORT with STORE removes key if result is empty (github issue 227)';
 		client.flushdb();
 		client.lpush('foo', 'bar', function (err, res) {
 			if (err) {
@@ -1245,7 +1245,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort32 = function (errorCallback) {
-		var test_case = "SORT with BY <constant> and STORE should still order output";
+		var test_case = 'SORT with BY <constant> and STORE should still order output';
 		client.del('myset', 'mylist', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1277,8 +1277,8 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort32 = function (errorCallback) {
-		var test_case = "SORT will complain with numerical sorting and bad doubles (1)";
-		var error = "";
+		var test_case = 'SORT will complain with numerical sorting and bad doubles (1)';
+		var error = '';
 		client.del('myset', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1290,7 +1290,7 @@ exports.Sort = (function () {
 				client.sort('myset', function (err, res) {
 					error = err;
 					try {
-						if (!assert.ok(ut.match("converted into double", error), test_case)) {
+						if (!assert.ok(ut.match('converted into double', error), test_case)) {
 							ut.pass(test_case);
 							testEmitter.emit('next');
 						}
@@ -1304,8 +1304,8 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort33 = function (errorCallback) {
-		var test_case = "SORT will complain with numerical sorting and bad doubles (1)";
-		var error = "";
+		var test_case = 'SORT will complain with numerical sorting and bad doubles (1)';
+		var error = '';
 		client.del('myset', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1317,7 +1317,7 @@ exports.Sort = (function () {
 				client.sort('myset', function (err, res) {
 					error = err;
 					try {
-						if (!assert.ok(ut.match("converted into double", error), test_case)) {
+						if (!assert.ok(ut.match('converted into double', error), test_case)) {
 							ut.pass(test_case);
 							testEmitter.emit('next');
 						}
@@ -1331,8 +1331,8 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort34 = function (errorCallback) {
-		var test_case = "SORT will complain with numerical sorting and bad doubles (2)";
-		var error = "";
+		var test_case = 'SORT will complain with numerical sorting and bad doubles (2)';
+		var error = '';
 		client.del('myset', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1348,7 +1348,7 @@ exports.Sort = (function () {
 					client.sort('myset', 'by', 'score:*', function (err, res) {
 						error = err;
 						try {
-							if (!assert.ok(ut.match("converted into double", error), test_case)) {
+							if (!assert.ok(ut.match('converted into double', error), test_case)) {
 								ut.pass(test_case);
 								testEmitter.emit('next');
 							}
@@ -1363,7 +1363,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort35 = function (errorCallback) {
-		var test_case = "SORT BY sub-sorts lexicographically if score is the same";
+		var test_case = 'SORT BY sub-sorts lexicographically if score is the same';
 		var loop_array = new Array();
 		client.del('myset', function (err, res) {
 			if (err) {
@@ -1395,7 +1395,7 @@ exports.Sort = (function () {
 	};
 
 	tester.Sort36 = function (errorCallback) {
-		var test_case = "SORT GET with pattern ending with just -> does not get hash field"
+		var test_case = 'SORT GET with pattern ending with just -> does not get hash field'
 			client.del('mylist', function (err, res) {
 				if (err) {
 					errorCallback(err);
@@ -1404,7 +1404,7 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					client.set("x:a->", 100, function (err, res) {
+					client.set('x:a->', 100, function (err, res) {
 						if (err) {
 							errorCallback(err);
 						}

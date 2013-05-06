@@ -4,16 +4,16 @@ exports.Other = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	other = {},
-	name = "Other",
-	client = "",
+	name = 'Other',
+	client = '',
 	tester = {},
-	cpid = "",
-	server_pid = "",
-	server_port = "",
-	server_host = "",
+	cpid = '',
+	server_pid = '',
+	server_port = '',
+	server_host = '',
 	all_tests = {},
-	sha1 = "",
-	dump = "";
+	sha1 = '',
+	dump = '';
 
 	//public property
 	other.debug_mode = false;
@@ -21,7 +21,7 @@ exports.Other = (function () {
 	//public method
 	other.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "other";
+			var tags = 'other';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -50,7 +50,7 @@ exports.Other = (function () {
 				} else {
 					client.end();
 					if (other.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -73,7 +73,7 @@ exports.Other = (function () {
 
 	//private methods
 	tester.other1 = function (errorCallback) {
-		var test_case = "SAVE - make sure there are all the types as values";
+		var test_case = 'SAVE - make sure there are all the types as values';
 		ut.waitForBgsave(client, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -111,7 +111,7 @@ exports.Other = (function () {
 												errorCallback(err);
 											}
 											try {
-												if (!assert.equal(res, "OK", test_case)) {
+												if (!assert.equal(res, 'OK', test_case)) {
 													ut.pass(test_case);
 													testEmitter.emit('next');
 												}
@@ -132,10 +132,10 @@ exports.Other = (function () {
 
 	tester.other2 = function (errorCallback) {
 		var iterations = 1000;
-		var fuzztype = new Array("binary", "alpha", "compr");
+		var fuzztype = new Array('binary', 'alpha', 'compr');
 		g.asyncFor(0, fuzztype.length, function (outerloop) {
 			var i = outerloop.iteration();
-			var test_case = "FUZZ stresser with data model " + fuzztype[i];
+			var test_case = 'FUZZ stresser with data model ' + fuzztype[i];
 			var error_array = new Array();
 			g.asyncFor(0, iterations, function (innerloop) {
 				var fuzz = ut.randstring(0, 512, fuzztype[i]);
@@ -168,7 +168,7 @@ exports.Other = (function () {
 	};
 
 	tester.other3 = function (errorCallback) {
-		var test_case = "BGSAVE";
+		var test_case = 'BGSAVE';
 		ut.waitForBgsave(client, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -221,10 +221,10 @@ exports.Other = (function () {
 	};
 
 	tester.other4 = function (errorCallback) {
-		var test_case = "SELECT an out of range DB";
+		var test_case = 'SELECT an out of range DB';
 		client.select(1000000, function (err, res) {
 			try {
-				if (!assert.ok(ut.match("invalid", err), test_case)) {
+				if (!assert.ok(ut.match('invalid', err), test_case)) {
 					ut.pass(test_case);
 					testEmitter.emit('next');
 				}
@@ -236,7 +236,7 @@ exports.Other = (function () {
 	};
 
 	tester.other5 = function (errorCallback) {
-		var test_case = "EXPIRES after AOF reload (without rewrite)";
+		var test_case = 'EXPIRES after AOF reload (without rewrite)';
 		var test_pass = false;
 		client.flushdb(function (err, res) {
 			client.config('set', 'appendonly', 'yes', function (err, res) {
@@ -298,7 +298,7 @@ exports.Other = (function () {
 	};
 
 	tester.other6 = function (errorCallback) {
-		var test_case = "EXPIRES after a reload (snapshot + append only file rewrite)";
+		var test_case = 'EXPIRES after a reload (snapshot + append only file rewrite)';
 		var res1 = 0,
 		res2 = 0;
 		client.flushdb(function (err, res) {
@@ -368,7 +368,7 @@ exports.Other = (function () {
 	};
 
 	tester.other7 = function (errorCallback) {
-		var test_case = "Perform a final SAVE to leave a clean DB on disk";
+		var test_case = 'Perform a final SAVE to leave a clean DB on disk';
 		ut.waitForBgsave(client, function (err, res) {
 			if (err) {
 				errorCallback(err)
@@ -378,7 +378,7 @@ exports.Other = (function () {
 					errorCallback(err)
 				}
 				try {
-					if (!assert.equal(res, "OK", test_case)) {
+					if (!assert.equal(res, 'OK', test_case)) {
 						ut.pass(test_case);
 						testEmitter.emit('next');
 					}
@@ -392,7 +392,7 @@ exports.Other = (function () {
 
 	// consistency
 	tester.other8 = function (errorCallback) {
-		var test_case = "Check consistency of different data types after a reload";
+		var test_case = 'Check consistency of different data types after a reload';
 		var numops = 1000;
 		client.flushdb(function (err, res) {
 			if (err) {
@@ -434,8 +434,8 @@ exports.Other = (function () {
 											}
 											fs.writeFileSync('.//tests//tmp//repldump1.txt', dump);
 											fs.writeFileSync('.//tests//tmp//repldump2.txt', newdump);
-											console.log("Consistency test failed!");
-											console.log("You can inspect the two dumps in /tmp/repldump*.txt");
+											console.log('Consistency test failed!');
+											console.log('You can inspect the two dumps in /tmp/repldump*.txt');
 											testEmitter.emit('next');
 										});
 									}
@@ -450,7 +450,7 @@ exports.Other = (function () {
 
 	//consistency
 	tester.other9 = function (errorCallback) {
-		var test_case = "Same dataset digest if saving/reloading as AOF?";
+		var test_case = 'Same dataset digest if saving/reloading as AOF?';
 		client.bgrewriteaof(function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -471,7 +471,7 @@ exports.Other = (function () {
 							try {
 								if (!assert.deepEqual(sha1_after, sha1, test_case)) {
 									ut.pass(test_case);
-									fs.unlink(path.dirname(g.srv[cpid][server_pid]['stdout']) + path.sep + "appendonly.aof", function (err) {
+									fs.unlink(path.dirname(g.srv[cpid][server_pid]['stdout']) + path.sep + 'appendonly.aof', function (err) {
 										if (err) {
 											errorCallback(err);
 										}
@@ -486,9 +486,9 @@ exports.Other = (function () {
 									}
 									fs.writeFileSync('.//tests//tmp//aofdump1.txt', dump);
 									fs.writeFileSync('.//tests//tmp//aofdump2.txt', newdump);
-									console.log("Consistency test failed!");
-									console.log("You can inspect the two dumps in /tmp/aofdump*.txt");
-									fs.unlink(path.dirname(g.srv[cpid][server_pid]['stdout']) + path.sep + "appendonly.aof", function (err) {
+									console.log('Consistency test failed!');
+									console.log('You can inspect the two dumps in /tmp/aofdump*.txt');
+									fs.unlink(path.dirname(g.srv[cpid][server_pid]['stdout']) + path.sep + 'appendonly.aof', function (err) {
 										if (err) {
 											errorCallback(err);
 										}
@@ -504,8 +504,8 @@ exports.Other = (function () {
 	};
 
 	tester.other10_1 = function (errorCallback) {
-		var test_case = "PIPELINING stresser (also a regression for the old epoll bug.) ";
-		var error = "",
+		var test_case = 'PIPELINING stresser (also a regression for the old epoll bug.) ';
+		var error = '',
 		flag = true;
 		client.write(ut.formatCommand(['SELECT', '9']), function (err, res) {
 			if (err) {
@@ -513,7 +513,7 @@ exports.Other = (function () {
 			}
 			g.asyncFor(0, 100000, function (loop) {
 				var i = loop.iteration();
-				var val = "0000" + i + "0000";
+				var val = '0000' + i + '0000';
 				client.write(ut.formatCommand(['SET', 'key:' + i, val]), function (err, set_res) {
 					if (err) {
 						errorCallback(err);
@@ -524,7 +524,7 @@ exports.Other = (function () {
 						}
 						if (get_res !== val) {
 							flag = false;
-							error = "Expected: " + val + " got: " + get_res;
+							error = 'Expected: ' + val + ' got: ' + get_res;
 							loop.break();
 						}
 						loop.next();
@@ -545,7 +545,7 @@ exports.Other = (function () {
 	};
 
 	tester.other11 = function (errorCallback) {
-		var test_case = "APPEND basics";
+		var test_case = 'APPEND basics';
 		var result = new Array();
 		client.append('foo', 'bar', function (err, res) {
 			if (err) {
@@ -582,7 +582,7 @@ exports.Other = (function () {
 	};
 
 	tester.other12 = function (errorCallback) {
-		var test_case = "APPEND basics, integer encoded values";
+		var test_case = 'APPEND basics, integer encoded values';
 		var result = new Array();
 		client.del('foo', function (err, res) {
 			if (err) {
@@ -632,9 +632,9 @@ exports.Other = (function () {
 	};
 
 	tester.other13 = function (errorCallback) {
-		var test_case = "APPEND fuzzing";
+		var test_case = 'APPEND fuzzing';
 		var error_array = new Array();
-		var type = new Array("alpha", "binary", "compr");
+		var type = new Array('alpha', 'binary', 'compr');
 		g.asyncFor(0, type.length, function (outerloop) {
 			var i = outerloop.iteration();
 			var b = [];
@@ -656,7 +656,7 @@ exports.Other = (function () {
 					var buf = Buffer.concat(b);
 					client.get('x', function (err, got) {
 						if (got !== buf.toString()) {
-							error_array.push("Expected " + buf + " got " + got);
+							error_array.push('Expected ' + buf + ' got ' + got);
 							outerloop.break();
 						} else
 							outerloop.next();
@@ -677,7 +677,7 @@ exports.Other = (function () {
 
 	//Leave the user with a clean DB before to exit
 	tester.other14 = function (errorCallback) {
-		var test_case = "FLUSHDB";
+		var test_case = 'FLUSHDB';
 		var aux = new Array();
 		client.select(9, function (err, res) {
 			if (err) {
@@ -706,7 +706,7 @@ exports.Other = (function () {
 								}
 								aux[1] = res;
 								try {
-									if (!assert.equal(aux, "0,0", test_case)) {
+									if (!assert.equal(aux, '0,0', test_case)) {
 										ut.pass(test_case);
 										testEmitter.emit('next');
 									}
@@ -723,7 +723,7 @@ exports.Other = (function () {
 	};
 
 	tester.other15 = function (errorCallback) {
-		var test_case = "Config GET * returns all config parameters";
+		var test_case = 'Config GET * returns all config parameters';
 		client.config('get', '*', function (err, res) {
 			if (err) {
 				errorCallback(err)
@@ -741,10 +741,10 @@ exports.Other = (function () {
 	};
 
 	tester.other16 = function (errorCallback) {
-		var test_case = "Config GET wrong number of parameters";
+		var test_case = 'Config GET wrong number of parameters';
 		client.config('get', 'param1', 'param2', function (err, res) {
 			try {
-				if (!assert.ok(ut.match("Wrong number of arguments for CONFIG get", err), test_case)) {
+				if (!assert.ok(ut.match('Wrong number of arguments for CONFIG get', err), test_case)) {
 					ut.pass(test_case);
 					testEmitter.emit('next');
 				}
@@ -756,13 +756,13 @@ exports.Other = (function () {
 	};
 
 	tester.other17 = function (errorCallback) {
-		var test_case = "Config GET parameter name.";
+		var test_case = 'Config GET parameter name.';
 		client.config('get', 'dbfilename', function (err, res) {
 			if (err) {
 				errorCallback(err)
 			}
 			try {
-				if (!assert.deepEqual(res[1], "dump.rdb", test_case)) {
+				if (!assert.deepEqual(res[1], 'dump.rdb', test_case)) {
 					ut.pass(test_case);
 					testEmitter.emit('next');
 				}
@@ -774,7 +774,7 @@ exports.Other = (function () {
 	};
 
 	tester.other18 = function (errorCallback) {
-		var test_case = "Config GET parameter with pattern";
+		var test_case = 'Config GET parameter with pattern';
 		client.config('get', '*max-*-entries*', function (err, res) {
 			if (err) {
 				errorCallback(err)
@@ -792,7 +792,7 @@ exports.Other = (function () {
 	};
 
 	tester.other19 = function (errorCallback) {
-		var test_case = "Config SET & GET combinations";
+		var test_case = 'Config SET & GET combinations';
 		var error = null,
 		count = 0,
 		size = 0;
@@ -944,7 +944,7 @@ exports.Other = (function () {
 	};
 
 	tester.other20 = function (errorCallback) {
-		var test_case = "Config RESETSTAT";
+		var test_case = 'Config RESETSTAT';
 		client.config('resetstat', function (err, result) {
 			if (err) {
 				errorCallback(err)
@@ -967,10 +967,10 @@ exports.Other = (function () {
 	};
 
 	tester.other21 = function (errorCallback) {
-		var test_case = "Config command other than GET, SET, RESETSTAT";
+		var test_case = 'Config command other than GET, SET, RESETSTAT';
 		client.config('fake_command', function (err, res) {
 			try {
-				if (!assert.ok(ut.match("CONFIG subcommand must be one of GET, SET, RESETSTAT", err), test_case)) {
+				if (!assert.ok(ut.match('CONFIG subcommand must be one of GET, SET, RESETSTAT', err), test_case)) {
 					ut.pass(test_case);
 					testEmitter.emit('next');
 				}
@@ -982,7 +982,7 @@ exports.Other = (function () {
 	};
 
 	tester.other22 = function (errorCallback) {
-		var test_case = "Lastsave";
+		var test_case = 'Lastsave';
 		client.lastsave(function (err, res) {
 			try {
 				if (!assert.ok(util.isDate(new Date(res)), test_case)) {
@@ -997,8 +997,8 @@ exports.Other = (function () {
 	};
 
 	tester.other23 = function (errorCallback) {
-		var test_case = "ECHO";
-		var str = "Hello World!!";
+		var test_case = 'ECHO';
+		var str = 'Hello World!!';
 		client.echo(str, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1015,7 +1015,7 @@ exports.Other = (function () {
 	};
 
 	tester.other24 = function (errorCallback) {
-		var test_case = "Redis Version Check";
+		var test_case = 'Redis Version Check';
 		var cmd = '.' + sep + 'redis' + sep + 'src' + sep + REDIS_SERVER + ' --version ';
 		var child_check = child.exec(cmd);
 		child_check.stdout.on('data', function (data) {
@@ -1031,7 +1031,7 @@ exports.Other = (function () {
 	};
 	
 	tester.other25 = function (errorCallback) {
-		var test_case = "Monitor",
+		var test_case = 'Monitor',
 		replies = [],
 		m_client;
 		m_client = redis.createClient(server_port, server, {
@@ -1039,10 +1039,10 @@ exports.Other = (function () {
 			});
 		m_client.on('ready', function () {
 			if (other.debug_mode) {
-				log.notice(name + ":Client connected  and listening on socket: " + server_host + ":" + server_port);
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
-		m_client.on("monitor", function (time, args) {
+		m_client.on('monitor', function (time, args) {
 			replies.push(args);
 			if (replies.length === 2) {
 
@@ -1050,7 +1050,7 @@ exports.Other = (function () {
 					if ((!assert.equal(replies[0].length, 1, test_case)) && (!assert.deepEqual(replies[0][0], 'dbsize', test_case)) &&
 						(!assert.equal(replies[1].length, 3, test_case)) && (!assert.deepEqual(replies[1][0], 'set', test_case)) &&
 						(!assert.deepEqual(replies[1][1], 'json', test_case)) &&
-						(!assert.deepEqual(replies[1][2], '{"name":"John","surname":"Doe"}', test_case)))
+						(!assert.deepEqual(replies[1][2], "{'name':'John','surname':'Doe'}", test_case)))
 						ut.pass(test_case);
 				} catch (e) {
 					ut.fail(e, true);
@@ -1058,16 +1058,16 @@ exports.Other = (function () {
 
 				m_client.quit();
 				if (other.debug_mode) {
-					log.notice(name + ":Client disconnected listeting to socket : " + server_host + ":" + server_port);
+					log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 				}
 				testEmitter.emit('next');
 			}
 		});
 		m_client.monitor(function (err, res) {
 			client.dbsize();
-			client.set("json", JSON.stringify({
-					name : "John",
-					surname : "Doe"
+			client.set('json', JSON.stringify({
+					name : 'John',
+					surname : 'Doe'
 				}));
 		});
 

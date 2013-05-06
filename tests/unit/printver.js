@@ -4,10 +4,10 @@ exports.PrintVer = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	printver = {},
-	name = "Printver",
-	client = "",
+	name = 'Printver',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {};
 
 	//public property
@@ -16,7 +16,7 @@ exports.PrintVer = (function () {
 	// public methods
 	printver.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
-			var tags = "printver";
+			var tags = 'printver';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -43,7 +43,7 @@ exports.PrintVer = (function () {
 				} else {
 					client.end();
 					if (printver.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : " + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -66,7 +66,7 @@ exports.PrintVer = (function () {
 
 	// private methods
 	tester.getInfo = function (errorCallback) {
-		var test_case = "Testing Redis version "
+		var test_case = 'Testing Redis version '
 			client.info(function (err, res) {
 				var version = client.server_info.redis_version
 					var sha1 = client.server_info.redis_git_sha1
