@@ -35,67 +35,67 @@ exports.Bitops = (function () {
 	}
 
 	function conv_bits(str) {
-		var Bin = '',
-		HexASCII = '';
+		var bin = '',
+		hex_ASCII = '';
 		for (var iStr = 0; iStr < str.length; iStr++) {
 			val = str[iStr].charCodeAt(0);
-			HexASCII = decimalToHex(val);
-			for (var i = 0; i < HexASCII.toString().length; i++) {
-				switch (HexASCII.toString()[i]) {
+			hex_ASCII = decimalToHex(val);
+			for (var i = 0; i < hex_ASCII.toString().length; i++) {
+				switch (hex_ASCII.toString()[i]) {
 				case 'A':
-					Bin += fourDgtBinNum(parseInt(10).toString(2));
+					bin += fourDgtBinNum(parseInt(10).toString(2));
 					break;
 				case 'B':
-					Bin += fourDgtBinNum(parseInt(11).toString(2));
+					bin += fourDgtBinNum(parseInt(11).toString(2));
 					break;
 				case 'C':
-					Bin += fourDgtBinNum(parseInt(12).toString(2));
+					bin += fourDgtBinNum(parseInt(12).toString(2));
 					break;
 				case 'D':
-					Bin += fourDgtBinNum(parseInt(13).toString(2));
+					bin += fourDgtBinNum(parseInt(13).toString(2));
 					break;
 				case 'E':
-					Bin += fourDgtBinNum(parseInt(14).toString(2));
+					bin += fourDgtBinNum(parseInt(14).toString(2));
 					break;
 				case 'F':
-					Bin += fourDgtBinNum(parseInt(15).toString(2));
+					bin += fourDgtBinNum(parseInt(15).toString(2));
 					break;
 				default:
-					Bin += fourDgtBinNum(parseInt(HexASCII.toString()[i]).toString(2));
+					bin += fourDgtBinNum(parseInt(hex_ASCII.toString()[i]).toString(2));
 					break;
 
 				}
 			}
 		}
-		return Bin.split('').reverse().join('');
+		return bin.split('').reverse().join('');
 	}
 
 	function convBin_string(binNum) {
 		var charSet = '';
-		var Singchar = ''
+		var singChar = ''
 			binNum = binNum.split('').reverse().join('')
 			for (var i = 0; i < binNum.length; i = i + 8) {
-				Singchar = binNum.substring(i, i + 8);
-				charSet += String.fromCharCode(parseInt(Singchar, 2).toString(10));
+				singChar = binNum.substring(i, i + 8);
+				charSet += String.fromCharCode(parseInt(singChar, 2).toString(10));
 			}
 			return charSet;
 	}
 
 	function count_bits(str) {
-		var Bin = conv_bits(str);
-		return Bin.split(/1/g).length - 1;
+		var bin = conv_bits(str);
+		return bin.split(/1/g).length - 1;
 	}
 	function simulate_bit_op(op, args) {
 		var maxlen = 0;
 		var j = 0;
 		var count = args.length;
-		var BinNum = '';
+		var bin_Num = '';
 		var bArray = {};
 		for (var i = 0; i < count; i++) {
-			BinNum = conv_bits(args[i]);
-			bArray[j] = BinNum;
-			if (BinNum.toString().length > maxlen) {
-				maxlen = BinNum.toString().length;
+			bin_Num = conv_bits(args[i]);
+			bArray[j] = bin_Num;
+			if (bin_Num.toString().length > maxlen) {
+				maxlen = bin_Num.toString().length;
 			}
 			j++;
 		}
@@ -110,7 +110,7 @@ exports.Bitops = (function () {
 		bit2 = '';
 		for (var x = 0; x < maxlen; x++) {
 			bit = bArray[0].toString().substring(x, x + 1);
-			if (op == 'not') {
+			if (op === 'not') {
 				bit = (bit == '1') ? 0 : 1;
 			}
 			for (var j = 1; j < count; j++) {
@@ -592,7 +592,7 @@ exports.Bitops = (function () {
 
 				});
 			}, function () {
-				if (ErrorMsg == ''){
+				if (ErrorMsg === ''){
 					ut.pass(test_case);
 					loop.next();
 				}
@@ -643,7 +643,7 @@ exports.Bitops = (function () {
 				});
 			})
 		}, function () {
-			if(errormsg == '')
+			if(errormsg === '')
 				ut.pass(test_case);
 			else
 				ut.fail(errormsg, true);

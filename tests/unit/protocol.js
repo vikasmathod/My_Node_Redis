@@ -3,7 +3,6 @@ exports.Protocol = (function () {
 	var testEmitter = new events.EventEmitter(),
 	ut = new Utility(),
 	server = new Server(),
-	server1 = new Server(),
 	protocol = {},
 	name = 'Protocol',
 	client = '',
@@ -302,34 +301,35 @@ exports.Protocol = (function () {
 		});
 		stream.write('*1\r\nfoo\r\n');
 	};
-
+	
 	tester.Proto9 = function (errorCallback) {
 		var test_case = 'Generic wrong number of args';
-		client = redis.createClient(server_port, server_host);
-		client.on('ready', function () {
+		var stream = net.createConnection(server_port, server_host);
+		stream.on('connect', function () {
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 			}
 		});
-		client.ping('x', 'y', 'z', function (err, res) {
-			if (res) {
-				errorCallback(res);
-			}
+		stream.on('error', function (err) {
+			errorCallback(err);
+		});
+		stream.on('data', function (data) {
 			try {
-				if (!assert.ok(ut.match("[wrong*][arguments]['ping'*]", err), test_case)) {
+				if (!assert.ok(ut.match("[wrong*][arguments]['ping'*]", data.toString()), test_case)) {
 					ut.pass(test_case);
 				}
 			} catch (e) {
 				ut.fail(e, true);
 			}
-			client.end();
+			stream.end();
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 			}
 			testEmitter.emit('next');
 		});
+		stream.write(ut.formatCommand(['PING','x','y','z']));
 	};
-
+	
 	tester.Proto10 = function (errorCallback) {
 		g.asyncFor(0, seq.length, function (outerloop) {
 			var retval;

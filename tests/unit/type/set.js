@@ -2047,38 +2047,6 @@ exports.Set = (function () {
 									Result = false;
 								}
 								loop.next();
-								/*g.asyncFor(0,1000,function(loop){
-								function test_cond(length){
-								if(tempArray.length == length){
-								tempArray = [];
-								if(ut.compareArray(res_array.sort(),myset.sort())){
-								Result = true;
-								loop.break();
-								}
-								else{
-								Result = false;
-								Error = 'Array not equal';
-								loop.next();
-								}
-								}
-								else
-								test_cond(length);
-								}
-								client.srandmember('myset',-10,function(err,res4){
-								tempArray = res4;
-								var i=0;
-								while(i<res4.length){
-								if(res_array.indexOf(res4[i]) == -1)
-								res_array.push(res4[i]);
-								i++
-								}
-								});
-								if(tempArray.length!=10){
-								setTimeout(function(){test_cond(10);},1000);
-								}
-								},function(){
-								arg(null,null);
-								});*/
 							});
 						}, function () {
 							arg(null, null);
@@ -2251,38 +2219,6 @@ exports.Set = (function () {
 									Result = false;
 								}
 								loop.next();
-								/*g.asyncFor(0,1000,function(loop){
-								function test_cond(length){
-								if(tempArray.length == length){
-								tempArray = [];
-								if(ut.compareArray(res_array.sort(),myset.sort())){
-								Result = true;
-								loop.break();
-								}
-								else{
-								Result = false;
-								Error = 'Array not equal';
-								loop.next();
-								}
-								}
-								else
-								test_cond(length);
-								}
-								client.srandmember('myset',-10,function(err,res4){
-								tempArray = res4;
-								var i=0;
-								while(i<res4.length){
-								if(res_array.indexOf(res4[i]) == -1)
-								res_array.push(res4[i]);
-								i++
-								}
-								});
-								if(tempArray.length!=10){
-								setTimeout(function(){test_cond(10);},1000);
-								}
-								},function(){
-								arg(null,null);
-								});*/
 							});
 						}, function () {
 							arg(null, null);

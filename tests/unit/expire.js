@@ -566,30 +566,30 @@ exports.Expire = (function () {
 		//This test is very likely to do a false positive if the
 		//server is under pressure, so if it does not work give it a few more
 		//chances.
-		var Resa = '',
-		Resb = '';
+		var res_A = '',
+		res_B = '';
 		g.asyncFor(0, 9, function (loop) {
 			client.del('x');
 			client.setex('x', 1, 'somevalue');
 
 			setTimeout(function () {
 				client.get('x', function (err, res) {
-					Resa = res;
+					res_A = res;
 				});
 
 				setTimeout(function () {
 					client.get('x', function (err, res) {
-						Resb = res;
+						res_B = res;
 					});
 				}, 1100);
-				if (Resa == 'somevalue' && Resb == '')
+				if (res_A == 'somevalue' && res_B == '')
 					loop.break();
 				loop.next();
 			}, 900);
 
 		}, function () {
 			try {
-				if (!assert.deepEqual([Resa, Resb], ['somevalue', ''], test_case))
+				if (!assert.deepEqual([res_A, res_B], ['somevalue', ''], test_case))
 					ut.pass(test_case);
 			} catch (e) {
 				ut.fail(e, true);
@@ -665,36 +665,36 @@ exports.Expire = (function () {
 		//This test is very likely to do a false positive if the
 		//server is under pressure, so if it does not work give it a few more
 		//chances
-		var ResA = '',
-		ResB = '',
-		ResC = '',
-		ResD = '',
+		var resA = '',
+		resB = '',
+		resC = '',
+		resD = '',
 		ResE = '',
-		ResF = '';
+		resF = '';
 		g.asyncFor(0, 9, function (loop) {
 			client.del('x', 'y', 'z');
 			client.psetex('x', 100, 'somevalue');
 			setTimeout(function () {
 				client.get('x', function (err, res) {
-					ResA = res;
+					resA = res;
 				});
 
 			}, 80);
 			setTimeout(function () {
 				client.get('x', function (err, res) {
-					ResB = res;
+					resB = res;
 				});
 			}, 120);
 			client.set('x', 'somevalue');
 			client.pexpire('x', 100);
 			setTimeout(function () {
 				client.get('x', function (err, res) {
-					ResC = res;
+					resC = res;
 				});
 			}, 80);
 			setTimeout(function () {
 				client.get('x', function (err, res) {
-					ResD = res;
+					resD = res;
 				});
 			}, 120);
 			client.set('x', 'somevalue');
@@ -706,16 +706,16 @@ exports.Expire = (function () {
 			}, 80);
 			setTimeout(function () {
 				client.get('x', function (err, res) {
-					ResF = res;
+					resF = res;
 				});
-				if (ResA == 'somevalue' && ResC == 'somevalue' && ResD == 'somevalue' &&
-					ResB == '' && ResD == '' && ResF == '')
+				if (resA === 'somevalue' && resC === 'somevalue' && resD === 'somevalue' &&
+					resB === '' && resD === '' && resF === '')
 					loop.break();
 				loop.next();
 			}, 120);
 		}, function () {
 			try {
-				if (!assert.deepEqual([ResA, ResB], ['somevalue', null], test_case))
+				if (!assert.deepEqual([resA, resB], ['somevalue', null], test_case))
 					ut.pass(test_case);
 			} catch (e) {
 				ut.fail(e, true);
