@@ -250,10 +250,6 @@ exports.Slowlog = (function () {
 					if (err) {
 						callback(err, null);
 					}
-					//client.sadd('set', 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, function (err, expres) {
-					/* if (err) {
-					callback(err, null);
-					} */
 					client.slowlog('get', function (err, res) {
 						if (err) {
 							errorCallback(err);
@@ -261,11 +257,6 @@ exports.Slowlog = (function () {
 						e = res[0];
 						var Res = e[3];
 						var expres = ['sadd', 'set', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '... (2 more arguments)'];
-
-						//client.lindex(e, 3, function (err, res) {
-						/* if (err) {
-						errorCallback(err);
-						} */
 						try {
 							if (!assert.deepEqual(Res, expres, test_case)) {
 								ut.pass(test_case);
@@ -275,9 +266,7 @@ exports.Slowlog = (function () {
 							ut.fail(e, true);
 							testEmitter.emit('next');
 						}
-						//});
 					});
-					//});
 				});
 			});
 		});

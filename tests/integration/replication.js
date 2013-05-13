@@ -667,7 +667,6 @@ exports.Replication = (function () {
 									callback(err)
 								}
 								// Don't know why this regex is not getting caught.
-								//var patt = 'slave\d{1}\:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\,\d{0,5}\,online ';
 								var patt = 'connected_slaves:3'
 									if (ut.match(patt, res)) {
 										loop.break();

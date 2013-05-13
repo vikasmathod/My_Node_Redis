@@ -643,11 +643,6 @@ exports.Expire = (function () {
 				}
 				res2 = size2
 			});
-			//client.set('size2', res, function (err, res) {
-			//	if (err) {
-			//		errorCallback(err);
-			//	}
-			//});
 		}, 1000);
 		try {
 			if ((!assert.equal(res1, 1, test_case)) && (!assert.equal(res2, 0, test_case))) {
@@ -669,7 +664,7 @@ exports.Expire = (function () {
 		resB = '',
 		resC = '',
 		resD = '',
-		ResE = '',
+		resE = '',
 		resF = '';
 		g.asyncFor(0, 9, function (loop) {
 			client.del('x', 'y', 'z');
@@ -701,7 +696,7 @@ exports.Expire = (function () {
 			client.pexpireat('x', ((new Date()).getTime() + 100));
 			setTimeout(function () {
 				client.get('x', function (err, res) {
-					ResE = res;
+					resE = res;
 				});
 			}, 80);
 			setTimeout(function () {
@@ -709,8 +704,9 @@ exports.Expire = (function () {
 					resF = res;
 				});
 				if (resA === 'somevalue' && resC === 'somevalue' && resD === 'somevalue' &&
-					resB === '' && resD === '' && resF === '')
+					resB === '' && resD === '' && resF === ''){
 					loop.break();
+				}
 				loop.next();
 			}, 120);
 		}, function () {
