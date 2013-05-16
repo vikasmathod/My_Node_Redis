@@ -1168,6 +1168,14 @@ exports.List = (function () {
 					errorCallback(err);
 				}
 				result_array.push(res);
+				try {
+					if (!assert.deepEqual(result_array, [ [ 'foo' ], 'foo' ], test_case)) {
+						ut.pass(test_case);
+					}
+				} catch (e) {
+					ut.fail(e, true);
+				}
+				testEmitter.emit('next');
 			});
 			setTimeout(function () {
 				cli.rpush('blist', 'foo', function (err, res) {
@@ -1180,18 +1188,11 @@ exports.List = (function () {
 						errorCallback(err);
 					}
 					result_array.push(res);
-					try {
-						if (!assert.deepEqual(result_array, [['foo']], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
-					testEmitter.emit('next');
 				});
 			}, 1000);
 		});
 	};
+	
 	tester.List16 = function (errorCallback) {
 		var test_case = 'BRPOPLPUSH with a client BLPOPing the target list';
 		var result_array = new Array();
@@ -4698,6 +4699,46 @@ exports.List = (function () {
 			testEmitter.emit('next');
 		});
 	};
+
+	tester.List108 = function(errorCallback){
+		var test_case = 'Timeout and invalid timeout error on BRPOPLPUSH';
+		client.brpoplpush('a', 'b', -1, function (err1, res) {	
+			client.brpoplpush('a','b', 0xffffffff, function (err2, res) {	
+				try{
+					if(!assert.ok(ut.match('negative',err1),test_case) && !assert.ok(ut.match('ERR timeout',err2),test_case))	
+						ut.pass(test_case);
+				}catch(e){
+					ut.fail(e,true);
+				}
+				testEmitter.emit('next');
+			});		
+		});
+	}
+	 
+	tester.List109 = function(errorCallback){
+		var test_case = 'LINDEX throw Error for Index out of range';
+		client.lpush('mylist', 'bar', function (err, res) {	
+			client.lindex('mylist', -1e-1, function (err1, res) {	
+				client.lset('mylist',-1e-1, 0, function (err2, res) {
+					client.lrange('mylist',0, -1e-1, function (err3, res) {	
+						client.ltrim('mylist',0, -1e-1, function (err4, res) {
+							client.lrem('mylist', -1e-1, function (err5, res) {
+								try{
+									if(!assert.ok(ut.match('out of range',err1),test_case) && !assert.ok(ut.match('out of range',err2),test_case)
+									&& !assert.ok(ut.match('out of range',err3),test_case) && !assert.ok(ut.match('out of range',err4),test_case)
+									&& !assert.ok(ut.match('wrong number of arguments',err5),test_case))	
+										ut.pass(test_case);
+								}catch(e){
+									ut.fail(e,true);
+								}
+								testEmitter.emit('next');
+							});
+						});
+					});
+				});
+			});		
+		});
+	}
 
 	return list;
 

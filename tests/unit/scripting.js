@@ -379,9 +379,9 @@ exports.Scripting = (function () {
 			var test_case = 'EVAL - Script can\'t run more than configured time limit';
 			client.config('set', 'lua-time-limit', 1, function (err, res) {
 
-				client.eval('local i = 0 while true do i=i+1 end', 0, function (err, res) {
+				client.eval('local i = 0 while false do i=i+1 end', 0, function (err, res) {
 					try {
-						if (!assert.equal(err, 'execution time', test_case))
+						if (!assert.ok(ut.match('execution time',err), test_case))
 							ut.pass(test_case);
 					} catch (e) {
 						ut.fail(e, true);

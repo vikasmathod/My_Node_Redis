@@ -6,16 +6,16 @@ exports.Bgsaveperf = (function () {
 	BgUtility = require('../support/bgutil.js'),
 	bg = new BgUtility(),
 	bgsaveperf = {},
-	name = 'BgsavePerf",
-	client = "",
+	name = 'BgsavePerf',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {},
 	iter1 = 1000000,
 	iter2 = 100,
-	start = "",
-	bgstart = "",
-	elapsed = "";
+	start = '',
+	bgstart = '',
+	elapsed = '';
 
 	//public property
 	bgsaveperf.debug_mode = false;
@@ -24,7 +24,7 @@ exports.Bgsaveperf = (function () {
 	bgsaveperf.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
 			// write logic to start the server here.
-			var tags = 'bgsave";
+			var tags = 'bgsave';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -50,7 +50,7 @@ exports.Bgsaveperf = (function () {
 				} else {
 					client.end();
 					if (bgsaveperf.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -75,7 +75,7 @@ exports.Bgsaveperf = (function () {
 
 
 	tester.bgp1 = function (errorCallback) {
-		var test_case = 'BGSAVE string copy on write latency";
+		var test_case = 'BGSAVE string copy on write latency';
 		ut.waitForBgsave(client, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -84,21 +84,21 @@ exports.Bgsaveperf = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				console.log("\tMeasuring Bgsave for ' + iter1 + ' strings");
+				console.log('\tMeasuring Bgsave for ' + iter1 + ' strings');
 				start = new Date().getTime();
 				bg.mset_loop(client, iter1, iter2, function (err, res) {
 					if (err) {
 						errorCallback(err);
 					}
 					elapsed = new Date().getTime() - start;
-					console.log("\tTime to create items : ' + elapsed + ' ms");
+					console.log('\tTime to create items : ' + elapsed + ' ms');
 					start = new Date().getTime();
 					client.set(500, 'xyz', function (err, res) {
 						if (err) {
 							errorCallback(err);
 						}
 						elapsed = new Date().getTime() - start;
-						console.log("\tTime to modify first value (no save) : ' + elapsed + ' ms");
+						console.log('\tTime to modify first value (no save) : ' + elapsed + ' ms');
 						ut.waitForBgsave(client, function (err, res) {
 							if (err) {
 								errorCallback(err);
@@ -113,7 +113,7 @@ exports.Bgsaveperf = (function () {
 										errorCallback(err);
 									}
 									elapsed = new Date().getTime() - bgstart;
-									console.log("\tTime for RO bgsave to complete : ' + elapsed + ' ms");
+									console.log('\tTime for RO bgsave to complete : ' + elapsed + ' ms');
 									start = new Date().getTime();
 									bgstart = new Date().getTime();
 									client.bgsave(function (err, res) {
@@ -121,27 +121,27 @@ exports.Bgsaveperf = (function () {
 											errorCallback(err);
 										}
 										elapsed = new Date().getTime() - start;
-										console.log("\tTime to start bgsave : ' + elapsed + ' ms");
+										console.log('\tTime to start bgsave : ' + elapsed + ' ms');
 										start = new Date().getTime();
 										client.set(502, 'xyz', function (err, res) {
 											if (err) {
 												errorCallback(err);
 											}
 											elapsed = new Date().getTime() - start;
-											console.log("\tTime to modify first value (saving) : ' + elapsed + ' ms");
+											console.log('\tTime to modify first value (saving) : ' + elapsed + ' ms');
 											start = new Date().getTime();
 											client.set(503, 'xyz', function (err, res) {
 												if (err) {
 													errorCallback(err);
 												}
 												elapsed = new Date().getTime() - start;
-												console.log("\tTime to modify second value (saving) : ' + elapsed + ' ms");
+												console.log('\tTime to modify second value (saving) : ' + elapsed + ' ms');
 												ut.waitForBgsave(client, function (err, res) {
 													if (err) {
 														errorCallback(err);
 													}
 													elapsed = new Date().getTime() - bgstart;
-													console.log("\tTime for bgsave to complete : ' + elapsed + ' ms\n");
+													console.log('\tTime for bgsave to complete : ' + elapsed + ' ms\n');
 													client.flushdb(function (err, res) {
 														if (err) {
 															errorCallback(err);
@@ -168,8 +168,8 @@ exports.Bgsaveperf = (function () {
 		});
 	};
 	tester.bgp2 = function (errorCallback) {
-		var test_case = 'BGSAVE list copy on write latency";
-		var key = 'mylist";
+		var test_case = 'BGSAVE list copy on write latency';
+		var key = 'mylist';
 		ut.waitForBgsave(client, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -178,21 +178,21 @@ exports.Bgsaveperf = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				console.log("\tMeasuring Bgsave for ' + iter1 + ' strings in list");
+				console.log('\tMeasuring Bgsave for ' + iter1 + ' strings in list');
 				start = new Date().getTime();
 				bg.rpush_loop(client, key, iter1, iter2, function (err, res) {
 					if (err) {
 						errorCallback(err);
 					}
 					elapsed = new Date().getTime() - start;
-					console.log("\tTime to create items : ' + elapsed + ' ms");
+					console.log('\tTime to create items : ' + elapsed + ' ms');
 					start = new Date().getTime();
 					client.rpush(key, 'abcdefghij', function (err, res) {
 						if (err) {
 							errorCallback(err);
 						}
 						elapsed = new Date().getTime() - start;
-						console.log("\tTime to modify first value (no save) : ' + elapsed + ' ms");
+						console.log('\tTime to modify first value (no save) : ' + elapsed + ' ms');
 						ut.waitForBgsave(client, function (err, res) {
 							if (err) {
 								errorCallback(err);
@@ -207,7 +207,7 @@ exports.Bgsaveperf = (function () {
 										errorCallback(err);
 									}
 									elapsed = new Date().getTime() - bgstart;
-									console.log("\tTime for RO bgsave to complete : ' + elapsed + ' ms");
+									console.log('\tTime for RO bgsave to complete : ' + elapsed + ' ms');
 									start = new Date().getTime();
 									bgstart = new Date().getTime();
 									client.bgsave(function (err, res) {
@@ -215,27 +215,27 @@ exports.Bgsaveperf = (function () {
 											errorCallback(err);
 										}
 										elapsed = new Date().getTime() - start;
-										console.log("\tTime to start bgsave : ' + elapsed + ' ms");
+										console.log('\tTime to start bgsave : ' + elapsed + ' ms');
 										start = new Date().getTime();
 										client.rpush(key, 'abcdefghij', function (err, res) {
 											if (err) {
 												errorCallback(err);
 											}
 											elapsed = new Date().getTime() - start;
-											console.log("\tTime to modify first value (saving) : ' + elapsed + ' ms");
+											console.log('\tTime to modify first value (saving) : ' + elapsed + ' ms');
 											start = new Date().getTime();
 											client.rpush(key, 'abcdefghij', function (err, res) {
 												if (err) {
 													errorCallback(err);
 												}
 												elapsed = new Date().getTime() - start;
-												console.log("\tTime to modify second value (saving) : ' + elapsed + ' ms");
+												console.log('\tTime to modify second value (saving) : ' + elapsed + ' ms');
 												ut.waitForBgsave(client, function (err, res) {
 													if (err) {
 														errorCallback(err);
 													}
 													elapsed = new Date().getTime() - bgstart;
-													console.log("\tTime for bgsave to complete : ' + elapsed + ' ms\n");
+													console.log('\tTime for bgsave to complete : ' + elapsed + ' ms\n');
 													client.flushdb(function (err, res) {
 														if (err) {
 															errorCallback(err);
@@ -262,8 +262,8 @@ exports.Bgsaveperf = (function () {
 		});
 	};
 	tester.bgp3 = function (errorCallback) {
-		var test_case = 'BGSAVE hash dictionary copy on write latency";
-		var key = 'myhash";
+		var test_case = 'BGSAVE hash dictionary copy on write latency';
+		var key = 'myhash';
 		ut.waitForBgsave(client, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -272,21 +272,21 @@ exports.Bgsaveperf = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				console.log("\tMeasuring Bgsave for ' + iter1 + ' strings in hash dictionary");
+				console.log('\tMeasuring Bgsave for ' + iter1 + ' strings in hash dictionary');
 				start = new Date().getTime();
 				bg.hmset_loop(client, key, iter1, iter2, function (err, res) {
 					if (err) {
 						errorCallback(err);
 					}
 					elapsed = new Date().getTime() - start;
-					console.log("\tTime to create items : ' + elapsed + ' ms");
+					console.log('\tTime to create items : ' + elapsed + ' ms');
 					start = new Date().getTime();
 					client.hset(key, 501, 'xyz', function (err, res) {
 						if (err) {
 							errorCallback(err);
 						}
 						elapsed = new Date().getTime() - start;
-						console.log("\tTime to modify first value (no save) : ' + elapsed + ' ms");
+						console.log('\tTime to modify first value (no save) : ' + elapsed + ' ms');
 						ut.waitForBgsave(client, function (err, res) {
 							if (err) {
 								errorCallback(err);
@@ -301,7 +301,7 @@ exports.Bgsaveperf = (function () {
 										errorCallback(err);
 									}
 									elapsed = new Date().getTime() - bgstart;
-									console.log("\tTime for RO bgsave to complete : ' + elapsed + ' ms");
+									console.log('\tTime for RO bgsave to complete : ' + elapsed + ' ms');
 									start = new Date().getTime();
 									bgstart = new Date().getTime();
 									client.bgsave(function (err, res) {
@@ -309,27 +309,27 @@ exports.Bgsaveperf = (function () {
 											errorCallback(err);
 										}
 										elapsed = new Date().getTime() - start;
-										console.log("\tTime to start bgsave : ' + elapsed + ' ms");
+										console.log('\tTime to start bgsave : ' + elapsed + ' ms');
 										start = new Date().getTime();
 										client.hset(key, 502, 'xyz', function (err, res) {
 											if (err) {
 												errorCallback(err);
 											}
 											elapsed = new Date().getTime() - start;
-											console.log("\tTime to modify first value (saving) : ' + elapsed + ' ms");
+											console.log('\tTime to modify first value (saving) : ' + elapsed + ' ms');
 											start = new Date().getTime();
 											client.hset(key, 503, 'xyz', function (err, res) {
 												if (err) {
 													errorCallback(err);
 												}
 												elapsed = new Date().getTime() - start;
-												console.log("\tTime to modify second value (saving) : ' + elapsed + ' ms");
+												console.log('\tTime to modify second value (saving) : ' + elapsed + ' ms');
 												ut.waitForBgsave(client, function (err, res) {
 													if (err) {
 														errorCallback(err);
 													}
 													elapsed = new Date().getTime() - bgstart;
-													console.log("\tTime for bgsave to complete : ' + elapsed + ' ms\n");
+													console.log('\tTime for bgsave to complete : ' + elapsed + ' ms\n');
 													client.flushdb(function (err, res) {
 														if (err) {
 															errorCallback(err);
@@ -356,8 +356,8 @@ exports.Bgsaveperf = (function () {
 		});
 	};
 	tester.bgp4 = function (errorCallback) {
-		var test_case = 'BGSAVE large set copy on write latency";
-		var key = 'myset";
+		var test_case = 'BGSAVE large set copy on write latency';
+		var key = 'myset';
 		ut.waitForBgsave(client, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -366,21 +366,21 @@ exports.Bgsaveperf = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				console.log("\tMeasuring Bgsave for ' + iter1 + ' strings in set");
+				console.log('\tMeasuring Bgsave for ' + iter1 + ' strings in set');
 				start = new Date().getTime();
 				bg.sadd_loop(client, key, iter1, iter2, function (err, res) {
 					if (err) {
 						errorCallback(err);
 					}
 					elapsed = new Date().getTime() - start;
-					console.log("\tTime to create items : ' + elapsed + ' ms");
+					console.log('\tTime to create items : ' + elapsed + ' ms');
 					start = new Date().getTime();
 					client.sadd(key, 'abc', function (err, res) {
 						if (err) {
 							errorCallback(err);
 						}
 						elapsed = new Date().getTime() - start;
-						console.log("\tTime to modify first value (no save) : ' + elapsed + ' ms");
+						console.log('\tTime to modify first value (no save) : ' + elapsed + ' ms');
 						ut.waitForBgsave(client, function (err, res) {
 							if (err) {
 								errorCallback(err);
@@ -395,7 +395,7 @@ exports.Bgsaveperf = (function () {
 										errorCallback(err);
 									}
 									elapsed = new Date().getTime() - bgstart;
-									console.log("\tTime for RO bgsave to complete : ' + elapsed + ' ms");
+									console.log('\tTime for RO bgsave to complete : ' + elapsed + ' ms');
 									start = new Date().getTime();
 									bgstart = new Date().getTime();
 									client.bgsave(function (err, res) {
@@ -403,27 +403,27 @@ exports.Bgsaveperf = (function () {
 											errorCallback(err);
 										}
 										elapsed = new Date().getTime() - start;
-										console.log("\tTime to start bgsave : ' + elapsed + ' ms");
+										console.log('\tTime to start bgsave : ' + elapsed + ' ms');
 										start = new Date().getTime();
 										client.sadd(key, 'def', function (err, res) {
 											if (err) {
 												errorCallback(err);
 											}
 											elapsed = new Date().getTime() - start;
-											console.log("\tTime to modify first value (saving) : ' + elapsed + ' ms");
+											console.log('\tTime to modify first value (saving) : ' + elapsed + ' ms');
 											start = new Date().getTime();
 											client.sadd(key, 'xyz', function (err, res) {
 												if (err) {
 													errorCallback(err);
 												}
 												elapsed = new Date().getTime() - start;
-												console.log("\tTime to modify second value (saving) : ' + elapsed + ' ms");
+												console.log('\tTime to modify second value (saving) : ' + elapsed + ' ms');
 												ut.waitForBgsave(client, function (err, res) {
 													if (err) {
 														errorCallback(err);
 													}
 													elapsed = new Date().getTime() - bgstart;
-													console.log("\tTime for bgsave to complete : ' + elapsed + ' ms\n");
+													console.log('\tTime for bgsave to complete : ' + elapsed + ' ms\n');
 													client.flushdb(function (err, res) {
 														if (err) {
 															errorCallback(err);
@@ -450,8 +450,8 @@ exports.Bgsaveperf = (function () {
 		});
 	};
 	tester.bgp5 = function (errorCallback) {
-		var test_case = 'BGSAVE large zset copy on write latency";
-		var key = 'myzset";
+		var test_case = 'BGSAVE large zset copy on write latency';
+		var key = 'myzset';
 		ut.waitForBgsave(client, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -460,21 +460,21 @@ exports.Bgsaveperf = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				console.log("\tMeasuring Bgsave for ' + iter1 + ' strings in ordered set");
+				console.log('\tMeasuring Bgsave for ' + iter1 + ' strings in ordered set');
 				start = new Date().getTime();
 				bg.zadd_loop(client, key, iter1, iter2, function (err, res) {
 					if (err) {
 						errorCallback(err);
 					}
 					elapsed = new Date().getTime() - start;
-					console.log("\tTime to create items : ' + elapsed + ' ms");
+					console.log('\tTime to create items : ' + elapsed + ' ms');
 					start = new Date().getTime();
 					client.zadd(key, 501, 9999, function (err, res) {
 						if (err) {
 							errorCallback(err);
 						}
 						elapsed = new Date().getTime() - start;
-						console.log("\tTime to modify first value (no save) : ' + elapsed + ' ms");
+						console.log('\tTime to modify first value (no save) : ' + elapsed + ' ms');
 						ut.waitForBgsave(client, function (err, res) {
 							if (err) {
 								errorCallback(err);
@@ -489,7 +489,7 @@ exports.Bgsaveperf = (function () {
 										errorCallback(err);
 									}
 									elapsed = new Date().getTime() - bgstart;
-									console.log("\tTime for RO bgsave to complete : ' + elapsed + ' ms");
+									console.log('\tTime for RO bgsave to complete : ' + elapsed + ' ms');
 									start = new Date().getTime();
 									bgstart = new Date().getTime();
 									client.bgsave(function (err, res) {
@@ -497,27 +497,27 @@ exports.Bgsaveperf = (function () {
 											errorCallback(err);
 										}
 										elapsed = new Date().getTime() - start;
-										console.log("\tTime to start bgsave : ' + elapsed + ' ms");
+										console.log('\tTime to start bgsave : ' + elapsed + ' ms');
 										start = new Date().getTime();
 										client.zadd(key, 502, 9998, function (err, res) {
 											if (err) {
 												errorCallback(err);
 											}
 											elapsed = new Date().getTime() - start;
-											console.log("\tTime to modify first value (saving) : ' + elapsed + ' ms");
+											console.log('\tTime to modify first value (saving) : ' + elapsed + ' ms');
 											start = new Date().getTime();
 											client.zadd(key, 503, 9997, function (err, res) {
 												if (err) {
 													errorCallback(err);
 												}
 												elapsed = new Date().getTime() - start;
-												console.log("\tTime to modify second value (saving) : ' + elapsed + ' ms");
+												console.log('\tTime to modify second value (saving) : ' + elapsed + ' ms');
 												ut.waitForBgsave(client, function (err, res) {
 													if (err) {
 														errorCallback(err);
 													}
 													elapsed = new Date().getTime() - bgstart;
-													console.log("\tTime for bgsave to complete : ' + elapsed + ' ms\n");
+													console.log('\tTime for bgsave to complete : ' + elapsed + ' ms\n');
 													client.flushdb(function (err, res) {
 														if (err) {
 															errorCallback(err);

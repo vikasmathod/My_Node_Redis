@@ -3,6 +3,8 @@ exports.Replication2 = (function () {
 	var testEmitter = new events.EventEmitter(),
 	ut = new Utility(),
 	server = new Server(),
+	server1 = new Server(),
+	server2 = new Server(),
 	replication2 = {},
 	name = 'Replication2',
 	tester = {},
@@ -11,7 +13,9 @@ exports.Replication2 = (function () {
 	master_port = '',
 	master_cli = '',
 	slave_cli = '',
+	client_pid = '',
 	server_pid = '',
+	server_pid1 = '',
 	server_pid2 = '';
 
 	//public property
@@ -163,6 +167,82 @@ exports.Replication2 = (function () {
 		});
 	};
 
+	tester.Repl23 = function(errorCallback){
+		var test_case = "SLAVEOF Command Basics";
+		var res_array = [];
+		var overrides = {};
+		var args = {};
+		args['name'] = name;
+		args['tags'] = "Slave";
+		args['overrides'] = overrides; 
+		server1.start_server(client_pid, args, function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			server_pid1 = res;
+			slavecli = g.srv[client_pid][server_pid1]['client'];
+			slave_host = g.srv[client_pid][server_pid1]['host'];
+			slave_port = g.srv[client_pid][server_pid1]['port'];
+			slavecli.slaveof(master_host, master_port, function (err, res) {
+				res_array.push(res);
+				slavecli.slaveof( 'no', 'one', function (err, res) {
+					res_array.push(res);
+					try{
+						if(!assert.deepEqual(res_array,['OK','OK'],test_case))
+							ut.pass(test_case);
+					}catch(e){
+						ut.fail(e,true);
+					}
+					slavecli.end();
+					server1.kill_server(client_pid, server_pid1, function (err, res) {
+						testEmitter.emit('next');
+					}); 
+				});
+			});
+		});
+	}
+	
+	tester.Repl24 = function(errorCallback){
+		var test_case = "MIGRATE Command Basics";
+		var res_array = [];
+		var overrides = {};
+		var args = {};
+		args['name'] = name;
+		args['tags'] = '';
+		args['overrides'] = overrides; 
+		master_cli.set('key', 'Some Value');
+		server2.start_server(client_pid, args, function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			server_pid1 = res;
+			client_new = g.srv[client_pid][server_pid1]['client'];
+			new_host = g.srv[client_pid][server_pid1]['host'];
+			new_port = g.srv[client_pid][server_pid1]['port'];
+			client_new.exists('key',function(err,res){
+				if(res === 1)
+					client_new.del('key');
+				master_cli.migrate(new_host, new_port, 'key', 0, -1, function (err, res) {
+					res_array.push(res);
+					client_new.exists('key',function(err,res){
+						res_array.push(res);
+						try{
+							if(!assert.deepEqual(res_array,['OK',1],test_case))
+								ut.pass(test_case);
+						}catch(e){
+							ut.fail(e,true);
+						}
+						client_new.end();
+						server2.kill_server(client_pid, server_pid1, function (err, res) {
+							testEmitter.emit('next');
+						});
+					});
+				});
+			});
+		});
+	}
+	
+	
 	return replication2
 }
 	());

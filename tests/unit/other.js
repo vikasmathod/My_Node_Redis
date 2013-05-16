@@ -1050,7 +1050,7 @@ exports.Other = (function () {
 					if ((!assert.equal(replies[0].length, 1, test_case)) && (!assert.deepEqual(replies[0][0], 'dbsize', test_case)) &&
 						(!assert.equal(replies[1].length, 3, test_case)) && (!assert.deepEqual(replies[1][0], 'set', test_case)) &&
 						(!assert.deepEqual(replies[1][1], 'json', test_case)) &&
-						(!assert.deepEqual(replies[1][2], "{'name':'John','surname':'Doe'}", test_case)))
+						(!assert.deepEqual(replies[1][2], '{"name":"John","surname":"Doe"}', test_case)))
 						ut.pass(test_case);
 				} catch (e) {
 					ut.fail(e, true);
@@ -1073,6 +1073,60 @@ exports.Other = (function () {
 
 	};
 
+	tester.other26 = function(errorCallback){
+		var test_case = "DEBUG Command Basics(OBJECT,POPULATE)";
+		var res_array = [];
+		client.set('foo','bar');
+		client.debug('object','foo',function(err,res_obj){
+			client.exists('key:0',function(err,res_key1){
+				client.exists('key:1',function(err,res_key2){
+					if(res_key1 === 1)
+						client.del('key:0');
+					if(res_key2 === 1)
+						client.del('key:1');
+					client.debug('populate',2,function(err,res){
+						res_array.push(res);
+						client.exists('key:0',function(err,res){
+							res_array.push(res);
+							client.exists('key:1',function(err,res){
+								res_array.push(res);
+									try{
+										if(!assert.equal(res_obj.split(' ')[4].split(':')[1],4,test_case)
+											&& !assert.deepEqual(res_array,['OK',1,1],test_case))
+												ut.pass(test_case);
+									}catch(e){
+										ut.fail(e,true);
+									}
+									testEmitter.emit('next');
+							});
+						});
+					})
+				});
+			});
+		});
+	}
+	
+	tester.other27 = function(errorCallback){
+		var test_case = "OBJECT Command basics(REFCOUNT,ENCODING,IDLETIME)";
+		var res_array = [];
+		client.set('foo','bar');
+		client.object('refcount','foo',function(err,res){
+			res_array.push(res);
+			client.object('encoding','foo',function(err,res){
+				res_array.push(res);
+				client.object('idletime','foo',function(err,res){
+					try{
+						if(!assert.deepEqual(res_array,[1,'raw'],test_case) && !isNaN(res))
+								ut.pass(test_case);
+					}catch(e){
+						ut.fail(e,true);
+					}
+					testEmitter.emit('next');
+				});
+			});
+		});
+	}
+	
 	return other;
 
 }

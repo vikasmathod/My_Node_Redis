@@ -2957,6 +2957,83 @@ exports.Zset = (function () {
 			});
 		});
 	}
+	
+	tester.zset6 = function (errorCallback) {
+		var test_case = 'ZREMRANGEBYRANK with WITHSCORES';
+		client.del('myzset');
+		client.zadd('myzset', 1, 'one', function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.zadd('myzset', 2, 'two', function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				client.zadd('myzset', 3, 'three', function (err, res) {
+					if (err) {
+						errorCallback(err);
+					}
+					client.zremrangebyrank('myzset', 0, 1, function (err, res) {
+						if (err) {
+							errorCallback(err);
+						}
+						client.zrange('myzset', 0, -1, 'WITHSCORES', function (err, res) {
+							if (err) {
+								errorCallback(err);
+							}
+							try {
+								if (!assert.deepEqual(res, ['three', '3'], test_case))
+									ut.pass(test_case);
+							} catch (e) {
+								ut.fail(e, true);
+							}
+							testEmitter.emit('next');
+						});
+					});
+				});
+			});
+		});
+
+	}
+	
+	tester.zset7 = function(errorCallback){
+		var test_case = 'ZREMRANGEBYRANK - Error invalid Floats';
+		var res_Array = [];
+		client.del('myzset');
+		client.zadd('myzset',1, 'one');	
+		client.zadd('myzset',2, 'two');
+		client.zadd('myzset',3, 'three');
+		client.zscore('myzset','a',function(err,res){
+			client.zremrangebyrank('myzset',0,1,function(err,res){
+				res_Array.push(res);
+				client.zremrangebyrank('myzset',-1e-1,1,function(err1,res){
+					client.zremrangebyrank('myzset',-1,0,function(err,res){
+						res_Array.push(res);
+						for(var i=0;i<1111;i++)
+							client.zadd('myzset',i, i); 
+						client.zremrangebyrank('myzset',0,1,function(err,res){
+							res_Array.push(res);
+							client.zremrangebyscore('myzset','a',1.4,function(err2,res){
+								client.zcount('myzset','a','',function(err3,res){
+									client.zscore('myzset',1,function(err,res){
+										try{
+											if(!assert.ok(ut.match("ERR",err1),test_case) && !assert.ok(ut.match("ERR min or max is not a float",err2),test_case)
+											 && !assert.ok(ut.match("ERR min or max is not a float",err3),test_case) && !assert.deepEqual(res_Array,[2, 1, 2],test_case))	
+												ut.pass(test_case);
+										}catch(e){
+											ut.fail(e,true);
+										}
+										testEmitter.emit('next');
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+	
 	return zset;
 
 }

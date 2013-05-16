@@ -6,10 +6,10 @@ exports.Bgsave = (function () {
 	BgUtility = require('../support/bgutil.js'),
 	bg = new BgUtility(),
 	bgsave = {},
-	name = 'Bgsave",
-	client = "",
+	name = 'Bgsave',
+	client = '',
 	tester = {},
-	server_pid = "",
+	server_pid = '',
 	all_tests = {};
 
 	//public property
@@ -19,7 +19,7 @@ exports.Bgsave = (function () {
 	bgsave.start_test = function (client_pid, callback) {
 		testEmitter.on('start', function () {
 			// write logic to start the server here.
-			var tags = 'bgsave";
+			var tags = 'bgsave';
 			var overrides = {};
 			var args = {};
 			args['name'] = name;
@@ -45,7 +45,7 @@ exports.Bgsave = (function () {
 				} else {
 					client.end();
 					if (bgsave.debug_mode) {
-						log.notice(name + ":Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ":" + g.srv[client_pid][server_pid]['port']);
+						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
 					testEmitter.emit('end');
 				}
@@ -69,7 +69,7 @@ exports.Bgsave = (function () {
 	//private methods
 
 	tester.bg1 = function (errorCallback) {
-		var test_case = 'BGSAVE";
+		var test_case = 'BGSAVE';
 		ut.waitForBgsave(client, function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -120,7 +120,7 @@ exports.Bgsave = (function () {
 		});
 	};
 	tester.bg2 = function (errorCallback) {
-		var test_case = 'BGSAVE snapshot update values";
+		var test_case = 'BGSAVE snapshot update values';
 		var iter1 = 1000;
 		var iterhalf = 500;
 		var step1 = 1;
@@ -171,7 +171,7 @@ exports.Bgsave = (function () {
 														errorCallback(err);
 													}
 													if ((mem2 - mem1) > 500) {
-														console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+														console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 													}
 													bg.get_op(client, 'get', 0, iter1, step1, [null, null], function (err, res) {
 														try {
@@ -198,7 +198,7 @@ exports.Bgsave = (function () {
 		});
 	};
 	tester.bg3 = function (errorCallback) {
-		var test_case = 'BGSAVE snapshot add new values";
+		var test_case = 'BGSAVE snapshot add new values';
 		var iter1 = 1000;
 		var iterhalf = 500;
 		var iter2 = 1100;
@@ -252,7 +252,7 @@ exports.Bgsave = (function () {
 														errorCallback(err);
 													}
 													if ((mem2 - mem1) > 500) {
-														console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+														console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 													}
 													bg.get_op(client, 'get', 0, iter1, step1, [null, null], function (err1, res) {
 														bg.exists_op(client, 'exists', iter1, iter3, step1, [null, 0], function (err2, res) {
@@ -281,7 +281,7 @@ exports.Bgsave = (function () {
 		});
 	};
 	tester.bg4 = function (errorCallback) {
-		var test_case = 'BGSAVE snapshot delete values";
+		var test_case = 'BGSAVE snapshot delete values';
 		var iter1 = 1000;
 		var iterhalf = 500;
 		var step1 = 1;
@@ -331,7 +331,7 @@ exports.Bgsave = (function () {
 														errorCallback(err);
 													}
 													if ((mem2 - mem1) > 500) {
-														console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+														console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 													}
 													bg.get_op(client, 'get', 0, iter1, step1, [null, null], function (err, res) {
 														try {
@@ -358,7 +358,7 @@ exports.Bgsave = (function () {
 		});
 	};
 	tester.bg5 = function (errorCallback) {
-		var test_case = 'BGSAVE snapshot append values";
+		var test_case = 'BGSAVE snapshot append values';
 		var iter1 = 1000;
 		var iterhalf = 500;
 		var step1 = 1;
@@ -407,7 +407,7 @@ exports.Bgsave = (function () {
 														errorCallback(err);
 													}
 													if ((mem2 - mem1) > 500) {
-														console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+														console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 													}
 													bg.get_op(client, 'get', 0, iter1, step1, [null, 'abcd'], function (err, res) {
 														try {
@@ -434,7 +434,7 @@ exports.Bgsave = (function () {
 		});
 	};
 	tester.bg6 = function (errorCallback) {
-		var test_case = 'BGSAVE snapshot setbit values";
+		var test_case = 'BGSAVE snapshot setbit values';
 		var iter1 = 1000;
 		var iterhalf = 500;
 		var step1 = 1;
@@ -483,7 +483,7 @@ exports.Bgsave = (function () {
 														errorCallback(err);
 													}
 													if ((mem2 - mem1) > 500) {
-														console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+														console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 													}
 													bg.get_op(client, 'get', 0, iter1, step1, [null, 'abcd'], function (err, res) {
 														try {
@@ -510,7 +510,7 @@ exports.Bgsave = (function () {
 		});
 	};
 	tester.bg7 = function (errorCallback) {
-		var test_case = 'BGSAVE snapshot setrange values";
+		var test_case = 'BGSAVE snapshot setrange values';
 		var iter1 = 1000;
 		var iterhalf = 500;
 		var step1 = 1;
@@ -559,7 +559,7 @@ exports.Bgsave = (function () {
 														errorCallback(err);
 													}
 													if ((mem2 - mem1) > 500) {
-														console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+														console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 													}
 													bg.get_op(client, 'get', 0, iter1, step1, [null, 'abcd'], function (err, res) {
 														try {
@@ -586,7 +586,7 @@ exports.Bgsave = (function () {
 		});
 	};
 	tester.bg8 = function (errorCallback) {
-		var test_case = 'BGSAVE snapshot incr & decr values";
+		var test_case = 'BGSAVE snapshot incr & decr values';
 		var iter1 = 1000;
 		var iterhalf = 500;
 		var step1 = 1;
@@ -636,7 +636,7 @@ exports.Bgsave = (function () {
 														errorCallback(err);
 													}
 													if ((mem2 - mem1) > 500) {
-														console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+														console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 													}
 													bg.get_op(client, 'get', 0, iter1, step1, [null, null], function (err, res) {
 														try {
@@ -663,7 +663,7 @@ exports.Bgsave = (function () {
 		});
 	};
 	tester.bg9 = function (errorCallback) {
-		var test_case = 'BGSAVE snapshot incrby & decrby values";
+		var test_case = 'BGSAVE snapshot incrby & decrby values';
 		var iter1 = 1000;
 		var iterhalf = 500;
 		var step1 = 1;
@@ -712,7 +712,7 @@ exports.Bgsave = (function () {
 														errorCallback(err);
 													}
 													if ((mem2 - mem1) > 500) {
-														console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+														console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 													}
 													bg.get_op(client, 'get', 0, iter1, step1, [null, null], function (err, res) {
 														try {
@@ -739,7 +739,7 @@ exports.Bgsave = (function () {
 		});
 	};
 	tester.bg10 = function (errorCallback) {
-		var test_case = 'BGSAVE snapshot rename values";
+		var test_case = 'BGSAVE snapshot rename values';
 		var iter1 = 1000;
 		var iterhalf = 500;
 		var step1 = 1;
@@ -788,7 +788,7 @@ exports.Bgsave = (function () {
 														errorCallback(err);
 													}
 													if ((mem2 - mem1) > 500) {
-														console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+														console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 													}
 													bg.get_op(client, 'get', 0, iter1, step1, [null, null], function (err, res) {
 														try {
@@ -815,7 +815,7 @@ exports.Bgsave = (function () {
 		});
 	};
 	tester.bg11 = function (errorCallback) {
-		var test_case = 'BGSAVE snapshot move values";
+		var test_case = 'BGSAVE snapshot move values';
 		var iter1 = 1000;
 		var iterhalf = 500;
 		var step1 = 1;
@@ -892,7 +892,7 @@ exports.Bgsave = (function () {
 																				errorCallback(err);
 																			}
 																			if ((mem2 - mem1) > 500) {
-																				console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																				console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 																			}
 																			bg.get_op(client, 'get', 0, iter1, step1, [null, null], function (err1, res) {
 																				client.select(1, function (err, res) {
@@ -960,7 +960,7 @@ exports.Bgsave = (function () {
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
 			var timeout = li.timeout;
-			var test_case = 'BGSAVE snapshot pop ' + li.type + ' list";
+			var test_case = 'BGSAVE snapshot pop ' + li.type + ' list';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -1011,7 +1011,7 @@ exports.Bgsave = (function () {
 																	cb(err);
 																}
 																if ((mem2 - mem1) > 500) {
-																	console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																	console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 																}
 																client.llen('mylist', function (err, length) {
 																	if (err) {
@@ -1072,7 +1072,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot push ' + li.type + ' list";
+			var test_case = 'BGSAVE snapshot push ' + li.type + ' list';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -1122,7 +1122,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.llen('mylist', function (err, length) {
 																if (err) {
@@ -1181,7 +1181,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot pushx ' + li.type + ' list";
+			var test_case = 'BGSAVE snapshot pushx ' + li.type + ' list';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -1232,7 +1232,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.llen('mylist', function (err, length) {
 																if (err) {
@@ -1291,7 +1291,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot blocking pop ' + li.type + ' list";
+			var test_case = 'BGSAVE snapshot blocking pop ' + li.type + ' list';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -1342,7 +1342,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.llen('mylist', function (err, length) {
 																if (err) {
@@ -1400,7 +1400,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot insert ' + li.type + ' list";
+			var test_case = 'BGSAVE snapshot insert ' + li.type + ' list';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -1450,7 +1450,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.llen('mylist', function (err, length) {
 																if (err) {
@@ -1508,7 +1508,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot rpoplpush ' + li.type + ' list";
+			var test_case = 'BGSAVE snapshot rpoplpush ' + li.type + ' list';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -1566,7 +1566,7 @@ exports.Bgsave = (function () {
 																		cb(err);
 																	}
 																	if ((mem2 - mem1) > 500) {
-																		console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																		console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 																	}
 																	client.llen('mylist', function (err, length) {
 																		if (err) {
@@ -1631,7 +1631,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot lset ' + li.type + ' list";
+			var test_case = 'BGSAVE snapshot lset ' + li.type + ' list';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -1689,7 +1689,7 @@ exports.Bgsave = (function () {
 																		cb(err);
 																	}
 																	if ((mem2 - mem1) > 500) {
-																		console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																		console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 																	}
 																	client.llen('mylist', function (err, length1) {
 																		if (err) {
@@ -1749,7 +1749,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot lrem ' + li.type + ' list";
+			var test_case = 'BGSAVE snapshot lrem ' + li.type + ' list';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -1799,7 +1799,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.llen('mylist', function (err, length) {
 																if (err) {
@@ -1858,7 +1858,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot ltrim ' + li.type + ' list";
+			var test_case = 'BGSAVE snapshot ltrim ' + li.type + ' list';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -1909,7 +1909,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.llen('mylist', function (err, length) {
 																if (err) {
@@ -1967,7 +1967,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot sadd ' + li.type + ' set";
+			var test_case = 'BGSAVE snapshot sadd ' + li.type + ' set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -2017,7 +2017,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															bg.sismember_op(client, 'sismember', 0, iter1, step1, [1, 'myset', null], function (err, res) {
 																if (err) {
@@ -2071,7 +2071,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot srem ' + li.type + ' set";
+			var test_case = 'BGSAVE snapshot srem ' + li.type + ' set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -2121,7 +2121,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															bg.sismember_op(client, 'sismember', 0, iter1, step1, [1, 'myset', null], function (err, res) {
 																if (err) {
@@ -2175,7 +2175,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot smove ' + li.type + ' set";
+			var test_case = 'BGSAVE snapshot smove ' + li.type + ' set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -2233,7 +2233,7 @@ exports.Bgsave = (function () {
 																		cb(err);
 																	}
 																	if ((mem2 - mem1) > 500) {
-																		console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																		console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 																	}
 																	bg.sismember_op(client, 'sismember', 0, iter1, step1, [1, 'myset', null], function (err, res) {
 																		if (err) {
@@ -2294,7 +2294,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot sinterstore ' + li.type + ' set";
+			var test_case = 'BGSAVE snapshot sinterstore ' + li.type + ' set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -2352,7 +2352,7 @@ exports.Bgsave = (function () {
 																		cb(err);
 																	}
 																	if ((mem2 - mem1) > 500) {
-																		console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																		console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 																	}
 																	bg.sismember_op(client, 'sismember', 0, iter1, step1, [1, 'myset', null], function (err, res) {
 																		if (err) {
@@ -2413,7 +2413,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot sunionstore ' + li.type + ' set";
+			var test_case = 'BGSAVE snapshot sunionstore ' + li.type + ' set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -2471,7 +2471,7 @@ exports.Bgsave = (function () {
 																		cb(err);
 																	}
 																	if ((mem2 - mem1) > 500) {
-																		console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																		console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 																	}
 																	bg.sismember_op(client, 'sismember', 0, iter1, step1, [1, 'myset', null], function (err, res) {
 																		if (err) {
@@ -2532,7 +2532,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot sdiffstore ' + li.type + ' set";
+			var test_case = 'BGSAVE snapshot sdiffstore ' + li.type + ' set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -2590,7 +2590,7 @@ exports.Bgsave = (function () {
 																		cb(err);
 																	}
 																	if ((mem2 - mem1) > 500) {
-																		console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																		console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 																	}
 																	bg.sismember_op(client, 'sismember', 0, iter1, step1, [1, 'myset', null], function (err, res) {
 																		if (err) {
@@ -2651,7 +2651,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot zadd ' + li.type + ' ordered set";
+			var test_case = 'BGSAVE snapshot zadd ' + li.type + ' ordered set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -2701,7 +2701,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															bg.check_op(client, 'zscore', 0, iter1, step1, [null, 'myset', null], function (err, res) {
 																if (err) {
@@ -2755,7 +2755,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot zrem ' + li.type + ' ordered set";
+			var test_case = 'BGSAVE snapshot zrem ' + li.type + ' ordered set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -2805,7 +2805,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															bg.check_op(client, 'zscore', 0, iter1, step1, [null, 'myset', null], function (err, res) {
 																if (err) {
@@ -2858,7 +2858,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot zincrby ' + li.type + ' ordered set";
+			var test_case = 'BGSAVE snapshot zincrby ' + li.type + ' ordered set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -2908,7 +2908,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															bg.check_op(client, 'zscore', 0, iter1, step1, [null, 'myset', null], function (err, res) {
 																if (err) {
@@ -2961,7 +2961,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot zremrangebyscore ' + li.type + ' ordered set";
+			var test_case = 'BGSAVE snapshot zremrangebyscore ' + li.type + ' ordered set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -3011,7 +3011,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															bg.check_op(client, 'zscore', 0, iter1, step1, [null, 'myset', null], function (err, res) {
 																if (err) {
@@ -3065,7 +3065,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot zremrangebyrank ' + li.type + ' ordered set";
+			var test_case = 'BGSAVE snapshot zremrangebyrank ' + li.type + ' ordered set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -3115,7 +3115,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															bg.check_op(client, 'zscore', 0, iter1, step1, [null, 'myset', null], function (err, res) {
 																if (err) {
@@ -3168,7 +3168,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot zunionstore ' + li.type + ' ordered set";
+			var test_case = 'BGSAVE snapshot zunionstore ' + li.type + ' ordered set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -3226,7 +3226,7 @@ exports.Bgsave = (function () {
 																		cb(err);
 																	}
 																	if ((mem2 - mem1) > 500) {
-																		console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																		console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 																	}
 																	bg.check_op(client, 'zscore', 0, iter1, step1, [null, 'myset', null], function (err, res) {
 																		if (err) {
@@ -3287,7 +3287,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot zinterstore ' + li.type + ' ordered set";
+			var test_case = 'BGSAVE snapshot zinterstore ' + li.type + ' ordered set';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -3345,7 +3345,7 @@ exports.Bgsave = (function () {
 																		cb(err);
 																	}
 																	if ((mem2 - mem1) > 500) {
-																		console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																		console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 																	}
 																	bg.check_op(client, 'zscore', 0, iter1, step1, [null, 'myset', null], function (err, res) {
 																		if (err) {
@@ -3406,7 +3406,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot hdel ' + li.type + ' hash";
+			var test_case = 'BGSAVE snapshot hdel ' + li.type + ' hash';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -3457,7 +3457,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.hlen('myhash', function (err, res) {
 																if (res != iter1) {
@@ -3516,7 +3516,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot hset ' + li.type + ' hash";
+			var test_case = 'BGSAVE snapshot hset ' + li.type + ' hash';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -3566,7 +3566,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.hlen('myhash', function (err, res) {
 																if (res != iter1) {
@@ -3625,7 +3625,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot hsetnx ' + li.type + ' hash";
+			var test_case = 'BGSAVE snapshot hsetnx ' + li.type + ' hash';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -3675,7 +3675,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.hlen('myhash', function (err, res) {
 																if (res != iter1) {
@@ -3734,7 +3734,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot hmset ' + li.type + ' hash";
+			var test_case = 'BGSAVE snapshot hmset ' + li.type + ' hash';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -3784,7 +3784,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.hlen('myhash', function (err, res) {
 																if (res != iter1) {
@@ -3843,7 +3843,7 @@ exports.Bgsave = (function () {
 			var iter1 = li.iter1;
 			var iterhalf = li.iterhalf;
 			var step1 = li.step1;
-			var test_case = 'BGSAVE snapshot hincrby ' + li.type + ' hash";
+			var test_case = 'BGSAVE snapshot hincrby ' + li.type + ' hash';
 			ut.waitForBgsave(client, function (err, res) {
 				if (err) {
 					cb(err);
@@ -3893,7 +3893,7 @@ exports.Bgsave = (function () {
 																cb(err);
 															}
 															if ((mem2 - mem1) > 500) {
-																console.log("Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
+																console.log('Warning: used memory before save ' + mem1 + ' after flushload ' + mem2);
 															}
 															client.hlen('myhash', function (err, res) {
 																if (res != iter1) {
@@ -3936,7 +3936,7 @@ exports.Bgsave = (function () {
 	};
 
 	tester.bg39 = function (errorCallback) {
-		var test_case = 'BGSAVE expires";
+		var test_case = 'BGSAVE expires';
 		ut.waitForBgsave(client, function (err, res) {
 			if (err) {
 				errorCallback(err);

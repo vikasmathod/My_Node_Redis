@@ -103,34 +103,29 @@ exports.Basic = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			if (res.length == 0) {
-				console.log('No keys to delete. Proceeding..\n');
-				testEmitter.emit('next');
-			} else {
-				g.asyncFor(0, res.length, function (loop) {
-					var i = loop.iteration();
-					client.del(res[i], function (err) {
-						if (err) {
-							errorCallback(err);
-						}
-						loop.next();
-					});
-				}, function () {
-					client.dbsize(function (err, res) {
-						if (err) {
-							errorCallback(err);
-						}
-						try {
-							if (!assert.equal(res, 0, test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e);
-						}
-						testEmitter.emit('next');
-					});
+			g.asyncFor(0, res.length, function (loop) {
+				var i = loop.iteration();
+				client.del(res[i], function (err) {
+					if (err) {
+						errorCallback(err);
+					}
+					loop.next();
 				});
-			}
+			}, function () {
+				client.dbsize(function (err, res) {
+					if (err) {
+						errorCallback(err);
+					}
+					try {
+						if (!assert.equal(res, 0, test_case)) {
+							ut.pass(test_case);
+						}
+					} catch (e) {
+						ut.fail(e);
+					}
+					testEmitter.emit('next');
+				});
+			});
 		});
 	};
 	tester.Basic2 = function (errorCallback) {
@@ -2979,6 +2974,82 @@ exports.Basic = (function () {
 		});
 	};
 
+	tester.basic72 = function(errorCallback){
+		var test_case = 'Basic INCRBY and DECR';
+		var res_Array = [];
+		client.set('foo',1);
+		client.incrby('foo',1);
+		client.get('foo',function(err,res){
+			res_Array.push(res);
+			client.incrby('foo',-1);
+			client.get('foo',function(err,res){
+				res_Array.push(res);
+				client.decr('foo');
+				client.get('foo',function(err,res){
+					res_Array.push(res);
+					client.incrby('foo','a',function(err,res){
+						try{
+							if(!assert.deepEqual(res_Array,[2,1,0],test_case) && !assert.ok(ut.match('ERR',err),test_case))
+								ut.pass(test_case);
+						}catch(e){
+							ut.fail(e,true);
+						}
+						testEmitter.emit('next');
+					});
+				});
+			});
+		});
+	}
+	
+	tester.basic73 = function(errorCallback){
+		var test_case = 'SETBIT throw Error for bits out of range';
+		var res_Array = [];
+		client.setbit('mykey', 1, 0xffffffff, function (err1, res) {
+			client.setbit('mykey', 1, 1e100, function (err2, res) {
+				try{
+					if(!assert.ok(ut.match('out of range',err1),test_case) && !assert.ok(ut.match('out of range',err2),test_case))
+						ut.pass(test_case);
+				}catch(e){
+					ut.fail(e,true);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	}
+	
+	tester.basic74 = function(errorCallback){
+		var test_case = 'GETBIT throw Error for bits out of range';
+		var res_Array = [];
+		client.getbit('mykey', -1, function (err1, res) {
+			try{
+				if(!assert.ok(ut.match('out of range',err1),test_case))
+					ut.pass(test_case);
+			}catch(e){
+				ut.fail(e,true);
+			}
+			testEmitter.emit('next');
+		});
+	}
+	
+	tester.basic75 = function(errorCallback){
+		var test_case = 'SETRANGE and GETRANGE throw Error for bits out of range';
+		var res_Array = [];
+		client.setrange('mykey', -1e-100, 'foo', function (err1, res) {
+			client.getrange('mykey', -1e-100, 0, function (err2, res) {
+				client.getrange('mykey', 0,-1e-100, function (err3, res) {
+					try{
+						if(!assert.ok(ut.match('out of range',err1),test_case) && !assert.ok(ut.match('out of range',err2),test_case)
+						&& !assert.ok(ut.match('out of range',err3),test_case))
+							ut.pass(test_case);
+					}catch(e){
+						ut.fail(e,true);
+					}
+					testEmitter.emit('next');
+				});
+			});
+		});
+	}
+	
 	return basic;
 
 }

@@ -1426,6 +1426,64 @@ exports.Sort = (function () {
 			});
 	}
 
+	tester.Sort37 = function (errorCallback) {
+		var test_case = 'DECR Time';
+		client.time(function (err, time) {
+			if (err) {
+				errorCallback(err);
+			}
+			client.set('somekey', time[1]);
+			client.decr('somekey', function (err, val) {
+				if (err) {
+					errorCallback(err);
+				}
+				try {
+					if (!assert.equal(val, time[1] - 1, test_case))
+						ut.pass(test_case);
+				} catch (e) {
+					ut.fail(e);
+				}
+				testEmitter.emit('next');
+			});
+		});
+	}
+	
+	tester.Sort38 = function(errorCallback){
+		var test_case = "Sort on ZSET";
+		client.del('myset');
+		client.zadd('myset', 1, 'a');
+		client.zadd('myset', 1, 'c');
+		client.zadd('myset', 4, 'd');
+		client.zadd('myset', 3, 'b');
+		client.zadd('myset', 2, 'e');
+		client.sort('myset','alpha',function(err,res1){
+			client.set('order:a', 1);
+			client.set('order:c', 1);
+			client.set('order:d', 4);
+			client.set('order:b', 3);
+			client.set('order:e', 2);
+			client.sort('myset','by','order:*',function(err,res2){
+				client.del('myset');
+				client.zadd('myset', 1, '1:a');
+				client.zadd('myset', 1, '3:c');
+				client.zadd('myset', 4, '4:d');
+				client.zadd('myset', 3, '2:b');
+				client.zadd('myset', 2, '5:e');
+				client.sort('myset','by','order:*','get','order:*','get','#',function(err,res3){
+					try{
+						if(!assert.deepEqual(res1,[ 'a', 'b', 'c', 'd', 'e' ],test_case) && 
+							!assert.deepEqual(res2,[  'a', 'c', 'e', 'b', 'd' ],test_case) &&
+							!assert.equal(res3.length,10,test_case))
+							ut.pass(test_case);
+					}catch(e){
+						ut.fail(e,true);
+					}
+					testEmitter.emit('next');
+				});
+			});
+		});
+	}
+	
 	return sort;
 
 }

@@ -66,7 +66,7 @@ exports.PrintVer = (function () {
 
 	// private methods
 	tester.getInfo = function (errorCallback) {
-		var test_case = 'Testing Redis version '
+		var test_case = 'Testing Redis version'
 			client.info(function (err, res) {
 				var version = client.server_info.redis_version
 					var sha1 = client.server_info.redis_git_sha1

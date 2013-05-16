@@ -50,7 +50,7 @@ Utility.prototype.fail = function (msg, debug, logging) {
 		if (logging) {
 			var timestamp = new Date().getTime();
 			var hrt = process.hrtime()[1];
-			msg = ' Message:' + msg.message + '\n\tName:' + msg.name + '\n\tActual:' + msg.actual + '\n\tExpected:' + msg.expected + '\n\tOperator:' + msg.operator;
+			msg = " Message:" + msg.message + "\n\tName:" + msg.name + "\n\tActual:" + msg.actual + "\n\tExpected:" + msg.expected + "\n\tOperator:" + msg.operator;
 			log.error(msg);
 			Utility.fail_list[hrt] = msg;
 		}
@@ -72,9 +72,9 @@ Utility.prototype.getFailList = function () {
 };
 Utility.prototype.console_log = function (event, msg) {
 	if (event == 'pass') {
-		console.log('\x1b[32m [Pass] \x1b[0m- ' + msg + '\n');
+		console.log("\x1b[32m [Pass] \x1b[0m- " + msg + "\n");
 	} else {
-		console.log('\x1b[31m [Fail] \x1b[0m- ' + msg + '\n');
+		console.log("\x1b[31m [Fail] \x1b[0m- " + msg + "\n");
 	}
 };
 Utility.prototype.match = function (patt, str) {
@@ -96,7 +96,7 @@ Utility.prototype.randomValue = function () {
 	case 2:
 		//32 bit compressible signed/unsigned
 		var ch = that.randpath(new Array(1, 2));
-		if (ch === 1)
+		if (ch == 1)
 			data = g.randomInt(2000000000);
 		else
 			data = g.randomInt(4000000000);
@@ -108,9 +108,9 @@ Utility.prototype.randomValue = function () {
 	case 4:
 		// Random string
 		var ch = that.randpath(new Array(1, 2, 3));
-		if (ch === 1)
+		if (ch == 1)
 			data = that.randstring(0, 256, 'alpha');
-		else if (ch === 2)
+		else if (ch == 2)
 			data = that.randstring(0, 256, 'compr');
 		else
 			data = that.randstring(0, 256, 'binary');
@@ -129,7 +129,7 @@ Utility.prototype.randomKey = function () {
 	case 2:
 		//32 bit compressible signed/unsigned
 		var ch = that.randpath(new Array(1, 2));
-		if (ch === 1)
+		if (ch == 1)
 			key = g.randomInt(2000000000);
 		else
 			key = g.randomInt(4000000000);
@@ -141,7 +141,7 @@ Utility.prototype.randomKey = function () {
 	case 4:
 		// Random string
 		var ch = that.randpath(new Array(1, 2));
-		if (ch === 1)
+		if (ch == 1)
 			key = that.randstring(0, 256, 'alpha');
 		else
 			key = that.randstring(0, 256, 'compr');
@@ -219,7 +219,7 @@ Utility.prototype.waitForBgsave = function (client, callback) {
 			if (err) {
 				callback(err, null);
 			}
-			if (result === 1) {
+			if (result == 1) {
 				setTimeout(function () {
 					loop.next();
 				}, 1000);
@@ -326,7 +326,6 @@ Utility.prototype.createComplexDataset = function (client, ops, useexpire, callb
 				async_cb(null);
 			},
 			one : function (async_cb) {
-
 				switch (that.randpath(new Array(1, 2, 3, 4, 5, 6))) {
 				case 1:
 					d = Math.random();
@@ -519,6 +518,7 @@ Utility.prototype.createComplexDataset = function (client, ops, useexpire, callb
 				default:
 					break;
 				}
+				
 				async_cb(null);
 			},
 
@@ -677,14 +677,14 @@ Utility.prototype.sortFunction = function (a, b) {
 		return (b === a) ? 0 : (a < b) ? 1 : -1;
 	return (a < b) ? -1 : (a === b) ? 0 : 1;
 };
-Utility.prototype.compareArray = function (Arr1, Arr2) {
-	if (Arr1.length != Arr2.length)
-		return false;
-	for (var i = 0; i < Arr1.length; i++)
-		if (Arr1[i] != Arr2[i])
-			return false;
-
-	return true;
+Utility.prototype.compareArray = function (arr1, arr2) {
+	if (arr1.length == arr2.length
+    && arr1.every(function(u, i) {
+        return u === arr2[i];
+    })){
+	   return true;
+	} else 
+	   return false;
 };
 // Wait for the specified condition to be true, with the specified number of
 // max retries and delay between retries. Otherwise the 'elsescript' is

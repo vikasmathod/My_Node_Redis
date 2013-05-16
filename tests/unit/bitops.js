@@ -713,6 +713,38 @@ exports.Bitops = (function () {
 		});
 	};
 
+	tester.Bitops18 = function(errorCallback){
+		var test_case = "Bitop Command for Keys";
+		var res_array = [];
+		client.set('foo',0);
+		client.set('bar',1);
+		client.bitop('and','res','foo','bar',function(err,res){
+			client.get('res',function(err,res){
+				res_array.push(res);
+				client.bitop('or','res','foo','bar',function(err,res){
+					client.get('res',function(err,res){
+						res_array.push(res);
+						client.bitop('xor','res','foo','bar',function(err,res){
+							client.get('res',function(err,res){
+								res_array.push(res);
+								client.bitop('not','res','bar','foo',function(err,res){
+									try{
+										if(!assert.deepEqual(res_array,[0,1,'\u0001'],test_case)
+										&& !assert.ok(ut.match('called with a single source key',err),test_case))
+												ut.pass(test_case);
+									}catch(e){
+										ut.fail(e,true);
+									}
+									testEmitter.emit('next');
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+	
 	return bitops;
 }
 	());
