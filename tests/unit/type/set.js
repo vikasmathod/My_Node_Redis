@@ -97,7 +97,7 @@ exports.Set = (function () {
 	function create_set(key, entries, callback) {
 		client.del(key, function (err, res) {
 			if (err) {
-				errorCallback(err);
+				callback(err);
 			}
 			g.asyncFor(0, entries.length, function (loop) {
 				client.sadd(key, entries[loop.iteration()], function (err, res) {
