@@ -165,6 +165,7 @@ exports.Pubsub = (function () {
 		}
 	}
 
+	//test methods
 	tester.psub1 = function (errorCallback) {
 		var test_case = 'PUBLISH/SUBSCRIBE basics';
 		var result1 = [],
@@ -256,15 +257,12 @@ exports.Pubsub = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if ((!assert.deepEqual(results.one, [
-								[1, 2], 1, 1, ['hello', 'world']
-							], test_case)) && (!assert.deepEqual(results.two, [0, 1, ['world']], test_case)) && (!assert.deepEqual(results.three, [0, 0], test_case))) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertMany(
+				[
+					['deepequal',results.one,[[1, 2], 1, 1, ['hello', 'world']]],
+					['deepequal',results.two,[0, 1, ['world']]],
+					['deepequal',results.three, [0, 0]]
+				],test_case);
 			client.end();
 			client1.end();
 			if (pubsub.debug_mode) {
@@ -314,17 +312,8 @@ exports.Pubsub = (function () {
 					result.push(sub_msg);
 					sub_msg = [];
 					unsub_msg = [];
-
-					try {
-						if (!assert.deepEqual(result, [
-									[1],
-									[1], 2, ['hello', 'hello']
-								], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					
+					ut.assertDeepEqual(result,[[1],[1], 2, ['hello', 'hello']],test_case);
 					client.end();
 					client1.end();
 					client2.end();
@@ -378,15 +367,7 @@ exports.Pubsub = (function () {
 								errorCallback(err);
 							}
 							result.push(res);
-
-							try {
-								if (!assert.deepEqual(result, [
-											[1, 2, 3], 0, 0, 0], test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertDeepEqual(result,[[1, 2, 3], 0, 0, 0],test_case);
 							client.end();
 							client1.end();
 							if (pubsub.debug_mode) {
@@ -428,16 +409,7 @@ exports.Pubsub = (function () {
 				result.push(sub_msg);
 				sub_msg = [];
 				unsub_msg = [];
-
-				try {
-					if (!assert.deepEqual(result, [
-								[1, 1, 1], 1, ['hello']
-							], test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(result,[[1, 1, 1], 1, ['hello']],test_case);
 				client.end();
 				client1.end();
 				if (pubsub.debug_mode) {
@@ -482,13 +454,7 @@ exports.Pubsub = (function () {
 						errorCallback(err);
 					}
 					result.push(res);
-					try {
-						if (!assert.deepEqual(result, [[0, 0, 0], [0, 0], [0]], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(result, [[0, 0, 0], [0, 0], [0]], test_case);
 					client.end();
 					client1.end();
 					if (pubsub.debug_mode) {
@@ -615,18 +581,12 @@ exports.Pubsub = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if ((!assert.deepEqual(results.one, [
-								[1, 2], 1, 1, 0, 0, 0, ['foo.1', 'bar.1']
-							], test_case)) && (!assert.deepEqual(results.two, [
-								[1, 0], 0, 1, ['bar.1']
-							], test_case)) && (!assert.deepEqual(results.three, [
-								[0], 0, 0], test_case))) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertMany(
+				[
+					['deepequal', results.one, [[1, 2], 1, 1, 0, 0, 0, ['foo.1', 'bar.1']]],
+					['deepequal', results.two, [[1, 0], 0, 1, ['bar.1']]],
+					['deepequal', results.three, [[0], 0, 0]]
+				],test_case);
 			client.end();
 			client1.end();
 			if (pubsub.debug_mode) {
@@ -675,16 +635,7 @@ exports.Pubsub = (function () {
 					result.push(sub_msg);
 					sub_msg = [];
 					unsub_msg = [];
-					try {
-						if (!assert.deepEqual(result, [
-									[1],
-									[1], 2, ['chan.foo', 'chan.foo']
-								], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(result, [[1],[1], 2, ['chan.foo', 'chan.foo']], test_case);
 					client.end();
 					client1.end();
 					client2.end();
@@ -737,14 +688,7 @@ exports.Pubsub = (function () {
 								errorCallback(err);
 							}
 							result.push(res);
-							try {
-								if (!assert.deepEqual(result, [
-											[1, 2, 3], 0, 0, 0], test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertDeepEqual(result, [[1, 2, 3], 0, 0, 0], test_case);
 							client.end();
 							client1.end();
 							if (pubsub.debug_mode) {
@@ -791,13 +735,7 @@ exports.Pubsub = (function () {
 						errorCallback(err);
 					}
 					result.push(res);
-					try {
-						if (!assert.deepEqual(result, [[0, 0, 0], [0, 0], [0]], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(result, [[0, 0, 0], [0, 0], [0]], test_case);
 					client.end();
 					client1.end();
 					if (pubsub.debug_mode) {
@@ -841,16 +779,7 @@ exports.Pubsub = (function () {
 					result.push(res);
 					result.push(sub_msg);
 					sub_msg = [];
-					try {
-						if (!assert.deepEqual(result, [
-									[1],
-									[2], 2, ['hello', 'foo.bar']
-								], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(result, [[1],[2], 2, ['hello', 'foo.bar']], test_case);
 					client.end();
 					client1.end();
 					if (pubsub.debug_mode) {

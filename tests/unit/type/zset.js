@@ -2295,15 +2295,8 @@ exports.Zset = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if (!assert.equal(res, 0, test_case)) {
-								ut.pass(test_case);
-								testEmitter.emit('next');
-							}
-						} catch (e) {
-							ut.fail(e, true);
-							testEmitter.emit('next');
-						}
+						ut.assertEqual(res, 0, test_case);
+						testEmitter.emit('next');
 					});
 				});
 			});
@@ -2323,15 +2316,8 @@ exports.Zset = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.deepEqual(res, ['neginf', 0], test_case)) {
-							ut.pass(test_case);
-							testEmitter.emit('next');
-						}
-					} catch (e) {
-						ut.fail(e, true);
-						testEmitter.emit('next');
-					}
+					ut.assertDeepEqual(res, ['neginf', 0], test_case);
+					testEmitter.emit('next');
 				});
 			});
 		});
@@ -2942,15 +2928,8 @@ exports.Zset = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.deepEqual(res, [100], test_case)) {
-									ut.pass(test_case);
-									testEmitter.emit('next');
-								}
-							} catch (e) {
-								ut.fail(e, true);
-								testEmitter.emit('next');
-							}
+							ut.assertDeepEqual(res, [100], test_case);
+							testEmitter.emit('next');
 						});
 					});
 				});
@@ -2981,12 +2960,7 @@ exports.Zset = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.deepEqual(res, ['three', '3'], test_case))
-									ut.pass(test_case);
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertDeepEqual(res, ['three', '3'], test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -3016,13 +2990,13 @@ exports.Zset = (function () {
 							client.zremrangebyscore('myzset','a',1.4,function(err2,res){
 								client.zcount('myzset','a','',function(err3,res){
 									client.zscore('myzset',1,function(err,res){
-										try{
-											if(!assert.ok(ut.match("ERR",err1),test_case) && !assert.ok(ut.match("ERR min or max is not a float",err2),test_case)
-											 && !assert.ok(ut.match("ERR min or max is not a float",err3),test_case) && !assert.deepEqual(res_Array,[2, 1, 2],test_case))	
-												ut.pass(test_case);
-										}catch(e){
-											ut.fail(e,true);
-										}
+										ut.assertMany(
+										[
+											['ok',"ERR",err1],
+											['ok',"ERR min or max is not a float",err2],
+											['ok',"ERR min or max is not a float",err3],
+											['deepequal',res_Array,[2, 1, 2]]
+										],test_case);
 										testEmitter.emit('next');
 									});
 								});

@@ -66,7 +66,7 @@ exports.List2 = (function () {
 		testEmitter.emit('start');
 	}
 
-	//private methods
+	//test methods
 	tester.List2_1 = function (errorCallback) {
 		var test_case = 'LTRIM stress testing - ziplist';
 		var large = list_common.ziplist;

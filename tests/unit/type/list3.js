@@ -95,13 +95,7 @@ exports.List3 = (function () {
 								errorCallback(err);
 							}
 							result_array.push(res);
-							try {
-								if ((!assert.deepEqual(result_array, [mylist[0], mylist[1]], test_case))) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertDeepEqual(result_array, [mylist[0], mylist[1]], test_case);
 							testEmitter.emit('next');
 						});
 					});

@@ -70,6 +70,7 @@ exports.Dump = (function () {
 		testEmitter.emit('start');
 	}
 
+	// test methods
 	tester.dump1 = function (errorCallback) {
 		var test_case = 'DUMP / RESTORE are able to serialize / unserialize a simple key';
 		var encoded = '';
@@ -99,13 +100,13 @@ exports.Dump = (function () {
 							errorCallback(err);
 						}
 						newClient.get('foo', function (err, res) {
-							try {
-								if (!assert.equal(exist, 0, test_case) && !assert.equal(resRes, 'OK', test_case)
-									 && !assert.equal(ttlres, -1, test_case) && !assert.equal(res, 'bar', test_case))
-									ut.pass(test_case);
-							} catch (e) {
-								ut.pass(e, true);
-							}
+							ut.assertMany(
+								[
+									['equal',exist, 0],
+									['equal',resRes, 'OK'],
+									['equal',ttlres, -1],
+									['equal',res, 'bar']
+								],test_case);
 							newClient.end();
 							testEmitter.emit('next');
 						});
@@ -143,9 +144,7 @@ exports.Dump = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								if (!assert.equal(res, 'bar', test_case)){
-									ut.pass(test_case);
-								}
+								ut.assertEqual(res, 'bar', test_case);
 							});
 						}
 					} catch (e) {
@@ -162,12 +161,7 @@ exports.Dump = (function () {
 		var test_case = 'RESTORE returns an error of the key already exists';
 		client.set('foo', 'bar');
 		client.restore('foo', 0, '...', function (err, res) {
-			try {
-				if (!assert.ok(ut.match('is busy', err), test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('is busy', err, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -178,12 +172,7 @@ exports.Dump = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.equal(res, null, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, null, test_case);
 				testEmitter.emit('next');
 			});
 	};
@@ -240,12 +229,7 @@ exports.Dump = (function () {
 																	if (err) {
 																		errorCallback(err);
 																	}
-																	try {
-																		if (!assert.equal(res, -1, test_case))
-																			ut.pass(test_case);
-																	} catch (e) {
-																		ut.fail(e, true);
-																	}
+																	ut.assertEqual(res, -1, test_case);
 																	second.end();
 																	server1.kill_server(client_pid, server_pid1, function (err, res) {
 																		testEmitter.emit('next');
@@ -477,17 +461,15 @@ exports.Dump = (function () {
 																if (err) {
 																	errorCallback(err);
 																}
-																if (!assert.equal(res, -1, test_case)) {
-																	ut.pass(test_case);
-																	second.end();
-																	server4.kill_server(client_pid, server_pid1, function (err, res) {
-																		if (err) {
-																			errorCallback(err);
-																		};
-																		testEmitter.emit('next');
+																ut.assertEqual(res, -1, test_case);
+																second.end();
+																server4.kill_server(client_pid, server_pid1, function (err, res) {
+																	if (err) {
+																		errorCallback(err);
+																	};
+																	testEmitter.emit('next');
 
-																	});
-																}
+																});
 															});
 														}
 													});
@@ -546,14 +528,12 @@ exports.Dump = (function () {
 								newClient.debug('sleep', 5.0);
 								setTimeout(function () {
 									client.migrate(second_server_host, second_server_port, 'key', 0, 1000, function (err, res) {
-										if (!assert.equal(ut.match('IOERR', err), true, test_case)) {
-											ut.pass(test_case);
-											newClient.end();
-											second.end();
-											server5.kill_server(client_pid, server_pid1, function (err, res) {
-												testEmitter.emit('next');
-											});
-										}
+										ut.assertOk('IOERR', err, test_case)
+										newClient.end();
+										second.end();
+										server5.kill_server(client_pid, server_pid1, function (err, res) {
+											testEmitter.emit('next');
+										});
 									});
 								}, 50);
 							}
@@ -640,12 +620,7 @@ exports.Dump = (function () {
 																				if (err) {
 																					errorCallback(err);
 																				}
-																				try {
-																					if (!assert.equal(res, 5000 * 20, test_case))
-																						ut.pass(test_case);
-																				} catch (e) {
-																					ut.fail(e, true);
-																				}
+																				ut.assertEqual(res, 5000 * 20, test_case);
 																				second.end();
 																				server3.kill_server(client_pid, server_pid1, function (err, res) {
 																					if (err) {

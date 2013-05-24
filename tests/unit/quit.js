@@ -86,13 +86,11 @@ exports.Quit = (function () {
 					if (res) {
 						errorCallback(res);
 					}
-					try {
-						if ((!assert.ok(err, test_case)) && (!assert.equal(result, 'OK', test_case))) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e);
-					}
+					ut.assertMany(
+						[
+							['ok',err, null],
+							['equal',result, 'OK']
+						],test_case);
 					if (quit.debug_mode) {
 						log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
 					}
@@ -133,13 +131,12 @@ exports.Quit = (function () {
 							if (err) {
 								errorCallback(res);
 							}
-							try {
-								if ((!assert.equal(res, null, test_case)) && (!assert.ok(error, test_case)) && (!assert.equal(result, 'OK', test_case))) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e);
-							}
+							ut.assertMany(
+								[
+									['equal',res, null],
+									['ok',error, null],
+									['equal',result, 'OK']
+								],test_case);
 							client.end();
 							if (quit.debug_mode) {
 								log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
@@ -182,13 +179,12 @@ exports.Quit = (function () {
 							if (err) {
 								errorCallback(res);
 							}
-							try {
-								if ((!assert.equal(res, null, test_case)) && (!assert.ok(error, test_case)) && (!assert.equal(result, 'OK', test_case))) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e);
-							}
+							ut.assertMany(
+								[
+									['equal',res, null],
+									['ok',error, null],
+									['equal',result, 'OK']
+								],test_case);
 							client.end();
 							if (quit.debug_mode) {
 								log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);

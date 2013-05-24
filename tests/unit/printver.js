@@ -64,19 +64,18 @@ exports.PrintVer = (function () {
 		testEmitter.emit('start');
 	}
 
-	// private methods
+	// test methods 
 	tester.getInfo = function (errorCallback) {
 		var test_case = 'Testing Redis version'
 			client.info(function (err, res) {
 				var version = client.server_info.redis_version
-					var sha1 = client.server_info.redis_git_sha1
-					if (version) {
-						ut.pass(test_case + version + '(' + sha1 + ')');
-						testEmitter.emit('next');
-					} else {
-						ut.fail(test_case, true);
-						testEmitter.emit('next');
-					}
+				var sha1 = client.server_info.redis_git_sha1
+				if (version) {
+					ut.pass(test_case + version + '(' + sha1 + ')');
+				} else {
+					ut.fail(test_case, true);
+				}
+				testEmitter.emit('next');
 			})
 	}
 

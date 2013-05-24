@@ -710,4 +710,80 @@ Utility.prototype.wait_for_condition = function (m, d, func, cbt, cbf) {
 		cbt();
 	});
 };
+Utility.prototype.assertEqual = function (arg1,arg2,message,inLoop) {
+	try {
+		if (!assert.equal(arg1, arg2, message) && !inLoop) {
+			this.pass(message);
+		}
+		return true;
+	} catch (e) {
+		this.fail(e,true);
+		return false;
+	}
+};
+Utility.prototype.assertOk = function (arg1,arg2,message,inLoop) {
+	try {
+		if(arg2 === null){
+			if (!assert.ok(arg1, message) && !inLoop) {
+				this.pass(message);
+			}
+		} else {
+			if (!assert.ok(this.match(arg1, arg2), message) && !inLoop) {
+				this.pass(message);
+			}
+		}
+		return true;
+	} catch (e) {
+		this.fail(e,true);
+		return false;
+	}
+};
+Utility.prototype.assertDeepEqual = function (arg1,arg2,message,inLoop) {
+	try {
+		if (!assert.deepEqual(arg1, arg2, message) && !inLoop) {
+			this.pass(message);
+		}
+		return true;
+	} catch (e) {
+		this.fail(e,true);
+		return false;
+	}
+};
+Utility.prototype.assertError = function (arg1,message,inLoop) {
+	try {
+		if (!assert.ifError(arg1, message) && !inLoop) {
+			this.pass(message);
+		}
+		return true;
+	} catch (e) {
+		this.fail(e,true);
+		return false;
+	}
+};
+Utility.prototype.assertMany = function (arg1,message) {
+	var boolRes = true;
+	for(var i = 0;i < arg1.length; i++){
+		switch(arg1[i][0]){
+			case 'equal':
+				boolRes = this.assertEqual(arg1[i][1],arg1[i][2],message,boolRes);
+			break;
+			case 'deepequal':
+				boolRes = this.assertDeepEqual(arg1[i][1],arg1[i][2],message,boolRes);
+			break;
+			case 'ok':
+				boolRes = this.assertOk(arg1[i][1],arg1[i][2],message,boolRes);
+			break;
+			case 'error':
+				boolRes = this.assertError(arg1[i][1],message,boolRes);
+			break;
+			default:
+				boolRes = this.assertEqual(arg1[i][1],arg1[i][2],message,boolRes);
+			break;
+		}
+		if(!boolRes)
+			break;			
+	}
+	if(boolRes)
+		this.pass(message);
+};
 module.exports = Utility;

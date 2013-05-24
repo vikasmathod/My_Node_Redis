@@ -64,6 +64,7 @@ exports.Aofrw = (function () {
 		testEmitter.emit('start');
 	}
 
+	// test methods
 	tester.Aofrw1 = function (errorCallback) {
 		var test_case = 'Turning off AOF kills the background writing child if any';
 		client.config('set', 'appendonly', 'yes', function (err, res) {
@@ -458,12 +459,11 @@ exports.Aofrw = (function () {
 		MultiCli.bgrewriteaof();
 		MultiCli.info('persistence');
 		MultiCli.exec(function (err, res) {
-			try {
-				if (!assert.equal(ut.match('scheduled', res[1]), true, test_case) && !assert.equal(ut.match('aof_rewrite_scheduled:1', res[2]), true, test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(test_case);
-			}
+			ut.assertMany(
+				[
+					['ok','scheduled',res[1]],
+					['ok','aof_rewrite_scheduled:1',res[2]]
+				],test_case);
 			setTimeout(function () {
 				testEmitter.emit('next');
 			}, 500);

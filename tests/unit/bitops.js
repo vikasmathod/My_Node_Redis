@@ -181,19 +181,15 @@ exports.Bitops = (function () {
 		}
 		testEmitter.emit('start');
 	}
-
+	
+	//test methods
 	tester.Bitops1 = function (errorCallback) {
 		var test_case = 'BITCOUNT returns 0 against non existing key';
 		client.bitcount('no-key', function (err, res) {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.equal(res, '0', test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(res, '0', test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -217,12 +213,7 @@ exports.Bitops = (function () {
 						errorCallback(err);
 					}
 					var bitCnt = count_bits(ipArray[iLoopIndx]);
-					try {
-						if (!assert.equal(res, bitCnt, test_case))
-							ut.pass(test_case);
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(res, bitCnt, test_case);
 					loop.next();
 				});
 			});
@@ -290,13 +281,13 @@ exports.Bitops = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.equal(res1, bitCnt1, test_case) && !assert.equal(res2, bitCnt2, test_case)
-									 && !assert.equal(res3, bitCnt3, test_case) && !assert.equal(res4, bitCnt1, test_case))
-									ut.pass(test_case);
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertMany(
+								[
+									['equal',res1, bitCnt1],
+									['equal',res2, bitCnt2],
+									['equal',res3, bitCnt3],
+									['equal',res4, bitCnt1]
+								],test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -308,12 +299,7 @@ exports.Bitops = (function () {
 	tester.Bitops5 = function (errorCallback) {
 		var test_case = 'BITCOUNT syntax error #1';
 		client.bitcount('s', 0, function (err, res) {
-			try {
-				if (!assert.equal(ut.match('syntax error', err), true, test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('syntax error',err,test_case)
 			testEmitter.emit('next');
 		});
 	};
@@ -329,12 +315,7 @@ exports.Bitops = (function () {
 					errorCallback(err);
 				}
 				client.bitcount('foo', 0, 4294967296, function (err, res) {
-					try {
-						if (!assert.equal(ut.match('out of range', err), true, test_case))
-							ut.pass(test_case);
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertOk('out of range', err, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -352,12 +333,7 @@ exports.Bitops = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.equal(res, null, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, null, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -374,12 +350,7 @@ exports.Bitops = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.equal(res, 0, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, 0, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -396,12 +367,7 @@ exports.Bitops = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.equal(res, 0, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, 0, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -434,13 +400,12 @@ exports.Bitops = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								try {
-									if (!assert.equal(res1, '\x01\x02\xff', test_case) && !assert.equal(res2, '\x01\x02\xff', test_case)
-										 && !assert.equal(res3, '\x01\x02\xff', test_case))
-										ut.pass(test_case);
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertMany(
+									[
+										['equal',res1,'\x01\x02\xff'],
+										['equal',res2,'\x01\x02\xff'],
+										['equal',res3,'\x01\x02\xff']
+									],test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -477,13 +442,12 @@ exports.Bitops = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								try {
-									if (!assert.equal(res1, '\x01\x02\xff', test_case) && !assert.equal(res2, '\x01\x02\xff', test_case)
-										 && !assert.equal(res3, '\x01\x02\xff', test_case))
-										ut.pass(test_case);
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertMany(
+									[
+										['equal',res1,'\x01\x02\xff'],
+										['equal',res2,'\x01\x02\xff'],
+										['equal',res3,'\x01\x02\xff']
+									],test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -521,13 +485,12 @@ exports.Bitops = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								try {
-									if (!assert.equal(res1, '\x01\x02\xff\x00\x00', test_case) && !assert.equal(res2, '\x01\x02\xff\xff', test_case)
-										 && !assert.equal(res3, '\x00\x00\x00\x00\xff', test_case))
-										ut.pass(test_case);
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertMany(
+									[
+										['equal',res1,'\x01\x02\xff\x00\x00'],
+										['equal',res2,'\x01\x02\xff\xff'],
+										['equal',res3,'\x00\x00\x00\x00\xff']
+									],test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -663,12 +626,7 @@ exports.Bitops = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.equal(res, 2, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, 2, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -684,12 +642,7 @@ exports.Bitops = (function () {
 				errorCallback(err);
 			}
 			client.bitop('xor', 'dest', 'a', 'b', 'c', 'd', function (err, res) {
-				try {
-					if (!assert.equal(ut.match('ERR', err), true, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('ERR', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -703,12 +656,7 @@ exports.Bitops = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.equal(res, 32, test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(res, 32, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -728,13 +676,11 @@ exports.Bitops = (function () {
 							client.get('res',function(err,res){
 								res_array.push(res);
 								client.bitop('not','res','bar','foo',function(err,res){
-									try{
-										if(!assert.deepEqual(res_array,[0,1,'\u0001'],test_case)
-										&& !assert.ok(ut.match('called with a single source key',err),test_case))
-												ut.pass(test_case);
-									}catch(e){
-										ut.fail(e,true);
-									}
+									ut.assertMany(
+										[
+											['deepequal',res_array,[0,1,'\u0001']],
+											['ok','called with a single source key',err]
+										],test_case);
 									testEmitter.emit('next');
 								});
 							});

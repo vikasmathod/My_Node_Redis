@@ -73,7 +73,8 @@ exports.Protocol = (function () {
 
 		testEmitter.emit('start');
 	}
-	//private methods
+	
+	// test methods 
 	tester.Proto1 = function (errorCallback) {
 		var test_case = 'Handle an empty query';
 		var stream = net.createConnection(server_port, server_host);
@@ -87,13 +88,7 @@ exports.Protocol = (function () {
 		});
 		stream.on('data', function (data) {
 			var result = data.toString().slice(1).split(/\r\n/g);
-			try {
-				if (!assert.deepEqual(result[0], 'PONG', test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(result[0], 'PONG', test_case);
 			stream.end();
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -117,13 +112,7 @@ exports.Protocol = (function () {
 		});
 		stream.on('data', function (data) {
 			var result = data.toString().slice(1).split(/\r\n/g);
-			try {
-				if (!assert.deepEqual(result[0], 'PONG', test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(result[0], 'PONG', test_case);
 			stream.end();
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -146,13 +135,7 @@ exports.Protocol = (function () {
 			errorCallback(err);
 		});
 		stream.on('data', function (data) {
-			try {
-				if (!assert.ok(ut.match('invalid multibulk length', data.toString()), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertOk('invalid multibulk length', data.toString(), test_case);
 			stream.end();
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -174,13 +157,7 @@ exports.Protocol = (function () {
 			errorCallback(err);
 		});
 		stream.on('data', function (data) {
-			try {
-				if (!assert.ok(ut.match("[expected '$', got 'f']", data.toString()), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('[expected \'$\', got \'f\']', data.toString(), test_case);
 			stream.end();
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -202,13 +179,7 @@ exports.Protocol = (function () {
 			errorCallback(err);
 		});
 		stream.on('data', function (data) {
-			try {
-				if (!assert.ok(ut.match('invalid bulk length', data.toString()), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('invalid bulk length', data.toString(), test_case);
 			stream.end();
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -230,13 +201,7 @@ exports.Protocol = (function () {
 			errorCallback(err);
 		});
 		stream.on('data', function (data) {
-			try {
-				if (!assert.ok(ut.match('invalid bulk length', data.toString()), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('invalid bulk length', data.toString(), test_case);
 			stream.end();
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -258,13 +223,7 @@ exports.Protocol = (function () {
 			errorCallback(err);
 		});
 		stream.on('data', function (data) {
-			try {
-				if (!assert.ok(ut.match('invalid bulk length', data.toString()), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('invalid bulk length', data.toString(), test_case);
 			stream.end();
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -286,13 +245,7 @@ exports.Protocol = (function () {
 			errorCallback(err);
 		});
 		stream.on('data', function (data) {
-			try {
-				if (!assert.ok(ut.match("[expected '$', got 'f']", data.toString()), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('[expected \'$\', got \'f\']', data.toString(), test_case);
 			stream.end();
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -314,13 +267,7 @@ exports.Protocol = (function () {
 			errorCallback(err);
 		});
 		stream.on('data', function (data) {
-			try {
-				if (!assert.ok(ut.match("[wrong*][arguments]['ping'*]", data.toString()), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('[wrong*][arguments][\'ping\'*]', data.toString(), test_case);
 			stream.end();
 			if (protocol.debug_mode) {
 				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -385,13 +332,7 @@ exports.Protocol = (function () {
 			stream.on('close', function (data) {
 				error = fs.readFileSync(server.stdout_file).toString().split('\n');
 				retval = error[error.length - 2];
-				try {
-					if (!assert.ok(ut.match('Protocol error', retval), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('Protocol error', retval, test_case);
 				outerloop.next();
 
 			});
@@ -431,12 +372,12 @@ exports.Protocol = (function () {
 				} else if (res) {
 					client1.rpush('nolist', 'a', function (err, res) {
 						if (err) {
-							errorCallback(err);
+							ut.fail(err,true);
 						} else if (res) {
-							client1.end();
 							ut.pass(test_case);
-							testEmitter.emit('next');
 						}
+						client1.end();
+						testEmitter.emit('next');
 					});
 				}
 			});

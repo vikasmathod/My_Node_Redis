@@ -70,6 +70,7 @@ exports.Scripting = (function () {
 		testEmitter.emit('start');
 	}
 
+	// test methods
 	tester.scripting1 = function (errorCallback) {
 		var test_case = 'EVAL - Does Lua interpreter replies to our requests?';
 		client.eval("return 'hello'", 0, function (err, res) {

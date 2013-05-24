@@ -69,6 +69,7 @@ exports.Expire = (function () {
 		return (value >= start && value <= end) ? true : false;
 	};
 
+	// test methods
 	tester.expire1 = function (errorCallback) {
 		var test_case = 'EXPIRE - set timeouts multiple times';
 		var result_array = new Array();
@@ -101,15 +102,8 @@ exports.Expire = (function () {
 									errorCallback(err);
 								}
 								// has the same output in Tcl
-								try {
-									if (!assert.deepEqual(result_array, [1, 5, 1, 10], test_case)) {
-										ut.pass(test_case);
-										testEmitter.emit('next');
-									}
-								} catch (e) {
-									ut.fail(e, true);
-									testEmitter.emit('next');
-								}
+								ut.assertDeepEqual(result_array, [1, 5, 1, 10], test_case);
+								testEmitter.emit('next');
 							});
 						});
 					});
@@ -124,15 +118,8 @@ exports.Expire = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.equal(res, 'foobar', test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertEqual(res, 'foobar', test_case);
+			testEmitter.emit('next');
 		})
 	};
 	tester.expire3 = function (errorCallback) {
@@ -149,15 +136,8 @@ exports.Expire = (function () {
 						errorCallback(err);
 					}
 					result_array.push(l2);
-					try {
-						if (!assert.deepEqual(result_array, [null, 0], test_case)) {
-							ut.pass(test_case);
-							testEmitter.emit('next');
-						}
-					} catch (e) {
-						ut.fail(e, true);
-						testEmitter.emit('next');
-					}
+					ut.assertDeepEqual(result_array, [null, 0], test_case);
+					testEmitter.emit('next');
 				});
 			});
 		}, 6000)
@@ -185,15 +165,8 @@ exports.Expire = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.equal(res, 'bar,foo', test_case)) {
-									ut.pass(test_case);
-									testEmitter.emit('next');
-								}
-							} catch (e) {
-								ut.fail(e, true);
-								testEmitter.emit('next');
-							}
+							ut.assertEqual(res, 'bar,foo', test_case);
+							testEmitter.emit('next');
 						});
 					});
 				});
@@ -220,15 +193,12 @@ exports.Expire = (function () {
 							errorCallback(err);
 						}
 						// has the same output in Tcl, providing leniency of +-1
-						try {
-							if ((!assert.deepEqual(res1, 1, test_case)) && (!assert.ok(checkrange(res2, 14, 16), test_case))) {
-								ut.pass(test_case);
-								testEmitter.emit('next');
-							}
-						} catch (e) {
-							ut.fail(e, true);
-							testEmitter.emit('next');
-						}
+						ut.assertMany(
+						[
+							['deepequal',res1, 1],
+							['ok',checkrange(res2, 14, 16), null]
+						],test_case);
+						testEmitter.emit('next');
 					});
 				});
 			});
@@ -249,15 +219,8 @@ exports.Expire = (function () {
 				}
 				result_array.push(res)
 				// has the same output in Tcl
-				try {
-					if (!assert.deepEqual(result_array, ['OK', 12], test_case)) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					}
-				} catch (e) {
-					ut.fail(e, true);
-					testEmitter.emit('next');
-				}
+				ut.assertDeepEqual(result_array, ['OK', 12], test_case);
+				testEmitter.emit('next');
 			});
 		});
 	};
@@ -268,15 +231,8 @@ exports.Expire = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.equal(res, 'test', test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertEqual(res, 'test', test_case);
+			testEmitter.emit('next');
 		});
 	};
 
@@ -290,15 +246,8 @@ exports.Expire = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.equal(res, 'foo', test_case)) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					}
-				} catch (e) {
-					ut.fail(e, true);
-					testEmitter.emit('next');
-				}
+				ut.assertEqual(res, 'foo', test_case);
+				testEmitter.emit('next');
 			});
 		});
 	};
@@ -310,15 +259,8 @@ exports.Expire = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.equal(res, null, test_case)) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					}
-				} catch (e) {
-					ut.fail(e, true);
-					testEmitter.emit('next');
-				}
+				ut.assertEqual(res, null, test_case);
+				testEmitter.emit('next');
 			});
 		}, 1100);
 	};
@@ -327,15 +269,8 @@ exports.Expire = (function () {
 		var test_case = 'SETEX - Wrong time parameter';
 		try {
 			client.setex('z', -10, 'foo', function (err, res) {
-				try {
-					if (!assert.ok(ut.match('invalid expire', err), test_case)) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					}
-				} catch (e) {
-					ut.fail(e, true);
-					testEmitter.emit('next');
-				}
+				ut.assertOk('invalid expire',err,test_case);
+				testEmitter.emit('next');
 			});
 		} catch (e) {
 			console.log('e-' + err);
@@ -372,16 +307,9 @@ exports.Expire = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								result_array.push(res)
-								try {
-									if (!assert.deepEqual(result_array, [50, 1, -1, 'foo'], test_case)) {
-										ut.pass(test_case);
-										testEmitter.emit('next');
-									}
-								} catch (e) {
-									ut.fail(e, true);
-									testEmitter.emit('next');
-								}
+								result_array.push(res);
+								ut.assertDeepEqual(result_array, [50, 1, -1, 'foo'], test_case);
+								testEmitter.emit('next');
 							});
 						});
 					});
@@ -406,16 +334,9 @@ exports.Expire = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					result_array.push(res)
-					try {
-						if (!assert.equal(result_array, '0,0', test_case)) {
-							ut.pass(test_case);
-							testEmitter.emit('next');
-						}
-					} catch (e) {
-						ut.fail(e, true);
-						testEmitter.emit('next');
-					}
+					result_array.push(res);
+					ut.assertEqual(result_array, '0,0', test_case);
+					testEmitter.emit('next');
 				});
 			});
 		});
@@ -455,15 +376,8 @@ exports.Expire = (function () {
 										if (err) {
 											errorCallback(err);
 										}
-										try {
-											if (!assert.ok(res, test_case)) {
-												ut.pass(test_case);
-												testEmitter.emit('next');
-											}
-										} catch (e) {
-											ut.fail(e, true);
-											testEmitter.emit('next');
-										}
+										ut.assertOk(res, null, test_case);
+										testEmitter.emit('next');
 									});
 								});
 							});
@@ -510,15 +424,8 @@ exports.Expire = (function () {
 										errorCallback(err);
 									}
 									result_array.push('foo');
-									try {
-										if (!assert.deepEqual(result_array.sort(), ['a', 'e', 'foo', 's', 't'], test_case)) {
-											ut.pass(test_case);
-											testEmitter.emit('next');
-										}
-									} catch (e) {
-										ut.fail(e, true);
-										testEmitter.emit('next');
-									}
+									ut.assertDeepEqual(result_array.sort(), ['a', 'e', 'foo', 's', 't'], test_case);
+									testEmitter.emit('next');
 								});
 							});
 						});
@@ -546,15 +453,11 @@ exports.Expire = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if ((!assert(res1 > 900, test_case)) && (!assert(res1 <= 1000, test_case))) {
-								ut.pass(test_case);
-								testEmitter.emit('next');
-							}
-						} catch (e) {
-							ut.fail(e, true);
-							testEmitter.emit('next');
-						}
+						ut.assertMany([
+							['ok',res1 > 900,null],
+							['ok',res1 <= 1000,null]
+						],test_case);
+						testEmitter.emit('next');
 					});
 				});
 			});
@@ -588,12 +491,7 @@ exports.Expire = (function () {
 			}, 900);
 
 		}, function () {
-			try {
-				if (!assert.deepEqual([res_A, res_B], ['somevalue', ''], test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual([res_A, res_B], ['somevalue', ''], test_case);
 			testEmitter.emit('next');
 		});
 	}
@@ -644,15 +542,12 @@ exports.Expire = (function () {
 				res2 = size2
 			});
 		}, 1000);
-		try {
-			if ((!assert.equal(res1, 1, test_case)) && (!assert.equal(res2, 0, test_case))) {
-				ut.pass(test_case);
-				testEmitter.emit('next');
-			}
-		} catch (e) {
-			ut.fail(e, true);
-			testEmitter.emit('next');
-		}
+		ut.assertMany(
+			[
+				['equal',res1, 1],
+				['equal',res2, 0]
+			],test_case);
+		testEmitter.emit('next');
 	};
 
 	tester.expire17 = function (errorCallback) {
@@ -710,12 +605,7 @@ exports.Expire = (function () {
 				loop.next();
 			}, 120);
 		}, function () {
-			try {
-				if (!assert.deepEqual([resA, resB], ['somevalue', null], test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual([resA, resB], ['somevalue', null], test_case);
 			testEmitter.emit('next');
 		})
 	};

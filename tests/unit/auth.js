@@ -67,6 +67,8 @@ exports.Auth = (function () {
 			}
 		});
 	}
+	
+	// test methods 
 	tester.Auth1 = function (errorCallback) {
 		var test_case = 'AUTH fails if there is no password configured server side';
 		start_server_auth(client_pid, null, function (err, res) {
@@ -76,13 +78,7 @@ exports.Auth = (function () {
 			server_pid = res;
 			client = g.srv[client_pid][server_pid]['client'];
 			client.auth('foo', function (err, res) {
-				try {
-					if (!assert.ok(ut.match('no password', err), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('no password',err,test_case);
 				client.end();
 				if (auth.debug_mode) {
 					log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
@@ -105,13 +101,7 @@ exports.Auth = (function () {
 			server_pid = res;
 			client = g.srv[client_pid][server_pid]['client'];
 			client.auth('wrong!', function (err, res) {
-				try {
-					if (!assert.ok(ut.match('ERR invalid password', err), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('ERR invalid password',err,test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -119,13 +109,7 @@ exports.Auth = (function () {
 	tester.Auth3 = function (errorCallback) {
 		var test_case = 'Arbitrary command gives an error when AUTH is required';
 		client.set('foo', 'bar', function (err, res) {
-			try {
-				if (!assert.ok(ut.match('ERR operation not permitted', err), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('ERR operation not permitted',err,test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -135,13 +119,7 @@ exports.Auth = (function () {
 			if (err) {
 				errorCallback(err, null);
 			}
-			try {
-				if (!assert.equal(res, 'OK', test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(res, 'OK', test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -155,13 +133,7 @@ exports.Auth = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.equal(res, 101, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, 101, test_case);
 				client.end();
 				if (auth.debug_mode) {
 					log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);

@@ -91,14 +91,7 @@ exports.Deamon = (function () {
 					}
 				});
 			}, function () {
-				try {
-					if (!assert.equal(retry, 0, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					console.log('assertion:expected warning not found on config file');
-					ut.fail(e);
-				}
+				ut.assertEqual(retry, 0, test_case);
 				kill_server(client_pid, server_pid, function (err, res) {
 					if (err) {
 						errorCallback(err, null);

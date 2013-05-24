@@ -72,15 +72,8 @@ exports.Cas = (function () {
 			if (res) {
 				errorCallback(res);
 			}
-			try {
-				if (!assert.ok(ut.match('DISCARD without MULTI', err), test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertOk('DISCARD without MULTI', err, test_case);
+			testEmitter.emit('next');
 		})
 	};
 
@@ -114,15 +107,8 @@ exports.Cas = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.ok(ut.match('Background append only file rewriting started', replies[3]), test_case)) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					}
-				} catch (e) {
-					ut.fail(e, true);
-					testEmitter.emit('next');
-				}
+				ut.assertOk('Background append only file rewriting started', replies[3], test_case);
+				testEmitter.emit('next');
 			})
 		})
 	};

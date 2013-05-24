@@ -64,6 +64,7 @@ exports.Multi = (function () {
 		testEmitter.emit('start');
 	}
 
+	// test methods
 	tester.multi1 = function (errorCallback) {
 		var test_case = 'MUTLI / EXEC basics';
 		var v = new Array();
@@ -90,13 +91,7 @@ exports.Multi = (function () {
 							errorCallback(err);
 						}
 						v.push(res);
-						try {
-							if (!assert.deepEqual(v, ['QUEUED', 'QUEUED', [['a', 'b', 'c'], 'PONG']], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(v, ['QUEUED', 'QUEUED', [['a', 'b', 'c'], 'PONG']], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -130,13 +125,7 @@ exports.Multi = (function () {
 							errorCallback(err);
 						}
 						v.push(res);
-						try {
-							if (!assert.deepEqual(v, ['QUEUED', 'OK', ['a', 'b', 'c']], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(v, ['QUEUED', 'OK', ['a', 'b', 'c']], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -152,13 +141,7 @@ exports.Multi = (function () {
 			error = err;
 		});
 		multi.exec(function (err, res) {
-			try {
-				if (!assert.ok(ut.match('ERR MULTI', error), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('ERR MULTI', error, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -182,13 +165,7 @@ exports.Multi = (function () {
 						errorCallback(err);
 					}
 					list[1] = res;
-					try {
-						if (!assert.deepEqual(list, [['a'], '0'], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(list, [['a'], '0'], test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -203,13 +180,7 @@ exports.Multi = (function () {
 			error = err;
 		});
 		multi.exec(function (err, res) {
-			try {
-				if (!assert.ok(ut.match('ERR WATCH', error), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('ERR WATCH', error, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -233,13 +204,11 @@ exports.Multi = (function () {
 								if (!assert.ok(ut.match('EXECABORT', err), test_case)) {
 									client.exists('foo1', function (err, res1) {
 										client.exists('foo2', function (err, res2) {
-											try {
-												if (!assert.equal(res1, 0, test_case) && !assert.equal(res2, 0, test_case)) {
-													ut.pass(test_case);
-												}
-											} catch (e) {
-												ut.fail(e, true)
-											}
+											ut.assertMany(
+												[
+													['equal', res1, 0],
+													['equal', res2, 0]
+												], test_case);
 											testEmitter.emit('next');
 										});
 									});
@@ -284,13 +253,11 @@ exports.Multi = (function () {
 															newClient.end();
 															client.exists('foo1', function (err, res1) {
 																client.exists('foo2', function (err, res2) {
-																	try {
-																		if (!assert.equal(res1, 0, test_case) && !assert.equal(res2, 0, test_case)) {
-																			ut.pass(test_case);
-																		}
-																	} catch (e) {
-																		ut.fail(e, true)
-																	}
+																	ut.assertMany(
+																		[
+																			['equal',res1, 0],
+																			['equal',res2, 0]
+																		], test_case);
 																	testEmitter.emit('next');
 																});
 															});
@@ -335,13 +302,7 @@ exports.Multi = (function () {
 							try {
 								if (!assert.ok(ut.match('EXECABORT', err), test_case)) {
 									client.ping(function (err, res1) {
-										try {
-											if (!assert.equal(res1, 'PONG', test_case)) {
-												ut.pass(test_case);
-											}
-										} catch (e) {
-											ut.fail(e, true)
-										}
+										ut.assertEqual(res1, 'PONG', test_case);
 										testEmitter.emit('next');
 									});
 								}
@@ -363,12 +324,7 @@ exports.Multi = (function () {
 		var multiOp = client.multi();
 		multiOp.ping();
 		multiOp.exec(function (err, res) {
-			try {
-				if (!assert.equal(res, 'PONG', test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(res, 'PONG', test_case);
 			testEmitter.emit('next');
 		});
 	}
@@ -381,12 +337,7 @@ exports.Multi = (function () {
 		var multiOp = client.multi();
 		multiOp.ping();
 		multiOp.exec(function (err, res) {
-			try {
-				if (!assert.equal(res, null, test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(res, null, test_case);
 			testEmitter.emit('next');
 		});
 	}
@@ -409,13 +360,7 @@ exports.Multi = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if (!assert.equal(res, null, test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, null, test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -438,12 +383,7 @@ exports.Multi = (function () {
 				var multiOp = client.multi();
 				multiOp.ping();
 				multiOp.exec(function (err, res) {
-					try {
-						if (!assert.equal(res, null, test_case))
-							ut.pass(test_case);
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(res, null, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -462,12 +402,7 @@ exports.Multi = (function () {
 		multiOp = client.multi();
 		multiOp.ping();
 		multiOp.exec(function (err, res) {
-			try {
-				if (!assert.equal(res, 'PONG', test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(res, 'PONG', test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -498,13 +433,7 @@ exports.Multi = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								try {
-									if (!assert.equal(res, 'PONG', test_case)) {
-										ut.pass(test_case);
-									}
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertEqual(res, 'PONG', test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -536,13 +465,7 @@ exports.Multi = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.equal(res, 'PONG', test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertEqual(res, 'PONG', test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -557,13 +480,7 @@ exports.Multi = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.equal(res, 'OK', test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(res, 'OK', test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -586,13 +503,7 @@ exports.Multi = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if (!assert.equal(res, null, test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, null, test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -618,13 +529,7 @@ exports.Multi = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if (!assert.equal(res, 'PONG', test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, 'PONG', test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -650,13 +555,7 @@ exports.Multi = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if (!assert.equal(res, null, test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, null, test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -682,13 +581,7 @@ exports.Multi = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if (!assert.equal(res, 'PONG', test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, 'PONG', test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -726,13 +619,7 @@ exports.Multi = (function () {
 									if (err) {
 										errorCallback(err);
 									}
-									try {
-										if (!assert.equal(res, 'PONG', test_case)) {
-											ut.pass(test_case);
-										}
-									} catch (e) {
-										ut.fail(e, true);
-									}
+									ut.assertEqual(res, 'PONG', test_case);
 									testEmitter.emit('next');
 								});
 							});
@@ -765,13 +652,7 @@ exports.Multi = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.equal(res, null, test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertEqual(res, null, test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -803,13 +684,7 @@ exports.Multi = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								try {
-									if (!assert.equal(res, 'PONG', test_case)) {
-										ut.pass(test_case);
-									}
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertEqual(res, 'PONG', test_case);
 								testEmitter.emit('next');
 							});
 						}, 1100);
@@ -841,13 +716,7 @@ exports.Multi = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.equal(res, 11, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(res, 11, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -880,13 +749,7 @@ exports.Multi = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.equal(res, 11, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(res, 11, test_case);
 					testEmitter.emit('next');
 				});
 			});
