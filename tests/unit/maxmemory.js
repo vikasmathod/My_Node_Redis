@@ -133,13 +133,7 @@ exports.Maxmemory = (function () {
 										if (err) {
 											errorCallback(err);
 										}
-										try {
-											if (!assert.ok(check(parseInt(used), (limit + 4096)), test_case)) {
-												ut.pass(test_case);
-											}
-										} catch (e) {
-											ut.fail(e, true);
-										}
+										ut.assertOk(check(parseInt(used), (limit + 4096)),null, test_case);
 										outerloop.next();
 
 										function check(a, b) {
@@ -219,22 +213,13 @@ exports.Maxmemory = (function () {
 								}, function () {
 									if (ut.match('allkeys-', policy[i])) {
 										ut.serverInfo(client, 'used_memory', function (err, used) {
-											try {
-												if (!assert.ok(check(parseInt(used), (limit + 4096)), test_case)) {
-													ut.pass(test_case);
-												}
-											} catch (e) {
-												ut.fail(e, true);
+											if (err) {
+												errorCallback(err);
 											}
+											ut.assertOk(check(parseInt(used), (limit + 4096)),null, test_case);
 										});
 									} else {
-										try {
-											if (!assert.equal(error, 1, test_case)) {
-												ut.pass(test_case);
-											}
-										} catch (e) {
-											ut.fail(e, true);
-										}
+										ut.assertEqual(error, 1, test_case);
 									}
 									outerloop.next();
 
@@ -341,13 +326,11 @@ exports.Maxmemory = (function () {
 											innerloop1.next();
 										});
 									}, function () {
-										try {
-											if ((!assert.ok(under_limit, test_case)) && (!assert.ok(key_exists, test_case))) {
-												ut.pass(test_case);
-											}
-										} catch (e) {
-											ut.fail(e, true);
-										}
+										ut.assertMany(
+											[
+												['ok',under_limit,null],
+												['ok',key_exists,null]
+											],test_case);
 										outerloop.next();
 									});
 

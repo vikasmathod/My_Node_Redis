@@ -100,17 +100,16 @@ exports.Introspection = (function () {
 									if (res) {
 										errorCallback(res);
 									}
-									try {
-										if ((!assert.equal(result, 'OK', test_case)) && (!assert.ok(ut.match('Redis connection gone from end event', err), test_case))) {
-											ut.pass(test_case);
-											// client should be disconnected using kill command
-											if (intro.debug_mode) {
-												log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-											}
-										}
-									} catch (e) {
-										ut.fail(e, true);
+									ut.assertMany(
+										[
+											['equal',result, 'OK'],
+											['ok','Redis connection gone from end event', err]
+										],test_case);
+									// client should be disconnected using kill command
+									if (intro.debug_mode) {
+										log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 									}
+									client.end();
 									server.kill_server(client_pid, server_pid, function (err, res) {
 										if (err) {
 											errorCallback(err);
@@ -189,13 +188,12 @@ exports.Introspection = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if ((!assert.equal(res1, 'OK', test_case)) && (!assert.equal(res2[1], 32, test_case)) && (!assert.equal(res3[1], 64, test_case))) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertMany(
+								[
+									['equal',res1, 'OK'],
+									['equal',res2[1], 32],
+									['equal',res3[1], 64],
+								],test_case);
 							client.end();
 							if (intro.debug_mode) {
 								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -241,13 +239,7 @@ exports.Introspection = (function () {
 						if (res) {
 							errorCallback(res);
 						}
-						try {
-							if (!assert.ok(ut.match('Can\'t BGSAVE while AOF log rewriting', err), test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertOk('Can\'t BGSAVE while AOF log rewriting', err,test_case);
 						client.end();
 						if (intro.debug_mode) {
 							log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -297,13 +289,11 @@ exports.Introspection = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if ((!assert.ok(ut.match('Redis is now ready to exit, bye', result), test_case)) && (!assert.ok(error, test_case))) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertMany(
+								[
+									['ok','Redis is now ready to exit, bye', result],
+									['ok',error,null]
+								],test_case);
 							client.end();
 							if (intro.debug_mode) {
 								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -354,13 +344,12 @@ exports.Introspection = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								try {
-									if ((!assert.ok(ut.match('Redis is now ready to exit, bye', result), test_case)) && (!assert.ok(error1, test_case)) && (!assert.ok(error2, test_case))) {
-										ut.pass(test_case);
-									}
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertMany(
+									[
+										['ok','Redis is now ready to exit, bye', result],
+										['ok',error1,null],
+										['ok',error2,null]
+									],test_case);
 								client.end();
 								if (intro.debug_mode) {
 									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -409,13 +398,7 @@ exports.Introspection = (function () {
 								errorCallback(err);
 							}
 							setTimeout(function () {
-								try {
-									if (!assert.ok(res, test_case)) {
-										ut.pass(test_case);
-									}
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertOk(res, null, test_case);
 								client.end();
 								if (intro.debug_mode) {
 									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -475,13 +458,7 @@ exports.Introspection = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								try {
-									if (!assert.ok(res, test_case)) {
-										ut.pass(test_case);
-									}
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertOk(res, null, test_case);
 								master_cli.end();
 								slave_cli.end();
 								if (intro.debug_mode) {
@@ -550,13 +527,7 @@ exports.Introspection = (function () {
 											errorCallback(err);
 										}
 										setTimeout(function () {
-											try {
-												if (!assert.ok(res, test_case)) {
-													ut.pass(test_case);
-												}
-											} catch (e) {
-												ut.fail(e, true);
-											}
+											ut.assertOk(res, null, test_case);
 											client.end();
 											if (intro.debug_mode) {
 												log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -600,12 +571,7 @@ exports.Introspection = (function () {
 				responses.push(args);
 			});
 			monitor_client.on('end', function (err, res) {
-				try {
-					if (!assert.equal(ut.match('set,foo,bar', responses.toString()), true, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('set,foo,bar', responses.toString(),test_case);
 				if (intro.debug_mode) {
 					log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
 				}
@@ -653,13 +619,11 @@ exports.Introspection = (function () {
 				responses.push(args);
 			});
 			monitor_client.on('end', function (err, res) {
-				try {
-					if (responses[0][0] == 'eval' && !assert.equal(ut.match('foo,bar', responses.toString()), true, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertMany(
+					[
+						['ok','foo,bar', responses.toString()],
+						['equal',responses[0][0],'eval']
+					],test_case);
 				testEmitter.emit('next');
 				monitor_client.end();
 				server10.kill_server(client_pid, server_pid, function (err, res) {

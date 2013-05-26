@@ -760,6 +760,17 @@ Utility.prototype.assertError = function (arg1,message,inLoop) {
 		return false;
 	}
 };
+Utility.prototype.assertNotEqual = function (arg1,arg2,message,inLoop) {
+	try {
+		if (!assert.notEqual(arg1,arg2,message) && !inLoop) {
+			this.pass(message);
+		}
+		return true;
+	} catch (e) {
+		this.fail(e,true);
+		return false;
+	}
+};
 Utility.prototype.assertMany = function (arg1,message) {
 	var boolRes = true;
 	for(var i = 0;i < arg1.length; i++){
@@ -775,6 +786,9 @@ Utility.prototype.assertMany = function (arg1,message) {
 			break;
 			case 'error':
 				boolRes = this.assertError(arg1[i][1],message,boolRes);
+			break;
+			case 'notequal':
+				boolRes = this.assertNotEqual(arg1[i][1],arg1[i][2],message,boolRes);
 			break;
 			default:
 				boolRes = this.assertEqual(arg1[i][1],arg1[i][2],message,boolRes);

@@ -90,12 +90,7 @@ exports.Limits = (function () {
 				});				
 			}, 100);
 		}, function () {
-			try {
-				if (!assert(c > 8 && c <= 10, test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk(c > 8 && c <= 10,null,test_case);
 			newClient.end();
 			testEmitter.emit('next');
 		});

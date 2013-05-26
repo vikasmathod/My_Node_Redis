@@ -110,15 +110,8 @@ exports.Other = (function () {
 											if (err) {
 												errorCallback(err);
 											}
-											try {
-												if (!assert.equal(res, 'OK', test_case)) {
-													ut.pass(test_case);
-													testEmitter.emit('next');
-												}
-											} catch (e) {
-												ut.fail(e, true);
-												testEmitter.emit('next');
-											}
+											ut.assertEqual(res, 'OK', test_case);
+											testEmitter.emit('next');
 										});
 									});
 								});
@@ -153,13 +146,7 @@ exports.Other = (function () {
 					});
 				});
 			}, function () {
-				try {
-					if (!assert.deepEqual(error_array, [], test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(error_array, [], test_case);
 				outerloop.next();
 			});
 		}, function () {
@@ -201,15 +188,8 @@ exports.Other = (function () {
 										if (err) {
 											errorCallback(err);
 										}
-										try {
-											if (!assert.equal(res, 10, test_case)) {
-												ut.pass(test_case);
-												testEmitter.emit('next');
-											}
-										} catch (e) {
-											ut.fail(e, true);
-											testEmitter.emit('next');
-										}
+										ut.assertEqual(res, 10, test_case);
+										testEmitter.emit('next');
 									});
 								});
 							});
@@ -223,15 +203,8 @@ exports.Other = (function () {
 	tester.other4 = function (errorCallback) {
 		var test_case = 'SELECT an out of range DB';
 		client.select(1000000, function (err, res) {
-			try {
-				if (!assert.ok(ut.match('invalid', err), test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertOk('invalid', err,test_case);
+			testEmitter.emit('next');
 		})
 	};
 
@@ -265,14 +238,8 @@ exports.Other = (function () {
 																								 && (ttl4 > 900 && ttl4 <= 1000) && (ttl5 > 1900 && ttl5 <= 2000) && (ttl6 > 2900 && ttl6 <= 3000)) {
 																								test_pass = true;
 																							}
-																							try {
-																								if (!assert.equal(test_pass, true, test_case)) {
-																									ut.pass(test_case);
-																									client.config('set', 'appendonly', 'no');
-																								}
-																							} catch (e) {
-																								ut.fail(e, true);
-																							}
+																							ut.assertEqual(test_pass, true, test_case);
+																							client.config('set', 'appendonly', 'no');
 																							testEmitter.emit('next');
 																						});
 																					});
@@ -347,13 +314,7 @@ exports.Other = (function () {
 												if (ttl > 900 && ttl <= 1000) {
 													res2 = 1;
 												}
-												try {
-													if (!assert.equal(ut.compareArray([res1, res2], [1, 1]), true, test_case)) {
-														ut.pass(test_case);
-													}
-												} catch (e) {
-													ut.fail(e, true);
-												}
+												ut.assertEqual(ut.compareArray([res1, res2], [1, 1]), true, test_case);
 												testEmitter.emit('next');
 											});
 										});
@@ -377,15 +338,8 @@ exports.Other = (function () {
 				if (err) {
 					errorCallback(err)
 				}
-				try {
-					if (!assert.equal(res, 'OK', test_case)) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					}
-				} catch (e) {
-					ut.fail(e, true);
-					testEmitter.emit('next');
-				}
+				ut.assertEqual(res, 'OK', test_case);
+				testEmitter.emit('next');
 			});
 		});
 	};
@@ -421,13 +375,12 @@ exports.Other = (function () {
 									if (err) {
 										errorCallback(err);
 									}
-									try {
-										if (!assert.deepEqual(sha1_after, sha1, test_case)) {
-											ut.pass(test_case);
-											testEmitter.emit('next');
-										}
-									} catch (e) {
-										ut.fail(e, true);
+									var bool_Res = ut.assertDeepEqual(sha1_after, sha1, test_case,true);
+									if(bool_Res){
+										ut.pass(test_case);
+										testEmitter.emit('next');
+									}	
+									else{
 										ut.csvdump(client, function (err, newdump) {
 											if (err) {
 												errorCallback(err);
@@ -438,7 +391,7 @@ exports.Other = (function () {
 											console.log('You can inspect the two dumps in /tmp/repldump*.txt');
 											testEmitter.emit('next');
 										});
-									}
+									}	
 								});
 							});
 						});
@@ -468,18 +421,16 @@ exports.Other = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.deepEqual(sha1_after, sha1, test_case)) {
-									ut.pass(test_case);
-									fs.unlink(path.dirname(g.srv[cpid][server_pid]['stdout']) + path.sep + 'appendonly.aof', function (err) {
-										if (err) {
-											errorCallback(err);
-										}
-										testEmitter.emit('next');
-									});
-								}
-							} catch (e) {
-								ut.fail(e, true);
+							var bool_Res = ut.assertDeepEqual(sha1_after, sha1, test_case,true);
+							if(bool_Res){	
+								ut.pass(test_case);
+								fs.unlink(path.dirname(g.srv[cpid][server_pid]['stdout']) + path.sep + 'appendonly.aof', function (err) {
+									if (err) {
+										errorCallback(err);
+									}
+									testEmitter.emit('next');
+								});
+							} else{
 								ut.csvdump(client, function (err, newdump) {
 									if (err) {
 										errorCallback(err);
@@ -531,15 +482,8 @@ exports.Other = (function () {
 					});
 				});
 			}, function () {
-				try {
-					if (!assert.ok(flag, test_case + error)) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					}
-				} catch (e) {
-					ut.fail(e, true);
-					testEmitter.emit('next');
-				}
+				ut.assertOk(flag, null, test_case + error);
+				testEmitter.emit('next');
 			});
 		});
 	};
@@ -567,13 +511,7 @@ exports.Other = (function () {
 							errorCallback(err);
 						}
 						result.push(res);
-						try {
-							if (!assert.deepEqual(result, [3, 'bar', 6, 'bar100'], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(result, [3, 'bar', 6, 'bar100'], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -614,13 +552,7 @@ exports.Other = (function () {
 										errorCallback(err);
 									}
 									result.push(res);
-									try {
-										if (!assert.deepEqual(result, [12, 12], test_case)) {
-											ut.pass(test_case);
-										}
-									} catch (e) {
-										ut.fail(e, true);
-									}
+									ut.assertDeepEqual(result, [12, 12], test_case);
 									testEmitter.emit('next');
 								});
 							});
@@ -664,17 +596,11 @@ exports.Other = (function () {
 				});
 			});
 		}, function () {
-			try {
-				if (!assert.deepEqual(error_array, [], test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual(error_array, [], test_case);
 			testEmitter.emit('next');
 		});
 	};
-
+ 
 	//Leave the user with a clean DB before to exit
 	tester.other14 = function (errorCallback) {
 		var test_case = 'FLUSHDB';
@@ -705,15 +631,8 @@ exports.Other = (function () {
 									errorCallback(err)
 								}
 								aux[1] = res;
-								try {
-									if (!assert.equal(aux, '0,0', test_case)) {
-										ut.pass(test_case);
-										testEmitter.emit('next');
-									}
-								} catch (e) {
-									ut.fail(e, true);
-									testEmitter.emit('next');
-								}
+								ut.assertEqual(aux, '0,0', test_case);
+								testEmitter.emit('next');
 							});
 						});
 					});
@@ -728,30 +647,16 @@ exports.Other = (function () {
 			if (err) {
 				errorCallback(err)
 			}
-			try {
-				if (!assert.equal(res.length, 92, test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertEqual(res.length, 92, test_case);
+			testEmitter.emit('next');
 		});
 	};
 
 	tester.other16 = function (errorCallback) {
 		var test_case = 'Config GET wrong number of parameters';
 		client.config('get', 'param1', 'param2', function (err, res) {
-			try {
-				if (!assert.ok(ut.match('Wrong number of arguments for CONFIG get', err), test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertOk('Wrong number of arguments for CONFIG get', err,test_case);
+			testEmitter.emit('next');
 		});
 	};
 
@@ -761,15 +666,8 @@ exports.Other = (function () {
 			if (err) {
 				errorCallback(err)
 			}
-			try {
-				if (!assert.deepEqual(res[1], 'dump.rdb', test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertDeepEqual(res[1], 'dump.rdb', test_case);
+			testEmitter.emit('next');
 		});
 	};
 
@@ -779,15 +677,8 @@ exports.Other = (function () {
 			if (err) {
 				errorCallback(err)
 			}
-			try {
-				if (!assert.equal(res.length, 8, test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertEqual(res.length, 8, test_case);
+			testEmitter.emit('next');
 		});
 	};
 
@@ -953,15 +844,12 @@ exports.Other = (function () {
 				if (err) {
 					errorCallback(err)
 				}
-				try {
-					if ((!assert.equal(result, 'OK', test_case)) && (!assert.equal(res, 1, test_case))) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					}
-				} catch (e) {
-					ut.fail(e, true);
-					testEmitter.emit('next');
-				}
+				ut.assertMany(
+					[
+						['equal',result, 'OK'],
+						['equal',res, 1],
+					],test_case);
+				testEmitter.emit('next');
 			});
 		});
 	};
@@ -969,30 +857,16 @@ exports.Other = (function () {
 	tester.other21 = function (errorCallback) {
 		var test_case = 'Config command other than GET, SET, RESETSTAT';
 		client.config('fake_command', function (err, res) {
-			try {
-				if (!assert.ok(ut.match('CONFIG subcommand must be one of GET, SET, RESETSTAT', err), test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertOk('CONFIG subcommand must be one of GET, SET, RESETSTAT', err, test_case);
+			testEmitter.emit('next');
 		});
 	};
 
 	tester.other22 = function (errorCallback) {
 		var test_case = 'Lastsave';
 		client.lastsave(function (err, res) {
-			try {
-				if (!assert.ok(util.isDate(new Date(res)), test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertOk(util.isDate(new Date(res)),null,test_case);
+			testEmitter.emit('next');
 		});
 	};
 
@@ -1003,13 +877,7 @@ exports.Other = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.deepEqual(res, str, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual(res, str, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -1019,13 +887,7 @@ exports.Other = (function () {
 		var cmd = '.' + sep + 'redis' + sep + 'src' + sep + REDIS_SERVER + ' --version ';
 		var child_check = child.exec(cmd);
 		child_check.stdout.on('data', function (data) {
-			try {
-				if (!assert.ok(ut.match('Redis server', data), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk('Redis server', data,test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -1045,17 +907,14 @@ exports.Other = (function () {
 		m_client.on('monitor', function (time, args) {
 			replies.push(args);
 			if (replies.length === 2) {
-
-				try {
-					if ((!assert.equal(replies[0].length, 1, test_case)) && (!assert.deepEqual(replies[0][0], 'dbsize', test_case)) &&
-						(!assert.equal(replies[1].length, 3, test_case)) && (!assert.deepEqual(replies[1][0], 'set', test_case)) &&
-						(!assert.deepEqual(replies[1][1], 'json', test_case)) &&
-						(!assert.deepEqual(replies[1][2], '{"name":"John","surname":"Doe"}', test_case)))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.fail(e, true);
-				}
-
+				ut.assertMany(
+					[
+						['equal',replies[0].length, 1],
+						['equal',replies[0][0], 'dbsize'],
+						['equal',replies[1][0], 'set'],
+						['equal',replies[1][1], 'json'],
+						['equal',replies[1][2], '{"name":"John","surname":"Doe"}'],
+					],test_case);
 				m_client.quit();
 				if (other.debug_mode) {
 					log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -1090,14 +949,12 @@ exports.Other = (function () {
 							res_array.push(res);
 							client.exists('key:1',function(err,res){
 								res_array.push(res);
-									try{
-										if(!assert.equal(res_obj.split(' ')[4].split(':')[1],4,test_case)
-											&& !assert.deepEqual(res_array,['OK',1,1],test_case))
-												ut.pass(test_case);
-									}catch(e){
-										ut.fail(e,true);
-									}
-									testEmitter.emit('next');
+								ut.assertMany(
+									[	
+										['equal',res_obj.split(' ')[4].split(':')[1],4],
+										['deepequal',res_array,['OK',1,1]]
+									],test_case);
+								testEmitter.emit('next');
 							});
 						});
 					})
@@ -1115,12 +972,11 @@ exports.Other = (function () {
 			client.object('encoding','foo',function(err,res){
 				res_array.push(res);
 				client.object('idletime','foo',function(err,res){
-					try{
-						if(!assert.deepEqual(res_array,[1,'raw'],test_case) && !isNaN(res))
-								ut.pass(test_case);
-					}catch(e){
-						ut.fail(e,true);
-					}
+					ut.assertMany(
+						[	
+							['deepequal',res_array,[1,'raw']],
+							['ok',!isNaN(res),null]
+						],test_case);
 					testEmitter.emit('next');
 				});
 			});

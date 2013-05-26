@@ -71,15 +71,8 @@ exports.Slowlog = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.equal(res, 0, test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertEqual(res, 0, test_case);
+			testEmitter.emit('next');
 		});
 	};
 	tester.slowlog2 = function (errorCallback) {
@@ -107,15 +100,8 @@ exports.Slowlog = (function () {
 								errorCallback(err);
 							}
 							result.push(res);
-							try {
-								if (!assert.deepEqual(result, [0, 1], test_case)) {
-									ut.pass(test_case);
-									testEmitter.emit('next');
-								}
-							} catch (e) {
-								ut.fail(e, true);
-								testEmitter.emit('next');
-							}
+							ut.assertDeepEqual(result, [0, 1], test_case);
+							testEmitter.emit('next');
 						});
 					});
 				});
@@ -141,15 +127,8 @@ exports.Slowlog = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if (!assert.equal(res, 10, test_case)) {
-								ut.pass(test_case);
-								testEmitter.emit('next');
-							}
-						} catch (e) {
-							ut.fail(e, true);
-							testEmitter.emit('next');
-						}
+						ut.assertEqual(res, 10, test_case);
+						testEmitter.emit('next');
 					});
 				});
 			});
@@ -162,15 +141,8 @@ exports.Slowlog = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.equal(res.length, 5, test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e, true);
-				testEmitter.emit('next');
-			}
+			ut.assertEqual(res.length, 5, test_case);
+			testEmitter.emit('next');
 		})
 	};
 	tester.slowlog5 = function (errorCallback) {
@@ -187,15 +159,8 @@ exports.Slowlog = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.equal(res, 0, test_case)) {
-							ut.pass(test_case);
-							testEmitter.emit('next');
-						}
-					} catch (e) {
-						ut.fail(e, true);
-						testEmitter.emit('next');
-					}
+					ut.assertEqual(res, 0, test_case);
+					testEmitter.emit('next');
 				});
 			});
 		});
@@ -213,18 +178,14 @@ exports.Slowlog = (function () {
 					errorCallback(err);
 				}
 				e = res[0];
-				try {
-					if ((!assert.equal(e.length, 4, test_case)) &&
-						(!assert.equal(e[0], 105, test_case)) &&
-						(!assert.ok(check(e[2], 10000), test_case)) &&
-						(!assert.deepEqual(e[3], ['debug', 'sleep', '0.2'], test_case))) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					}
-				} catch (e) {
-					ut.fail(e, true);
-					testEmitter.emit('next');
-				}
+				ut.assertMany(
+					[
+						['equal',e.length, 4],
+						['equal',e[0], 105],
+						['ok',check(e[2], 10000), null],
+						['deepequal',e[3], ['debug', 'sleep', '0.2']]
+					],test_case);
+				testEmitter.emit('next');
 				function check(a, b) {
 					if (a > b)
 						return true;
@@ -257,15 +218,8 @@ exports.Slowlog = (function () {
 						e = res[0];
 						var Res = e[3];
 						var expres = ['sadd', 'set', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '... (2 more arguments)'];
-						try {
-							if (!assert.deepEqual(Res, expres, test_case)) {
-								ut.pass(test_case);
-								testEmitter.emit('next');
-							}
-						} catch (e) {
-							ut.fail(e, true);
-							testEmitter.emit('next');
-						}
+						ut.assertDeepEqual(Res, expres, test_case);
+						testEmitter.emit('next');
 					});
 				});
 			});
@@ -302,15 +256,8 @@ exports.Slowlog = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.deepEqual(res, null, test_case)) {
-									ut.pass(test_case);
-									testEmitter.emit('next');
-								}
-							} catch (e) {
-								ut.fail(e, true);
-								testEmitter.emit('next');
-							}
+							ut.assertDeepEqual(res, null, test_case);
+							testEmitter.emit('next');
 						});
 					});
 				});
