@@ -69,6 +69,7 @@ var Test_helper = function () {
 	"unit/type/hash",
 	"unit/bitops",
 	"unit/dump",
+	"unit/sort",
 	"unit/multi",
 	"unit/cas",	 
 	"unit/quit",
