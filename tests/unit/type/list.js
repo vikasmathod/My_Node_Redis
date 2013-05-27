@@ -1082,8 +1082,10 @@ exports.List = (function () {
 					errorCallback(err);
 				}
 				result_array.push(res);
-				ut.assertDeepEqual(result_array, [ [ 'foo' ], 'foo' ], test_case);
-				testEmitter.emit('next');
+				setTimeout(function(){
+					ut.assertDeepEqual(result_array, [[ 'foo' ], 'foo' ], test_case);
+					testEmitter.emit('next');
+				},100);
 			});
 			setTimeout(function () {
 				cli.rpush('blist', 'foo', function (err, res) {
@@ -1530,8 +1532,10 @@ exports.List = (function () {
 										errorCallback(err);
 									}
 									result_array.push(res);
-									ut.assertDeepEqual(result_array, [['blist1', 'foo'], 0, 0, ['blist2', 'foo'], 0, 0], test_case);
-									testEmitter.emit('next');
+									setTimeout(function(){
+										ut.assertDeepEqual(result_array, [['blist1', 'foo'], 0, 0, ['blist2', 'foo'], 0, 0], test_case);
+										testEmitter.emit('next');
+									},100);
 								});
 							});
 						});
