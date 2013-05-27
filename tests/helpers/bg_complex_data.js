@@ -6,19 +6,26 @@ ut = new Utility();
 
 function bg_complex_data(host, port, db, ops) {
 	client = redis.createClient(port, host);
-	client.select(db, function (err, res) {
-		if (err) {
-			console.log(err);
-			client.end();
-			process.exit();
-		}
-		ut.createComplexDataset(client, ops, null, function (err, res) {
+	client.on('ready',function(err,res){
+		client.select(db, function (err, res) {
 			if (err) {
 				console.log(err);
 				client.end();
 				process.exit();
 			}
+			ut.createComplexDataset(client, ops, null, function (err, res) {
+				if (err) {
+					console.log(err);
+					client.end();
+					process.exit();
+				}
+			});
 		});
+	});
+	client.on('error',function(err){
+		console.log(err);
+		client.end();
+		process.exit();
 	});
 }
 

@@ -1,4 +1,4 @@
-// static properties
+	// static properties
 Utility.test_pass = 0;
 Utility.test_fail = 0;
 Utility.fail_list = {};

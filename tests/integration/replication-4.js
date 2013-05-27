@@ -159,7 +159,7 @@ exports.Replication4 = (function () {
 								try {
 									if (!assert.equal(res, 'slave', test_case)) {
 										ut.pass(test_case);
-										cb(null, null);
+										cb(null, true);
 									}
 								} catch (e) {
 									cb(e, null);
@@ -173,7 +173,7 @@ exports.Replication4 = (function () {
 					setTimeout(function () {
 						stop_bg_complex_data(load_handle0);
 						stop_bg_complex_data(load_handle1);
-						stop_bg_complex_data(load_handle2);
+						stop_bg_complex_data(load_handle2); 
 						
 						var retry = 10;
 						g.asyncFor(0, retry, function (loop) {

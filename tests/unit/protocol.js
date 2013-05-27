@@ -330,11 +330,12 @@ exports.Protocol = (function () {
 			}, function () {});
 
 			stream.on('close', function (data) {
-				error = fs.readFileSync(server.stdout_file).toString().split('\n');
-				retval = error[error.length - 2];
-				ut.assertOk('Protocol error', retval, test_case);
-				outerloop.next();
-
+				setTimeout(function(){
+					error = fs.readFileSync(server.stdout_file).toString().split('\n');
+					retval = error[error.length - 2];
+					ut.assertOk('Protocol error', retval, test_case);
+					outerloop.next();
+				},100);
 			});
 
 		}, function () {

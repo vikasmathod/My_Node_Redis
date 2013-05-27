@@ -105,7 +105,7 @@ exports.Aofrw = (function () {
 							}
 							setTimeout(function () {
 								testEmitter.emit('next');
-							}, 500);
+							}, 1000);
 						});
 					}, function () {});
 				});
@@ -191,7 +191,7 @@ exports.Aofrw = (function () {
 		}, function () {
 			setTimeout(function () {
 				testEmitter.emit('next');
-			}, 500);
+			}, 1000);
 		});
 	};
 
@@ -278,7 +278,7 @@ exports.Aofrw = (function () {
 		}, function () {
 			setTimeout(function () {
 				testEmitter.emit('next');
-			}, 500);
+			}, 1000);
 		});
 	};
 
@@ -358,7 +358,7 @@ exports.Aofrw = (function () {
 		}, function () {
 			setTimeout(function () {
 				testEmitter.emit('next');
-			}, 500);
+			}, 1000);
 		});
 	};
 
@@ -420,7 +420,7 @@ exports.Aofrw = (function () {
 														ut.pass(test_case);
 														setTimeout(function () {
 															dObjloop.next();
-														}, 80);
+														}, 200);
 													}
 												});
 											});
@@ -440,14 +440,14 @@ exports.Aofrw = (function () {
 			}, function () {
 				setTimeout(function () {
 					dTypeloop.next();
-				}, 80);
+				}, 200);
 				
 			});
 
 		}, function () {
 			setTimeout(function () {
 				testEmitter.emit('next');
-			}, 500);
+			}, 1000);
 		});
 
 	};
@@ -466,12 +466,12 @@ exports.Aofrw = (function () {
 				],test_case);
 			setTimeout(function () {
 				testEmitter.emit('next');
-			}, 500);
+			}, 1000);
 		});
 
 	};
 
-	tester.Aofrw7 = function (errorCallback) {
+	 tester.Aofrw7 = function (errorCallback) {
 		var test_case = 'BGREWRITEAOF is refused if already in progress';
 		client.multi().bgrewriteaof().exec(function (err, res) {
 			if (err) {
@@ -505,7 +505,7 @@ exports.Aofrw = (function () {
 				});
 			}, 100);
 		});
-	};
+	}; 
 
 	return aofrw;
 }

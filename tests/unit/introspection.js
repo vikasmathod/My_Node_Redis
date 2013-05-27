@@ -54,7 +54,7 @@ exports.Introspection = (function () {
 		testEmitter.emit('start');
 	}
 
-	//private methods
+	//test methods
 
 	tester.introspection1 = function (errorCallback) {
 		var test_case = 'CLIENT LIST & KILL';
@@ -285,22 +285,24 @@ exports.Introspection = (function () {
 							errorCallback(res);
 						}
 						var file = g.srv[client_pid][server_pid]['stdout'];
-						fs.readFile(file, function (err, result) {
-							if (err) {
-								errorCallback(err);
-							}
-							ut.assertMany(
-								[
-									['ok','Redis is now ready to exit, bye', result],
-									['ok',error,null]
-								],test_case);
-							client.end();
-							if (intro.debug_mode) {
-								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-							}
-							testEmitter.emit('next');
-							// no server to kill. Server is gone due to shutdown
-						});
+						setTimeout(function(){
+							fs.readFile(file, function (err, result) {
+								if (err) {
+									errorCallback(err);
+								}
+								ut.assertMany(
+									[
+										['ok','Redis is now ready to exit, bye', result],
+										['ok',error,null]
+									],test_case);
+								client.end();
+								if (intro.debug_mode) {
+									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+								}
+								testEmitter.emit('next');
+								// no server to kill. Server is gone due to shutdown
+							});
+						},100);
 					});
 				});
 			});
@@ -340,30 +342,32 @@ exports.Introspection = (function () {
 								errorCallback(res);
 							}
 							var file = g.srv[client_pid][server_pid]['stdout'];
-							fs.readFile(file, function (err, result) {
-								if (err) {
-									errorCallback(err);
-								}
-								ut.assertMany(
-									[
-										['ok','Redis is now ready to exit, bye', result],
-										['ok',error1,null],
-										['ok',error2,null]
-									],test_case);
-								client.end();
-								if (intro.debug_mode) {
-									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-								}
-								testEmitter.emit('next');
-								// no server to kill. Server is gone due to shutdown
-							});
+							setTimeout(function(){
+								fs.readFile(file, function (err, result) {
+									if (err) {
+										errorCallback(err);
+									}
+									ut.assertMany(
+										[
+											['ok','Redis is now ready to exit, bye', result],
+											['ok',error1,null],
+											['ok',error2,null]
+										],test_case);
+									client.end();
+									if (intro.debug_mode) {
+										log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+									}
+									testEmitter.emit('next');
+									// no server to kill. Server is gone due to shutdown
+								});
+							},100);
 						});
 					});
 				});
 			});
 		});
 	};
-
+ 
 	tester.introspection6 = function (errorCallback) {
 		var test_case = 'Scheduled AOF when BGSAVE is in progress';
 		var tags = 'introspection6';
@@ -519,9 +523,6 @@ exports.Introspection = (function () {
 									errorCallback(err);
 								}
 								client.bgrewriteaof(function (err, res) {
-									if (err) {
-										errorCallback(err);
-									}
 									ut.waitForBgrewriteaof(client, function (err, res) {
 										if (err) {
 											errorCallback(err);
@@ -542,16 +543,16 @@ exports.Introspection = (function () {
 									});
 								});
 							});
-						}, 100);
+						}, 300);
 					});
 				});
 			});
 		});
 	};
-
+ 
 	tester.introspection9 = function (errorCallback) {
 		var test_case = 'MONITOR can log executed commands'
-			var tags = 'introspection9';
+		var tags = 'introspection9';
 		var overrides = {};
 		var responses = [];
 		var args = {};
@@ -577,9 +578,8 @@ exports.Introspection = (function () {
 				}
 				testEmitter.emit('next');
 				monitor_client.end();
-
+				client.end();
 				server9.kill_server(client_pid, server_pid, function (err, res) {
-					client.end();
 					if (err) {
 						errorCallback(err);
 					}
@@ -597,7 +597,7 @@ exports.Introspection = (function () {
 		});
 	};
 
-	tester.introspection10 = function (errorCallback) {
+	 tester.introspection10 = function (errorCallback) {
 		var test_case = 'MONITOR can log commands issued by the scripting engine'
 			var tags = 'introspection10';
 		var overrides = {};
@@ -645,7 +645,7 @@ exports.Introspection = (function () {
 
 		});
 	};
-
+ 
 	return intro;
 
 }

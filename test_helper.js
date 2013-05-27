@@ -58,36 +58,36 @@ var Test_helper = function () {
 	"unit/auth",
 	"unit/protocol",
 	"unit/basic",
-	//"unit/scripting" ,
-	//"unit/type/list",
+	"unit/scripting" ,
+	"unit/type/list",
 	"unit/type/list2",
-	//"unit/type/list3",
-	//"unit/type/set",
+	"unit/type/list3",
+	"unit/type/set",
 	"unit/type/zset",
-	//"unit/type/hash",
 	"unit/expire",
 	"unit/aofrw",
+	"unit/type/hash",
 	"unit/bitops",
 	"unit/dump",
 	"unit/multi",
 	"unit/cas",	 
 	"unit/quit",
-	"unit/pubsub",
-	/*"unit/slowlog",
 	"unit/maxmemory",
+	"unit/pubsub",
 	"unit/introspection",
+	"unit/slowlog",
 	"unit/other", 
 	"unit/limits",
-	//"integration/replication",
+	"integration/replication",
 	"integration/replication-2",
 	"integration/replication-3",
-	"integration/replication-4" , 
+	"integration/replication-4", 
 	"integration/aof",
 	"integration/rdb",
 	"integration/convert-zipmap-hash-on-load",
 	"integration/redis-cli",
-	"unit/obuf-limits", */
-	"additional/daemonize"
+	"unit/obuf-limits", 
+	"additional/daemonize" 
 	
   );
 
@@ -180,7 +180,7 @@ var Test_helper = function () {
       node_child[i] = child.fork('./test_helper.js', ['--client', test_array[i]], { env: process.env, });
       setTimeout(function () {
         loop.next();
-      }, 50);
+      }, 100);
 
       node_child[i].on('exit', function (data) {
       });
