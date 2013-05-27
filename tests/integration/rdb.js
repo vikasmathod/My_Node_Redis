@@ -104,13 +104,7 @@ exports.rdb = (function () {
 				'"5000000000"'], '\n', '"zset_zipped"', '"zset"']
 		client.select(0, function (err, res) {
 			ut.csvdump(client, function (err, res) {
-
-				try {
-					if (!assert.deepEqual(res, result_Array, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(res, result_Array, test_case);
 				testEmitter.emit('next');
 			});
 		});

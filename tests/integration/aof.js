@@ -126,14 +126,7 @@ exports.Aof = (function () {
 						}
 					});
 				}, function () {
-					try {
-						if (!assert.equal(retry, 0, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						console.log('assertion:expected error not found on config file');
-						ut.fail(e);
-					}
+					ut.assertEqual(retry, 0, test_case);
 					// no server to kill. Just delete the entry from dictionary.
 					delete g.srv[client_pid][server_pid];
 					callback(null, true);
@@ -187,14 +180,7 @@ exports.Aof = (function () {
 						}
 					});
 				}, function () {
-					try {
-						if (!assert.equal(retry, 0, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						console.log('assertion:expected error not found on config file');
-						ut.fail(e);
-					}
+					ut.assertEqual(retry, 0, test_case);
 					// no server to kill. Just delete the entry from dictionary.
 					delete g.srv[client_pid][server_pid];
 					callback(null, true);
@@ -208,14 +194,7 @@ exports.Aof = (function () {
 		var cmd = '.' + sep + 'redis' + sep + 'src' + sep + REDIS_CHECK_AOF + ' ' + aof_path;
 		var child_check = child.exec(cmd,
 				function (error, stdout, stderr) {
-				try {
-					if (!assert.ok(ut.match('not valid', stdout), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-
-					ut.fail(e);
-				}
+				ut.assertOk('not valid', stdout, test_case);
 				testEmitter.emit('next');
 			});
 	};
@@ -226,14 +205,7 @@ exports.Aof = (function () {
 		var child_check = child.exec(cmd);
 		child_check.stdin.write('y');
 		child_check.stdout.on('data', function (data) {
-			try {
-				if (!assert.ok(ut.match('Successfully truncated AOF', data), test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-
-				ut.fail(e, true);
-			}
+			ut.assertOk('Successfully truncated AOF', data, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -253,13 +225,11 @@ exports.Aof = (function () {
 						if (err) {
 							async_cb(err, null);
 						}
-						try {
-							if (!assert.equal(res, 1, test_case)) {
-								ut.pass(test_case);
-								async_cb(null, true);
-							}
-						} catch (e) {
-							ut.fail(e);
+						var res_Bool = ut.assertEqual(res, 1, test_case, true);
+						if(res_Bool){
+							ut.pass(test_case);
+							async_cb(null, true);
+						} else{
 							async_cb(e, null);
 						}
 					});
@@ -283,21 +253,15 @@ exports.Aof = (function () {
 								async_cb(err, null);
 							}
 							result_array.push(res);
-							try {
-								if (!assert.deepEqual(result_array, ['hello', null], test_case)) {
-									ut.pass(test_case);
-									client.end();
-									if (aof.debug_mode) {
-										log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-									}
-									async_cb(null, true);
-								}
-							} catch (e) {
-								ut.fail(e);
-								client.end();
-								if (aof.debug_mode) {
-									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-								}
+							var res_Bool = ut.assertDeepEqual(result_array, ['hello', null], test_case, true);
+							client.end();
+							if (aof.debug_mode) {
+								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+							}
+							if(res_Bool){
+								ut.pass(test_case);
+								async_cb(null, true);
+							} else{
 								async_cb(e, null);
 							}
 						});
@@ -356,13 +320,11 @@ exports.Aof = (function () {
 								if (err) {
 									async_cb(err, null);
 								}
-								try {
-									if (!assert.equal(res, 1, test_case)) {
-										ut.pass(test_case);
-										async_cb(null, true);
-									}
-								} catch (e) {
-									ut.fail(e);
+								var res_Bool = ut.assertEqual(res, 1, test_case, true);
+								if(res_Bool){
+									ut.pass(test_case);
+									async_cb(null, true);
+								} else{
 									async_cb(e, null);
 								}
 							});
@@ -379,21 +341,15 @@ exports.Aof = (function () {
 								if (err) {
 									async_cb(err, null);
 								}
-								try {
-									if (!assert.equal(res, 1, test_case)) {
-										ut.pass(test_case);
-										client.end();
-										if (aof.debug_mode) {
-											log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-										}
-										async_cb(null, true);
-									}
-								} catch (e) {
-									ut.fail(e);
-									client.end();
-									if (aof.debug_mode) {
-										log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-									}
+								var res_Bool = ut.assertEqual(res, 1, test_case);
+								client.end();
+								if (aof.debug_mode) {
+									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+								}
+								if(res_Bool){
+									ut.pass(test_case);
+									async_cb(null, true);
+								} else{
 									async_cb(e, null);
 								}
 							});
@@ -470,21 +426,15 @@ exports.Aof = (function () {
 							if (err) {
 								async_cb(err, null);
 							}
-							try {
-								if (!assert.equal(res, 0, test_case)) {
-									ut.pass(test_case);
-									client.end();
-									if (aof.debug_mode) {
-										log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-									}
-									async_cb(null, true);
-								}
-							} catch (e) {
-								ut.fail(e);
-								client.end();
-								if (aof.debug_mode) {
-									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-								}
+							var res_Bool = ut.assertEqual(res, 0, test_case, true);
+							client.end();
+							if (aof.debug_mode) {
+								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+							}
+							if(res_Bool){
+								ut.pass(test_case);
+								async_cb(null, true);
+							} else{
 								async_cb(e, null);
 							}
 						});
@@ -518,13 +468,7 @@ exports.Aof = (function () {
 					errorCallback(err);
 				}
 				client.expire('x', -1, function (err, res) {
-					try {
-						if (!assert.ifError(err, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e);
-					}
+					ut.assertError(err, test_case);
 					client.end();
 					if (aof.debug_mode) {
 						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -572,13 +516,7 @@ exports.Aof = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.equal(res1, 0, test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e);
-							}
+							ut.assertEqual(res1, 0, test_case);
 							client.end();
 							if (aof.debug_mode) {
 								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -632,13 +570,7 @@ exports.Aof = (function () {
 							}
 							result.push(res);
 							// Key john should exist wheres as jane should not
-							try {
-								if (!assert.deepEqual(result, [1, 'doe', null], test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e);
-							}
+							ut.assertDeepEqual(result, [1, 'doe', null], test_case);
 							client.end();
 							if (aof.debug_mode) {
 								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);

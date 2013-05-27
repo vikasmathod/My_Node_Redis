@@ -273,14 +273,7 @@ exports.Replication = (function () {
 												if (err) {
 													cb(err);
 												}
-												try {
-													if (!assert.deepEqual(digest, digest0, test_case)) {
-														ut.pass(test_case);
-
-													}
-												} catch (e) {
-													ut.fail(e, true);
-												}
+												ut.assertDeepEqual(digest, digest0, test_case);
 												client.quit();
 												client.on('end', function () {
 													if (replication.debug_mode) {
@@ -386,13 +379,7 @@ exports.Replication = (function () {
 						if (err) {
 							cb(err)
 						}
-						try {
-							if (!assert.equal(res, 'master', test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, 'master', test_case);
 						cb(null, true);
 					});
 				},
@@ -431,13 +418,7 @@ exports.Replication = (function () {
 							if (err) {
 								cb(err)
 							}
-							try {
-								if (!assert.equal(res, 'down', test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertEqual(res, 'down', test_case);
 							cb(null, true);
 						});
 					});
@@ -448,13 +429,7 @@ exports.Replication = (function () {
 						if (err) {
 							cb(err)
 						}
-						try {
-							if (!assert.equal(res, 'slave', test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, 'slave', test_case);
 						// calling wait_for_sync here so that the next test executes only after this competes.
 						ut.wait_for_sync(slave_cli, function (err, res) {
 							if (err) {
@@ -474,13 +449,7 @@ exports.Replication = (function () {
 						if (err) {
 							cb(err)
 						}
-						try {
-							if (!assert.equal(res, 'foo', test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, 'foo', test_case);
 						cb(null, true);
 					});
 				},
@@ -490,13 +459,7 @@ exports.Replication = (function () {
 						if (err) {
 							cb(err)
 						}
-						try {
-							if (!assert.equal(res, 'up', test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, 'up', test_case);
 						cb(null, true);
 					});
 				},
@@ -519,13 +482,7 @@ exports.Replication = (function () {
 										cb(err)
 									}
 									result.push(res);
-									try {
-										if (!assert.deepEqual(result, [0, 0], test_case)) {
-											ut.pass(test_case);
-										}
-									} catch (e) {
-										ut.fail(e, true);
-									}
+									ut.assertDeepEqual(result, [0, 0], test_case);
 									cb(null, true);
 								});
 							});

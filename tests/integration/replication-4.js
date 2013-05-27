@@ -211,13 +211,11 @@ exports.Replication4 = (function () {
 										if (err) {
 											cb(err, null);
 										}
-										try {
-											if (!assert.deepEqual(digest, digest0, test_case)) {
-												ut.pass(test_case);
-												cb(null, null);
-											}
-										} catch (e) {
-											ut.fail(e, true);
+										var res_Bool = ut.assertDeepEqual(digest, digest0, test_case, true);
+										if(res_Bool){
+											ut.pass(test_case);
+											cb(null, null);
+										} else{
 											ut.csvdump(master_cli, function (err, csv1) {
 												if (err) {
 													cb(err, null);

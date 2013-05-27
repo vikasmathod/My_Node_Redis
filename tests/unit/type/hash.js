@@ -120,14 +120,7 @@ exports.Hash = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(res, 8, test_case)) {
-						// def - util.pass(<name>,[debug_mode=false],[logging=true])
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, 8, test_case);
 				testEmitter.emit('next');
 			});
 
@@ -140,15 +133,8 @@ exports.Hash = (function () {
 			if (err) {
 				errorCallback(err);
 			} else {
-				try {
-					if (!assert.ok(res, test_case)) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					}
-				} catch (e) {
-					ut.fail(e);
-					errorCallback(e);
-				}
+				ut.assertOk(res, null, test_case);
+				testEmitter.emit('next');
 			}
 		});
 
@@ -176,13 +162,7 @@ exports.Hash = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(res, 1024, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, 1024, test_case);
 				testEmitter.emit('next');
 			});
 
@@ -192,15 +172,8 @@ exports.Hash = (function () {
 	tester.Hash4 = function (errorCallback) {
 		var test_case = 'Is the big hash encoded with a ziplist?';
 		assert_encoding('hashtable', 'bighash', function (err, res) {
-			try {
-				if (!assert.ok(res, test_case)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				}
-			} catch (e) {
-				ut.fail(e);
-				errorCallback(e);
-			}
+			ut.assertOk(res, null, test_case);
+			testEmitter.emit('next');
 		});
 
 	};
@@ -223,13 +196,7 @@ exports.Hash = (function () {
 				loop.next();
 			});
 		}, function () {
-			try {
-				if (!assert.equal(error_array.length, 0, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(error_array.length, 0, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -252,13 +219,7 @@ exports.Hash = (function () {
 				loop.next();
 			});
 		}, function () {
-			try {
-				if (!assert.equal(error_array.length, 0, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(error_array.length, 0, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -276,13 +237,7 @@ exports.Hash = (function () {
 					errorCallback(err);
 				}
 				rv.push(res);
-				try {
-					if (!assert.deepEqual(rv, [null, null], test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(rv, [null, null], test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -334,13 +289,7 @@ exports.Hash = (function () {
 											errorCallback(err);
 										}
 										rv.push(res);
-										try {
-											if (!assert.deepEqual(rv, [0, 'newval1', 1, 0, 'newval2', 1, 1, 1], test_case)) {
-												ut.pass(test_case);
-											}
-										} catch (e) {
-											ut.fail(e, true);
-										}
+										ut.assertDeepEqual(rv, [0, 'newval1', 1, 0, 'newval2', 1, 1, 1], test_case);
 										testEmitter.emit('next');
 									});
 								});
@@ -362,13 +311,7 @@ exports.Hash = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(res, 'foo', test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, 'foo', test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -387,13 +330,7 @@ exports.Hash = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.deepEqual(result, 'foo', test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(result, 'foo', test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -410,13 +347,7 @@ exports.Hash = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(res, 'foo', test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, 'foo', test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -435,13 +366,7 @@ exports.Hash = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.deepEqual(result, 'foo', test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(result, 'foo', test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -452,13 +377,8 @@ exports.Hash = (function () {
 		var test_case = 'HMSET wrong number of args';
 		client.hmset('smallhash', 'key1', 'val1', 'key2', function (err, res) {
 			if (!res) {
-				if (ut.match('wrong number', err)) {
-					ut.pass(test_case);
-					testEmitter.emit('next');
-				} else {
-					ut.fail(e);
-					errorCallback(test_case);
-				}
+				ut.assertOk('wrong number', err, test_case);
+				testEmitter.emit('next');
 			}
 		});
 	};
@@ -475,13 +395,7 @@ exports.Hash = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.deepEqual(res, 'OK', test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertEqual(res, 'OK', test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -498,13 +412,7 @@ exports.Hash = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.deepEqual(res, 'OK', test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertEqual(res, 'OK', test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -527,17 +435,7 @@ exports.Hash = (function () {
 						errorCallback(err);
 					}
 					rv.push(res);
-					try {
-						if (!assert.deepEqual(rv, [
-									[null, null],
-									[null, null],
-									[null, null]
-								], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(rv, [[null, null],[null, null],[null, null]], test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -552,13 +450,8 @@ exports.Hash = (function () {
 			}
 			client.hmget('wrongtype', 'field1', 'field2', function (err, res) {
 				if (!res) {
-					if (ut.match('wrong', err)) {
-						ut.pass(test_case);
-						testEmitter.emit('next');
-					} else {
-						ut.fail(e);
-						errorCallback(test_case);
-					}
+					ut.assertOk('wrong', err, test_case);
+					testEmitter.emit('next');
 				}
 			});
 		});
@@ -585,13 +478,7 @@ exports.Hash = (function () {
 					}
 				}
 			}
-			try {
-				if (!assert.deepEqual(errors, [], test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual(errors, [], test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -617,13 +504,7 @@ exports.Hash = (function () {
 					}
 				}
 			}
-			try {
-				if (!assert.deepEqual(errors, [], test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual(errors, [], test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -637,13 +518,7 @@ exports.Hash = (function () {
 			}
 			var result_array = res.sort(ut.sortFunction);
 			var keys_array = keys.sort(ut.sortFunction);
-			try {
-				if (!assert.deepEqual(result_array, keys_array, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual(result_array, keys_array, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -657,13 +532,7 @@ exports.Hash = (function () {
 			}
 			var result_array = res.sort(ut.sortFunction);
 			var keys_array = keys.sort(ut.sortFunction);
-			try {
-				if (!assert.deepEqual(result_array, keys_array, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertDeepEqual(result_array, keys_array, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -680,13 +549,7 @@ exports.Hash = (function () {
 			}
 			var result_array = res.sort(ut.sortFunction);
 			var vals_array = vals.sort(ut.sortFunction);
-			try {
-				if (!assert.deepEqual(result_array, vals_array, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual(result_array, vals_array, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -703,13 +566,7 @@ exports.Hash = (function () {
 			}
 			var result_array = res.sort(ut.sortFunction);
 			var vals_array = vals.sort(ut.sortFunction);
-			try {
-				if (!assert.deepEqual(result_array, vals_array, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertDeepEqual(result_array, vals_array, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -732,13 +589,7 @@ exports.Hash = (function () {
 			}
 			var result_array = result.sort(ut.sortFunction);
 			var full_array = full.sort(ut.sortFunction);
-			try {
-				if (!assert.deepEqual(result_array, full_array, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual(result_array, full_array, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -761,13 +612,7 @@ exports.Hash = (function () {
 			}
 			var result_array = result.sort(ut.sortFunction);
 			var full_array = full.sort(ut.sortFunction);
-			try {
-				if (!assert.deepEqual(result_array, full_array, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertDeepEqual(result_array, full_array, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -820,13 +665,7 @@ exports.Hash = (function () {
 										}
 										rv.push(res);
 										bighash = ut.shift(bighash, 1); // dirty trick to shift
-										try {
-											if (!assert.deepEqual(rv, [0, 0, 1, 0, null, 1, 0, null], test_case)) {
-												ut.pass(test_case);
-											}
-										} catch (e) {
-											ut.fail(e, true);
-										}
+										ut.assertDeepEqual(rv, [0, 0, 1, 0, null, 1, 0, null], test_case);
 										testEmitter.emit('next');
 									});
 								});
@@ -867,13 +706,7 @@ exports.Hash = (function () {
 								rv.push(key);
 								rv.push(res[key]);
 							}
-							try {
-								if (!assert.deepEqual(rv, [0, 2, 'b', '2'], test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertDeepEqual(rv, [0, 2, 'b', '2'], test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -902,13 +735,7 @@ exports.Hash = (function () {
 							errorCallback(err);
 						}
 						rv.push(res);
-						try {
-							if (!assert.deepEqual(rv, [3, 0], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(rv, [3, 0], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -941,13 +768,7 @@ exports.Hash = (function () {
 							errorCallback(err);
 						}
 						rv.push(res);
-						try {
-							if (!assert.deepEqual(rv, [1, 0, 1, 0], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(rv, [1, 0, 1, 0], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -965,13 +786,7 @@ exports.Hash = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.ok(ut.match('hashtable', res), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('hashtable', res, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -987,13 +802,7 @@ exports.Hash = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(res, 2, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertEqual(res, 2, test_case)
 				testEmitter.emit('next');
 			});
 		});
@@ -1029,13 +838,7 @@ exports.Hash = (function () {
 									errorCallback(err);
 								}
 								rv.push(res);
-								try {
-									if (!assert.deepEqual(rv, [2, 2, 2, 2], test_case)) {
-										ut.pass(test_case);
-									}
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertDeepEqual(rv, [2, 2, 2, 2], test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -1068,13 +871,7 @@ exports.Hash = (function () {
 							errorCallback(err);
 						}
 						rv.push(res);
-						try {
-							if (!assert.deepEqual(rv, [5, 5, 5, 5], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(rv, [5, 5, 5, 5], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1103,13 +900,7 @@ exports.Hash = (function () {
 							errorCallback(err);
 						}
 						rv.push(res);
-						try {
-							if (!assert.deepEqual(rv, [102, 102], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(rv, [102, 102], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1137,13 +928,7 @@ exports.Hash = (function () {
 							errorCallback(err);
 						}
 						rv.push(res);
-						try {
-							if (!assert.deepEqual(rv, [17179869185, 17179869185], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(rv, [17179869185, 17179869185], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1171,13 +956,7 @@ exports.Hash = (function () {
 							errorCallback(err);
 						}
 						rv.push(res);
-						try {
-							if (!assert.deepEqual(rv, [34359738368, 34359738368], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(rv, [34359738368, 34359738368], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1196,13 +975,11 @@ exports.Hash = (function () {
 				}
 				client.hincrby('smallhash', 'str', 1, function (smallerr, res) {
 					client.hincrby('bighash', 'str', 1, function (bigerr, res) {
-						try {
-							if ((!assert.ok(ut.match('not an integer', smallerr), test_case)) && (!assert.ok(ut.match('not an integer', bigerr), test_case))) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertMany(
+							[
+								['ok','not an integer', smallerr],
+								['ok','not an integer', bigerr]
+							],test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1220,13 +997,11 @@ exports.Hash = (function () {
 					errorCallback(err);
 				}
 				client.hincrby('hash', 'n', -10000, function (hasherr, res) {
-					try {
-						if ((!assert.ok(ut.match('overflow', hasherr), test_case)) && (!assert.deepEqual(result, '-9223372036854775485', test_case))) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertMany(
+						[
+							['ok','overflow', hasherr],
+							['equal',result, '-9223372036854775485']
+						],test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -1244,13 +1019,7 @@ exports.Hash = (function () {
 					errorCallback(err);
 				}
 				client.hget('hash', str, function (err, res) {
-					try {
-						if (!assert.deepEqual(res, 'b', test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(res, 'b', test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -1268,13 +1037,11 @@ exports.Hash = (function () {
 				}
 				client.hincrby('smallhash', 'str', 1, function (smallerr, res) {
 					client.hincrby('bighash', 'str', 1, function (bigerr, res) {
-						try {
-							if ((!assert.ok(ut.match('not an integer', smallerr), test_case)) && (!assert.ok(ut.match('not an integer', bigerr), test_case))) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertMany(
+							[
+								['ok','not an integer', smallerr],
+								['ok','not an integer', bigerr]
+							],test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1289,12 +1056,7 @@ exports.Hash = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.equal(res, 2.5, test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(res, 2.5, test_case);
 			testEmitter.emit('next');
 		});
 	}
@@ -1324,12 +1086,7 @@ exports.Hash = (function () {
 							errorCallback(err);
 						}
 						array.push(res);
-						try {
-							if (!assert.deepEqual(array, [2.5, 2.5, 2.5, 2.5], test_case))
-								ut.pass(test_case);
-						} catch (e) {
-							ut.pass(e, true);
-						}
+						ut.assertDeepEqual(array, [2.5, 2.5, 2.5, 2.5], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1360,12 +1117,7 @@ exports.Hash = (function () {
 							errorCallback(err);
 						}
 						array.push(res);
-						try {
-							if (!assert.deepEqual(array, [6, 6, 6, 6], test_case))
-								ut.pass(test_case);
-						} catch (e) {
-							ut.pass(e, true);
-						}
+						ut.assertDeepEqual(array, [6, 6, 6, 6], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1388,12 +1140,7 @@ exports.Hash = (function () {
 					errorCallback(err);
 				}
 				array.push(res);
-				try {
-					if (!assert.deepEqual(array, [102.5, 102.5], test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.pass(e, true);
-				}
+				ut.assertDeepEqual(array,  [102.5, 102.5], test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1414,12 +1161,7 @@ exports.Hash = (function () {
 					errorCallback(err);
 				}
 				array.push(res);
-				try {
-					if (!assert.deepEqual(array, [17179869185, 17179869185], test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.pass(e, true);
-				}
+				ut.assertDeepEqual(array, [17179869185, 17179869185], test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1440,12 +1182,7 @@ exports.Hash = (function () {
 					errorCallback(err);
 				}
 				array.push(res);
-				try {
-					if (!assert.deepEqual(array, [34359738368, 34359738368], test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.pass(e, true);
-				}
+				ut.assertDeepEqual(array, [34359738368, 34359738368], test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1458,13 +1195,11 @@ exports.Hash = (function () {
 		client.hset('bighash', 'str', ' 11');
 		client.hincrbyfloat('smallhash', 'str', 1, function (smallErr, res) {
 			client.hincrbyfloat('bighash', 'str', 1, function (bigErr, res) {
-				try {
-					if (!assert.equal(ut.match('not a valid float', smallErr), true, test_case) &&
-						!assert.equal(ut.match('not a valid float', bigErr), true, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.pass(e, true);
-				}
+				ut.assertMany(
+					[
+						['ok','not a valid float', smallErr],
+						['ok','not a valid float', bigErr]
+					],test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1477,13 +1212,11 @@ exports.Hash = (function () {
 		client.hset('bighash', 'str', ' 11 ');
 		client.hincrbyfloat('smallhash', 'str', 1, function (smallErr, res) {
 			client.hincrbyfloat('bighash', 'str', 1, function (bigErr, res) {
-				try {
-					if (!assert.equal(ut.match('not a valid float', smallErr), true, test_case) &&
-						!assert.equal(ut.match('not a valid float', bigErr), true, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.pass(e, true);
-				}
+				ut.assertMany(
+					[
+						['ok','not a valid float', smallErr],
+						['ok','not a valid float', bigErr]
+					],test_case);
 				testEmitter.emit('next');
 			});
 		});

@@ -96,13 +96,12 @@ exports.convert_zipmap = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.ok(ut.match('ziplist', resHash), test_case) &&
-									!assert.equal(resLen, 2, test_case) && !assert.deepEqual(resGet, ['v1', 'v2'], test_case))
-									ut.pass(test_case);
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertMany(
+								[
+									['ok','ziplist', resHash],
+									['equal',resLen, 2],
+									['deepequal',resGet, ['v1', 'v2']]
+								],test_case);
 							client.end();
 							server.kill_server(client_pid, server_pid, function (err, res) {
 								if (err) {
@@ -152,13 +151,12 @@ exports.convert_zipmap = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.ok(ut.match('hashtable', resHash), test_case) &&
-									!assert.equal(resLen, 2, test_case) && !assert.deepEqual(resGet, ['v1', 'v2'], test_case))
-									ut.pass(test_case);
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertMany(
+								[
+									['ok','hashtable', resHash],
+									['equal',resLen, 2],
+									['deepequal',resGet, ['v1', 'v2']]
+								],test_case);
 							client.end();
 							server1.kill_server(client_pid, server_pid1, function (err, res) {
 								if (err) {
@@ -208,13 +206,12 @@ exports.convert_zipmap = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.ok(ut.match('hashtable', resHash), test_case) &&
-									!assert.equal(resLen, 2, test_case) && !assert.deepEqual(resGet, ['v1', 'v2'], test_case))
-									ut.pass(test_case);
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertMany(
+								[
+									['ok','hashtable', resHash],
+									['equal',resLen, 2],
+									['deepequal',resGet, ['v1', 'v2']]
+								],test_case);
 							client.end();
 							server2.kill_server(client_pid, server_pid2, function (err, res) {
 								if (err) {

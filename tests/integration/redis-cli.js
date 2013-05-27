@@ -90,12 +90,7 @@ exports.redis_cli = (function () {
 		cli_console.stdout.on('data', function (data) {
 			var patt = new RegExp(/[a-z0-9_]+:[a-z0-9_]+/);
 			var result = patt.test(data);
-			try {
-				if (!assert.ok(result, test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertOk(result, null, test_case);
 			testEmitter.emit('next');
 		});
 		setTimeout(function () {
@@ -107,13 +102,7 @@ exports.redis_cli = (function () {
 		var test_case = 'test_interactive_cli: Status reply';
 		var cli_console = child.exec(cmdCli);
 		cli_console.stdout.on('data', function (data) {
-			try {
-				//trim the data cause of new line charecter
-				if (!assert.equal(data.trim(), 'OK', test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(data.trim(), 'OK', test_case);
 			testEmitter.emit('next');
 		});
 		setTimeout(function () {
@@ -125,13 +114,7 @@ exports.redis_cli = (function () {
 		var test_case = 'test_interactive_cli: Integer reply';
 		var cli_console = child.exec(cmdCli);
 		cli_console.stdout.on('data', function (data) {
-			try {
-				//trim the data cause of new line charecter
-				if (!assert.equal(data.trim(), '1', test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(data.trim(), '1', test_case);
 			testEmitter.emit('next');
 		});
 		setTimeout(function () {
@@ -143,13 +126,7 @@ exports.redis_cli = (function () {
 		var test_case = 'test_interactive_cli: Bulk reply';
 		var cli_console = child.exec(cmdCli);
 		cli_console.stdout.on('data', function (data) {
-			try {
-				//trim the data cause of new line charecter
-				if (!assert.equal(data.trim(), 'foo', test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(data.trim(), 'foo', test_case);
 			testEmitter.emit('next');
 		});
 		setTimeout(function () {
@@ -162,13 +139,7 @@ exports.redis_cli = (function () {
 		var test_case = 'test_interactive_cli: Multi-bulk reply';
 		var cli_console = child.exec(cmdCli);
 		cli_console.stdout.on('data', function (data) {
-			try {
-				//trim the data cause of new line charecter
-				if (!assert.equal(data.trim(), 'foo\nbar', test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertEqual(data.trim(), 'foo\nbar', test_case);
 			testEmitter.emit('next');
 		});
 		setTimeout(function () {
@@ -340,10 +311,7 @@ exports.redis_cli = (function () {
 				}, 500);
 			}
 		}, function (err, results) {
-			if (strError === '')
-				ut.pass(test_case);
-			else
-				ut.fail(strError, true);
+			ut.assertEqual(strError, '', test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -356,12 +324,7 @@ exports.redis_cli = (function () {
 				//trim the data cause of new line charecter
 				if (!assert.equal(data.trim(), 'OK', test_case)) {
 					client.get('key', function (err, res) {
-						try {
-							if (!assert.equal(res, 'bar', test_case))
-								ut.pass(test_case);
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, 'bar', test_case);
 						testEmitter.emit('next');
 					});
 				}
@@ -377,14 +340,7 @@ exports.redis_cli = (function () {
 		client.del('counter');
 		var cli_console = child.exec(cmdCli + ' -n 0 incr counter');
 		cli_console.stdout.on('data', function (data) {
-			try {
-				//trim the data cause of new line charecter
-				if (!assert.equal(data.trim(), '1', test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-
-			}
+			ut.assertEqual(data.trim(), '1', test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -394,14 +350,7 @@ exports.redis_cli = (function () {
 		client.set('key', 'tab\tnewline\n');
 		var cli_console = child.exec(cmdCli + ' -n 0 get key');
 		cli_console.stdout.on('data', function (data) {
-			try {
-				//trim the data cause of new line charecter
-				if (!assert.equal(data.trim(), 'tab\tnewline', test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-
-			}
+			ut.assertEqual(data.trim(), 'tab\tnewline', test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -413,14 +362,7 @@ exports.redis_cli = (function () {
 		client.rpush('list', 'bar');
 		var cli_console = child.exec(cmdCli + ' -n 0 lrange list 0 -1');
 		cli_console.stdout.on('data', function (data) {
-			try {
-				//trim the data cause of new line charecter
-				if (!assert.equal(data.trim(), 'foo\nbar', test_case))
-					ut.pass(test_case);
-			} catch (e) {
-				ut.fail(e, true);
-
-			}
+			ut.assertEqual(data.trim(), 'foo\nbar', test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -433,12 +375,7 @@ exports.redis_cli = (function () {
 			var cli_console1 = child.exec(cmdCli + ' -n 0 set key ' + data);
 			setTimeout(function () {
 				client.get('key', function (err, res) {
-					try {
-						if (!assert.equal(res, 'foo', test_case))
-							ut.pass(test_case);
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(res, 'foo', test_case);
 					testEmitter.emit('next');
 				});
 			}, 1000);
@@ -465,12 +402,7 @@ exports.redis_cli = (function () {
 				cli_console.stdout.on('data', function (data) {
 					var cli_console1 = child.exec(cmdCli + ' -n 0 set key ' + data.trim());
 					client.get('key', function (err, res) {
-						try {
-							if (!assert.equal(res, 'foo', test_case))
-								ut.pass(test_case);
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, 'foo', test_case);
 						testEmitter.emit('next');
 					});
 				});

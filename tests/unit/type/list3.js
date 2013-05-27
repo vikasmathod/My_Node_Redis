@@ -198,11 +198,7 @@ exports.List3 = (function () {
 				});
 			});
 		}, function () {
-			if (pass_count == ((200 + 1) * iterations)) {
-				ut.pass(test_case);
-			} else {
-				ut.fail(test_case);
-			}
+			ut.assertEqual(pass_count,(200 + 1) * iterations, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -292,11 +288,7 @@ exports.List3 = (function () {
 				});
 			});
 		}, function () {
-			if (msg == '') {
-				ut.pass(test_case);
-			} else {
-				ut.fail(msg);
-			}
+			ut.assertEqual(msg,'',test_case);
 			testEmitter.emit('next');
 		});
 	};

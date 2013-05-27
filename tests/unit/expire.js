@@ -568,42 +568,42 @@ exports.Expire = (function () {
 				client.get('x', function (err, res) {
 					resA = res;
 				});
-
 			}, 80);
 			setTimeout(function () {
 				client.get('x', function (err, res) {
 					resB = res;
 				});
+				client.set('x', 'somevalue');
+				client.pexpire('x', 100);
+				setTimeout(function () {
+					client.get('x', function (err, res) {
+						resC = res;
+					});
+				}, 80);
+				setTimeout(function () {
+					client.get('x', function (err, res) {
+						resD = res;
+					});
+					client.set('x', 'somevalue');
+					client.pexpireat('x', ((new Date()).getTime() + 100));
+					setTimeout(function () {
+						client.get('x', function (err, res) {
+							resE = res;
+						});
+					}, 80);
+					setTimeout(function () {
+						client.get('x', function (err, res) {
+							resF = res;
+						});
+						if (resA === 'somevalue' && resC === 'somevalue' && resD === 'somevalue' &&
+							resB === '' && resD === '' && resF === ''){
+							loop.break();
+						}
+						loop.next();
+					}, 120);
+				}, 120);
 			}, 120);
-			client.set('x', 'somevalue');
-			client.pexpire('x', 100);
-			setTimeout(function () {
-				client.get('x', function (err, res) {
-					resC = res;
-				});
-			}, 80);
-			setTimeout(function () {
-				client.get('x', function (err, res) {
-					resD = res;
-				});
-			}, 120);
-			client.set('x', 'somevalue');
-			client.pexpireat('x', ((new Date()).getTime() + 100));
-			setTimeout(function () {
-				client.get('x', function (err, res) {
-					resE = res;
-				});
-			}, 80);
-			setTimeout(function () {
-				client.get('x', function (err, res) {
-					resF = res;
-				});
-				if (resA === 'somevalue' && resC === 'somevalue' && resD === 'somevalue' &&
-					resB === '' && resD === '' && resF === ''){
-					loop.break();
-				}
-				loop.next();
-			}, 120);
+			
 		}, function () {
 			ut.assertDeepEqual([resA, resB], ['somevalue', null], test_case);
 			testEmitter.emit('next');

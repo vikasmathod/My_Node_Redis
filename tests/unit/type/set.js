@@ -250,13 +250,7 @@ exports.Set = (function () {
 												errorCallback(err);
 											}
 											result_array.push(res.sort());
-											try {
-												if (!assert.deepEqual(result_array, [1, 0, 2, 1, 1, 0, ['bar', 'foo']], test_case)) {
-													ut.pass(test_case);
-												}
-											} catch (e) {
-												ut.fail(e, true);
-											}
+											ut.assertDeepEqual(result_array, [1, 0, 2, 1, 1, 0, ['bar', 'foo']], test_case);
 											testEmitter.emit('next');
 										});
 									});
@@ -314,13 +308,7 @@ exports.Set = (function () {
 												errorCallback(err);
 											}
 											result_array.push(res.sort());
-											try {
-												if (!assert.deepEqual(result_array, [1, 0, 2, 1, 1, 0, ['16', '17']], test_case)) {
-													ut.pass(test_case);
-												}
-											} catch (e) {
-												ut.fail(e, true);
-											}
+											ut.assertDeepEqual(result_array, [1, 0, 2, 1, 1, 0, ['16', '17']], test_case);
 											testEmitter.emit('next');
 										});
 									});
@@ -339,13 +327,7 @@ exports.Set = (function () {
 				errorCallback(err);
 			}
 			client.sadd('mylist', 'bar', function (err, res) {
-				try {
-					if (!assert.ok(ut.match('kind', err), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('kind', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -366,13 +348,11 @@ exports.Set = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if ((!assert.equal(result, 1, test_case)) && (!assert.ok(res, test_case))) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertMany(
+							[
+								['equal',result, 1],
+								['ok',res, null]
+							],test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -395,13 +375,7 @@ exports.Set = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.equal(res, 1, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(res, 1, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -434,13 +408,11 @@ exports.Set = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if ((!assert.equal(result, 1, test_case)) && (!assert.ok(res, test_case))) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertMany(
+								[
+									['equal',result, 1],
+									['ok',res, null]
+								],test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -466,13 +438,11 @@ exports.Set = (function () {
 					}
 					result_array.push(res);
 					client.smembers('myset', function (err, res) {
-						try {
-							if ((!assert.deepEqual(res.sort(), ['A', 'B', 'a', 'b', 'c'].sort(), test_case)) && (!assert.deepEqual(result_array, [3, 2], test_case))) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertMany(
+							[
+								['deepequal',res.sort(), ['A', 'B', 'a', 'b', 'c'].sort()],
+								['deepequal',result_array, [3, 2]]
+							],test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -561,13 +531,7 @@ exports.Set = (function () {
 											if (err) {
 												errorCallback(err);
 											}
-											try {
-												if (!assert.equal(res, true, test_case)) {
-													ut.pass(test_case);
-												}
-											} catch (e) {
-												ut.fail(e, true);
-											}
+											ut.assertEqual(res, true, test_case);
 											testEmitter.emit('next');
 										});
 									});
@@ -602,13 +566,11 @@ exports.Set = (function () {
 						}
 						result_array.push(res);
 						client.smembers('myset', function (err, res) {
-							try {
-								if ((!assert.equal(res.sort(), 'bar,ciao', test_case)) && (!assert.deepEqual(result_array, [0, 1], test_case))) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertMany(
+							[
+								['equal',res.sort().toString(), 'bar,ciao'],
+								['deepequal',result_array, [0, 1]]
+							],test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -639,13 +601,11 @@ exports.Set = (function () {
 						}
 						result_array.push(res);
 						client.smembers('myset', function (err, res) {
-							try {
-								if ((!assert.equal(res.sort(), '3,5', test_case)) && (!assert.deepEqual(result_array, [0, 1], test_case))) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertMany(
+							[
+								['equal',res.sort().toString(), '3,5'],
+								['ok',result_array, [0, 1]]
+							],test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -675,13 +635,11 @@ exports.Set = (function () {
 						}
 						result_array.push(res);
 						client.smembers('myset', function (err, res) {
-							try {
-								if ((!assert.equal(res.sort(), 'a,c', test_case)) && (!assert.deepEqual(result_array, [0, 2], test_case))) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertMany(
+							[
+								['equal',res.sort(), 'a,c'],
+								['deepequal',result_array, [0, 2]]
+							],test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -704,13 +662,7 @@ exports.Set = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.equal(res, 3, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(res, 3, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -1050,14 +1002,7 @@ exports.Set = (function () {
 				errorCallback(err);
 			}
 			client.sinter('key1', 'noset', function (err, res) {
-
-				try {
-					if (!assert.ok(ut.match('wrong kind', err), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('wrong kind', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1069,13 +1014,7 @@ exports.Set = (function () {
 				errorCallback(err);
 			}
 			client.sunion('key1', 'noset', function (err, res) {
-				try {
-					if (!assert.ok(ut.match('wrong kind', err), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('wrong kind', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1097,13 +1036,7 @@ exports.Set = (function () {
 						errorCallback(err);
 					}
 					result.push(res);
-					try {
-						if (!assert.deepEqual(result, [0, 0], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(result, [0, 0], test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -1126,13 +1059,7 @@ exports.Set = (function () {
 						errorCallback(err);
 					}
 					result.push(res);
-					try {
-						if (!assert.deepEqual(result, [0, 0], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(result, [0, 0], test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -1170,13 +1097,11 @@ exports.Set = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								try {
-									if ((!assert.equal(res, 0, test_case)) && (!assert.deepEqual(sortedres, Hcontent, test_case))) {
-										ut.pass(test_case);
-									}
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertMany(
+									[
+										['equal',res, 0],
+										['deepequal',sortedres, Hcontent]
+									],test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -1208,13 +1133,7 @@ exports.Set = (function () {
 				for (k in myset) {
 					myset_arr[c++] = k
 				}
-				try {
-					if (!assert.deepEqual(myset_arr.sort(), Hcontent, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(myset_arr.sort(), Hcontent, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1252,13 +1171,11 @@ exports.Set = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								try {
-									if ((!assert.equal(res, 0, test_case)) && (!assert.deepEqual(sortedres, Icontent, test_case))) {
-										ut.pass(test_case);
-									}
-								} catch (e) {
-									ut.fail(e, true);
-								}
+								ut.assertMany(
+									[
+										['equal',res, 0],
+										['deepequal',sortedres, Icontent]
+									],test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -1290,13 +1207,7 @@ exports.Set = (function () {
 				for (k in myset) {
 					myset_arr[c++] = k
 				}
-				try {
-					if (!assert.deepEqual(myset_arr.sort(), Icontent, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(myset_arr.sort(), Icontent, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1381,13 +1292,7 @@ exports.Set = (function () {
 												if (err) {
 													errorCallback(err)
 												}
-												try {
-													if (!assert.deepEqual(result, [1, [1, 'b'], [2, 3, 4, 'a'], 1, ['a', 'b'], [1, 2, 3, 4]], test_case)) {
-														ut.pass(test_case);
-													}
-												} catch (e) {
-													ut.fail(e, true);
-												}
+												ut.assertDeepEqual(result, [1, [1, 'b'], [2, 3, 4, 'a'], 1, ['a', 'b'], [1, 2, 3, 4]], test_case);
 												testEmitter.emit('next');
 											});
 										});
@@ -1422,13 +1327,7 @@ exports.Set = (function () {
 							errorCallback(err)
 						}
 						result.push(res.sort());
-						try {
-							if (!assert.deepEqual(result, [1, [1, 2, 'a', 'b'], [3, 4]], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(result, [1, [1, 2, 'a', 'b'], [3, 4]], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1457,13 +1356,7 @@ exports.Set = (function () {
 							errorCallback(err)
 						}
 						result.push(res.sort());
-						try {
-							if (!assert.deepEqual(result, [0, [1, 'a', 'b'], [2, 3, 4]], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertDeepEqual(result, [0, [1, 'a', 'b'], [2, 3, 4]], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1484,13 +1377,7 @@ exports.Set = (function () {
 				result.push(res);
 				client.smembers('myset2', function (err, res) {
 					result.push(res.sort());
-					try {
-						if (!assert.deepEqual(result, [0, [2, 3, 4]], test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(result, [0, [2, 3, 4]], test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -1522,13 +1409,7 @@ exports.Set = (function () {
 							if (err) {
 								errorCallback(err)
 							}
-							try {
-								if (!assert.deepEqual(result, [1, [1, 'b'], ['a']], test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertDeepEqual(result, [1, [1, 'b'], ['a']], test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -1562,13 +1443,7 @@ exports.Set = (function () {
 							if (err) {
 								errorCallback(err)
 							}
-							try {
-								if (!assert.deepEqual(result, [1, [3, 4], [2]], test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.fail(e, true);
-							}
+							ut.assertDeepEqual(result, [1, [3, 4], [2]], test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -1583,13 +1458,7 @@ exports.Set = (function () {
 				errorCallback(err);
 			}
 			client.smove('x', 'myset2', 'foo', function (err, res) {
-				try {
-					if (!assert.ok(ut.match('wrong kind', err), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('wrong kind', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1601,13 +1470,7 @@ exports.Set = (function () {
 				errorCallback(err);
 			}
 			client.smove('myset2', 'x', 'foo', function (err, res) {
-				try {
-					if (!assert.ok(ut.match('wrong kind', err), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertOk('wrong kind', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1724,13 +1587,7 @@ exports.Set = (function () {
 						if (err) {
 							errorCallback(err, null);
 						}
-						try {
-							if (!assert.equal(res, '', test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, '', test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1753,13 +1610,7 @@ exports.Set = (function () {
 						errorCallback(err);
 					}
 					client.sinter('set1', 'set2', 'set3', function (err, res) {
-						try {
-							if (!assert.equal(res, '', test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res, '', test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1797,13 +1648,7 @@ exports.Set = (function () {
 									if (err) {
 										errorCallback(err);
 									}
-									try {
-										if (!assert.equal(res.sort(), '1,2,3', test_case)) {
-											ut.pass(test_case);
-										}
-									} catch (e) {
-										ut.fail(e, true);
-									}
+									ut.assertEqual(res.sort(), '1,2,3', test_case);
 									testEmitter.emit('next');
 								});
 							});
@@ -1832,13 +1677,7 @@ exports.Set = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if (!assert.equal(res.sort(), 'a,b,c', test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e, true);
-						}
+						ut.assertEqual(res.sort(), 'a,b,c', test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1851,13 +1690,7 @@ exports.Set = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.deepEqual(res, [], test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual(res, [], test_case);
 			testEmitter.emit('next');
 		});
 	};

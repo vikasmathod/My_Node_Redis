@@ -106,13 +106,7 @@ exports.Replication3 = (function () {
 					if (err) {
 						errorCallback(err)
 					}
-					try {
-						if (!assert.equal(res, 'slave', test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertEqual(res, 'slave', test_case);
 					testEmitter.emit('next');
 				});
 			}, 1000);
@@ -140,13 +134,11 @@ exports.Replication3 = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								try {
-									if (!assert.deepEqual(digest, digest0, test_case)) {
-										ut.pass(test_case);
-										testEmitter.emit('next');
-									}
-								} catch (e) {
-									ut.fail(e, true);
+								var bool_Res = ut.assertDeepEqual(digest, digest0, test_case,true);
+								if(bool_Res){
+									ut.pass(test_case);
+									testEmitter.emit('next');
+								} else{
 									ut.csvdump(master_cli, function (err, csv1) {
 										if (err) {
 											errorCallback(err);
