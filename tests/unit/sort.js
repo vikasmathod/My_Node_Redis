@@ -176,14 +176,7 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.deepEqual(sorted, local_result, test_case)) {
-							// def - util.pass(<name>,[debug_mode=false],[logging=true])
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(sorted, local_result, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -201,13 +194,7 @@ exports.Sort = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(res1, local_result, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(res1, local_result, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -223,13 +210,7 @@ exports.Sort = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(sorted, local_result, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(sorted, local_result, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -251,13 +232,7 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.deepEqual(sorted, local_result, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(sorted, local_result, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -275,14 +250,7 @@ exports.Sort = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-
-				try {
-					if (!assert.deepEqual(exp_res, local_result, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(exp_res, local_result, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -298,13 +266,7 @@ exports.Sort = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(sorted, local_result, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(sorted, local_result, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -325,13 +287,7 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.deepEqual(sorted, local_result, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e);
-					}
+					ut.assertDeepEqual(sorted, local_result, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -345,17 +301,11 @@ exports.Sort = (function () {
 				errorCallback(err);
 			}
 			local_result = res.splice(5, 5);
-			client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5, 5, function (err, res1) {
+			client.sort('tosort', 'by', 'weight_*', 'LIMIT', 5, 5, function (err, sorted) {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(res1, local_result, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e);
-				}
+				ut.assertDeepEqual(sorted, local_result, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -371,13 +321,7 @@ exports.Sort = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(sorted, local_result, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e);
-				}
+				ut.assertDeepEqual(sorted, local_result, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -399,13 +343,7 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.deepEqual(sorted, local_result, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertDeepEqual(sorted, local_result, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -418,13 +356,7 @@ exports.Sort = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.deepEqual(sorted, local_result, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e, true);
-			}
+			ut.assertDeepEqual(sorted, local_result, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -445,13 +377,7 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.deepEqual(sorted, local_result, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e);
-					}
+					ut.assertDeepEqual(sorted, local_result, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -464,13 +390,7 @@ exports.Sort = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.deepEqual(sorted, local_result, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertDeepEqual(sorted, local_result, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -491,13 +411,7 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.deepEqual(sorted, local_result, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e);
-					}
+					ut.assertDeepEqual(sorted, local_result, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -510,13 +424,7 @@ exports.Sort = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.deepEqual(sorted, local_result, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertDeepEqual(sorted, local_result, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -533,13 +441,7 @@ exports.Sort = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(g.buffers_to_strings(sorted), local_result, test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(g.buffers_to_strings(sorted), local_result, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -551,13 +453,11 @@ exports.Sort = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if ((!assert.equal(16, res.length, test_case)) && (!assert.ok(check(res), test_case))) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertMany(
+				[
+					['equal',res.length,16],
+					['ok',check(res),null]
+				],test_case);
 			testEmitter.emit('next');
 
 			function check(result) {
@@ -612,13 +512,12 @@ exports.Sort = (function () {
 					}
 					result_array2.push(result2[index]);
 				});
-				try {
-					if ((!assert.equal(result1.length, result2.length, test_case)) && (!assert.deepEqual(result1, result_array1, test_case)) && (!assert.deepEqual(result2, result_array2, test_case))) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e);
-				}
+				ut.assertMany(
+				[
+					['equal',result1.length, result2.length],
+					['deepequal',result2, result_array2],
+					['deepequal',result1, result_array1]
+				],test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -639,13 +538,11 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if ((!assert.deepEqual(g.buffers_to_strings(res2), g.buffers_to_strings(global_result), test_case)) && (!assert.equal(16, res3, test_case))) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertMany(
+						[
+							['equal', res3, 16],
+							['deepequal',g.buffers_to_strings(res2), g.buffers_to_strings(global_result)]
+						],test_case);
 					assert_encoding('ziplist', 'sort-res', function (err, res) {
 						if (err) {
 							errorCallback(err);
@@ -671,13 +568,11 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if ((!assert.deepEqual(g.buffers_to_strings(res2), g.buffers_to_strings(global_result), test_case)) && (!assert.equal(16, res3, test_case))) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true);
-					}
+					ut.assertMany(
+						[
+							['equal', res3, 16],
+							['deepequal',g.buffers_to_strings(res2), g.buffers_to_strings(global_result)]
+						],test_case);
 					assert_encoding('ziplist', 'sort-res', function (err, res) {
 						if (err) {
 							errorCallback(err);
@@ -698,13 +593,7 @@ exports.Sort = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.deepEqual(g.buffers_to_strings(res), local_result, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertDeepEqual(g.buffers_to_strings(res), local_result, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -733,13 +622,7 @@ exports.Sort = (function () {
 								errorCallback(err);
 							}
 							client.sort('mylist', 'alpha', function (err, res) {
-								try {
-									if (!assert.deepEqual(res, [1, 10, 2, 3], test_case)) {
-										ut.pass(test_case);
-									}
-								} catch (e) {
-									ut.fail(e);
-								}
+								ut.assertDeepEqual(res, [1, 10, 2, 3], test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -784,13 +667,7 @@ exports.Sort = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(g.buffers_to_strings(res), ['e', 'd', 'c', 'b', 'a'], test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e);
-				}
+				ut.assertDeepEqual(g.buffers_to_strings(res), ['e', 'd', 'c', 'b', 'a'], test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -836,13 +713,7 @@ exports.Sort = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.deepEqual(g.buffers_to_strings(res), ['min', 'c', 'a', 'b', 'd', 'max'], test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e);
-				}
+				ut.assertDeepEqual(g.buffers_to_strings(res), ['min', 'c', 'a', 'b', 'd', 'max'], test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -869,13 +740,7 @@ exports.Sort = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.deepEqual(res, sf, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertDeepEqual(res, sf, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -887,13 +752,7 @@ exports.Sort = (function () {
 			if (err) {
 				errorCallback(err);
 			}
-			try {
-				if (!assert.equal(res, 0, test_case)) {
-					ut.pass(test_case);
-				}
-			} catch (e) {
-				ut.fail(e);
-			}
+			ut.assertEqual(res, 0, test_case);
 			testEmitter.emit('next');
 		});
 	};
@@ -913,13 +772,7 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.equal(res, 0, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e);
-					}
+					ut.assertEqual(res, 0, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -1122,14 +975,7 @@ exports.Sort = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-
-				try {
-					if (!assert.deepEqual(g.buffers_to_strings(replies), g.buffers_to_strings([['a', 'c', 'e', 'b', 'd'], ['d', 'b', 'e', 'c', 'a']]), test_case)) {
-						ut.pass(test_case);
-					}
-				} catch (e) {
-					ut.fail(e, true);
-				}
+				ut.assertDeepEqual(g.buffers_to_strings(replies), g.buffers_to_strings([['a', 'c', 'e', 'b', 'd'], ['d', 'b', 'e', 'c', 'a']]), test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1197,15 +1043,7 @@ exports.Sort = (function () {
 										errorCallback(err);
 									}
 									result_array.push(res);
-									try {
-										//commented as multi-dimensional array is not implemented yet!!
-										//if (!assert.equal(result_array, ['a', 'd', ['a', 'c'], ['d', 'b'], '', ['a', 'c', 'e', 'b', 'd']], test_case)) {
-										if (!assert.equal(result_array.toString(), ['a', 'd', ['a', 'c'], ['d', 'b'], '', ['a', 'c', 'e', 'b', 'd']].toString(), test_case)) {
-											ut.pass(test_case);
-										}
-									} catch (e) {
-										ut.fail(e);
-									}
+									ut.assertDeepEqual(result_array.toString(), ['a', 'd', ['a', 'c'], ['d', 'b'], '', ['a', 'c', 'e', 'b', 'd']].toString(), test_case);
 									testEmitter.emit('next');
 								});
 							});
@@ -1231,13 +1069,7 @@ exports.Sort = (function () {
 					if (err) {
 						errorCallback(err);
 					}
-					try {
-						if (!assert.equal(res, 0, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e);
-					}
+					ut.assertEqual(res, 0, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -1262,13 +1094,7 @@ exports.Sort = (function () {
 						if (err) {
 							errorCallback(err);
 						}
-						try {
-							if (!assert.equal(result, ['a', 'aa', 'aaa', 'azz', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z'], test_case)) {
-								ut.pass(test_case);
-							}
-						} catch (e) {
-							ut.fail(e);
-						}
+						ut.assertDeepEqual(result, ['a', 'aa', 'aaa', 'azz', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'z'], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1278,7 +1104,6 @@ exports.Sort = (function () {
 
 	tester.Sort32 = function (errorCallback) {
 		var test_case = 'SORT will complain with numerical sorting and bad doubles (1)';
-		var error = '';
 		client.del('myset', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1288,16 +1113,8 @@ exports.Sort = (function () {
 					callback(err, null);
 				}
 				client.sort('myset', function (err, res) {
-					error = err;
-					try {
-						if (!assert.ok(ut.match('converted into double', error), test_case)) {
-							ut.pass(test_case);
-							testEmitter.emit('next');
-						}
-					} catch (e) {
-						ut.fail(e, true);
-						testEmitter.emit('next');
-					}
+					ut.assertOk('converted into double', err, test_case);
+					testEmitter.emit('next');
 				});
 			});
 		});
@@ -1305,7 +1122,6 @@ exports.Sort = (function () {
 
 	tester.Sort33 = function (errorCallback) {
 		var test_case = 'SORT will complain with numerical sorting and bad doubles (1)';
-		var error = '';
 		client.del('myset', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1315,16 +1131,8 @@ exports.Sort = (function () {
 					callback(err, null);
 				}
 				client.sort('myset', function (err, res) {
-					error = err;
-					try {
-						if (!assert.ok(ut.match('converted into double', error), test_case)) {
-							ut.pass(test_case);
-							testEmitter.emit('next');
-						}
-					} catch (e) {
-						ut.fail(e, true);
-						testEmitter.emit('next');
-					}
+					ut.assertOk('converted into double', err, test_case);
+					testEmitter.emit('next');
 				});
 			});
 		});
@@ -1332,7 +1140,6 @@ exports.Sort = (function () {
 
 	tester.Sort34 = function (errorCallback) {
 		var test_case = 'SORT will complain with numerical sorting and bad doubles (2)';
-		var error = '';
 		client.del('myset', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1346,16 +1153,8 @@ exports.Sort = (function () {
 						callback(err, null);
 					}
 					client.sort('myset', 'by', 'score:*', function (err, res) {
-						error = err;
-						try {
-							if (!assert.ok(ut.match('converted into double', error), test_case)) {
-								ut.pass(test_case);
-								testEmitter.emit('next');
-							}
-						} catch (e) {
-							ut.fail(e, true);
-							testEmitter.emit('next');
-						}
+						ut.assertOk('converted into double', err, test_case);
+						testEmitter.emit('next');
 					});
 				});
 			});
@@ -1381,13 +1180,7 @@ exports.Sort = (function () {
 					if (err) {
 						callback(err, null);
 					}
-					try {
-						if (!assert.equal(ut.compareArray(sortedres, loop_array), true, test_case)) {
-							ut.pass(test_case);
-						}
-					} catch (e) {
-						ut.fail(e, true)
-					}
+					ut.assertDeepEqual(sortedres, loop_array, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -1412,13 +1205,7 @@ exports.Sort = (function () {
 							if (err) {
 								errorCallback(err);
 							}
-							try {
-								if (!assert.equal(res, 100, test_case)) {
-									ut.pass(test_case);
-								}
-							} catch (e) {
-								ut.pass(e, true);
-							}
+							ut.assertEqual(res, 100, test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -1437,12 +1224,7 @@ exports.Sort = (function () {
 				if (err) {
 					errorCallback(err);
 				}
-				try {
-					if (!assert.equal(val, time[1] - 1, test_case))
-						ut.pass(test_case);
-				} catch (e) {
-					ut.fail(e);
-				}
+				ut.assertEqual(val, time[1] - 1, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1470,14 +1252,12 @@ exports.Sort = (function () {
 				client.zadd('myset', 3, '2:b');
 				client.zadd('myset', 2, '5:e');
 				client.sort('myset','by','order:*','get','order:*','get','#',function(err,res3){
-					try{
-						if(!assert.deepEqual(res1,[ 'a', 'b', 'c', 'd', 'e' ],test_case) && 
-							!assert.deepEqual(res2,[  'a', 'c', 'e', 'b', 'd' ],test_case) &&
-							!assert.equal(res3.length,10,test_case))
-							ut.pass(test_case);
-					}catch(e){
-						ut.fail(e,true);
-					}
+					ut.assertMany(
+						[
+							['deepequal',res1,[ 'a', 'b', 'c', 'd', 'e' ]],
+							['deepequal',res2,[  'a', 'c', 'e', 'b', 'd' ]],
+							['equal',res3.length,10]
+						],test_case);
 					testEmitter.emit('next');
 				});
 			});

@@ -148,13 +148,7 @@ exports.AofRace = (function () {
 									if (err) {
 										errorCallback(err);
 									}
-									try {
-										if (!assert.equal(res, 20000, test_case)) {
-											ut.pass(test_case);
-										}
-									} catch (e) {
-										ut.fail(e, true);
-									}
+									ut.assertEqual(res, 20000, test_case);
 									cli.end();
 									if (aofrace.debug_mode) {
 										log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
