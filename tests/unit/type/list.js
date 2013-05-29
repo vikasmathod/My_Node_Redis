@@ -1406,8 +1406,10 @@ exports.List = (function () {
 						errorCallback(err);
 					}
 					result_array.push(res);
-					ut.assertDeepEqual(result_array, [['blist1', 'foo'], 0], test_case);
-					testEmitter.emit('next');
+					setTimeout(function(){
+						ut.assertDeepEqual(result_array, [['blist1', 'foo'], 0], test_case);
+						testEmitter.emit('next');
+					},200);
 				});
 			});
 		});
@@ -1533,7 +1535,7 @@ exports.List = (function () {
 									}
 									result_array.push(res);
 									setTimeout(function(){
-										ut.assertDeepEqual(result_array, [['blist1', 'foo'], 0, 0, ['blist2', 'foo'], 0, 0], test_case);
+										ut.assertDeepEqual(result_array.sort(), [0, 0, 0, 0,['blist1', 'foo'],  ['blist2', 'foo']], test_case);
 										testEmitter.emit('next');
 									},100);
 								});
@@ -1566,8 +1568,10 @@ exports.List = (function () {
 						errorCallback(err);
 					}
 					result_array.push(res);
-					ut.assertDeepEqual(result_array, [['blist1', 'foo'], 0], test_case);
-					testEmitter.emit('next');
+					setTimeout(function(){
+						ut.assertDeepEqual(result_array, [['blist1', 'foo'], 0], test_case);
+						testEmitter.emit('next');
+					},200);
 				});
 			});
 		});
@@ -1692,7 +1696,7 @@ exports.List = (function () {
 										errorCallback(err);
 									}
 									result_array.push(res);
-									ut.assertDeepEqual(result_array, [['blist1', 'foo'], 0, 0, ['blist2', 'foo'], 0, 0], test_case);
+									ut.assertDeepEqual(result_array.sort(), [ 0, 0, 0, 0, [ 'blist1', 'foo' ], [ 'blist2', 'foo' ] ], test_case);
 									testEmitter.emit('next');
 								});
 							});

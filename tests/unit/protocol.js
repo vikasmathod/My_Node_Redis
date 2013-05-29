@@ -335,7 +335,7 @@ exports.Protocol = (function () {
 					retval = error[error.length - 2];
 					ut.assertOk('Protocol error', retval, test_case);
 					outerloop.next();
-				},100);
+				},500);
 			});
 
 		}, function () {

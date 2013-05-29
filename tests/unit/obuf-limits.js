@@ -104,7 +104,7 @@ exports.Obuf_limits = (function () {
 										i = 0;
 										//3300(random number picked after trail and error method) publish commands are sent
 										//without waiting for reply
-										while (i < 3300) {
+										while (i < 3200) {
 											client.publish('foo', 'bar');
 											i++;
 										}
