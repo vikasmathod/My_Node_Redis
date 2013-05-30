@@ -21,6 +21,7 @@
 - Make sure package.json file exists in the current folder.
 - To install the dependencies first, do
 	 <pre><code> npm install </code></pre>
+- Copy commands.js from <pre><code> node_modules\redis\lib </code></pre> and paste and overwrite in <<folder where test suite is present>>\node_modules\redis\lib
 - To run the tests just, do
 	 <pre><code> npm test </code></pre>
 
