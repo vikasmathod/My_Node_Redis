@@ -116,7 +116,7 @@ exports.Obuf_limits = (function () {
 										i = 0;
 										//3300(random number picked after trail and error method) publish commands are sent
 										//without waiting for reply
-										while (i < 3200) {
+										while (i < 3100) {
 											client.publish('foo', 'bar');
 											i++;
 										}
@@ -131,6 +131,7 @@ exports.Obuf_limits = (function () {
 								ut.pass(test_case);
 							else
 								ut.fail('Client output buffer hard limit is not enforced', true);
+							newClient.end();
 							testEmitter.emit('next');
 						});
 					}
@@ -203,6 +204,7 @@ exports.Obuf_limits = (function () {
 								ut.pass(test_case);
 							else
 								ut.fail('Client output buffer soft limit enforcing failed', true);
+							newClient.end();
 							testEmitter.emit('next');
 						});
 					}
@@ -244,7 +246,7 @@ exports.Obuf_limits = (function () {
 						 */
 						g.asyncFor(0, -1, function (loop) {
 							i = 0;
-							while (i < 50) {
+							while (i < 3200) {
 								client.publish('foo', 'bar');
 								i++;
 							}
@@ -280,6 +282,7 @@ exports.Obuf_limits = (function () {
 								ut.pass(test_case);
 							else
 								ut.fail('Client output buffer soft limit is not enforced ', true);
+							newClient.end();
 							testEmitter.emit('next');
 						});
 					}
