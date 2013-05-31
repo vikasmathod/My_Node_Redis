@@ -47,3 +47,11 @@
 - currently logs are are <pre><code>\tests\logs\results.log</code></pre>
 - logging of all commands/data in and out or redis is encorporated, to enable , in test_helper.js set <pre><code>redis.log_to_file = true</code></pre>
 - the debug log for above would be found at <pre><code>\tests\logs\redis-debug.log</code></pre>
+
+[0]: http://nodejs.org/download/
+[1]: https://github.com/MSOpenTech/redis
+[2]: http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git
+[3]: http://www.python.org/download/releases/2.7.3/
+[4]: http://www.microsoft.com/visualstudio/en-us/products/2010-editions/visual-cpp-express
+[5]: https://github.com/TooTallNate/node-gyp
+[6]: https://github.com/nitesh123/node_redis
