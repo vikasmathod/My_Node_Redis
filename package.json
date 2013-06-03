@@ -11,7 +11,7 @@
     "portfinder": "~0.2.1",
 	"log": "~1.3.0",
 	"buffertools": "~1.1.0",
-    "redis": "git://github.com/nitesh123/node_redis.git#modified",
+    "redis": "https://github.com/nitesh123/node_redis/archive/modified.tar.gz",
     "rimraf": "~2.0.2",
     "sprintf": "~0.1.1"
   },
