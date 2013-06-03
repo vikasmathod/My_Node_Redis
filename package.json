@@ -13,7 +13,8 @@
 	"buffertools": "~1.1.0",
     "redis": "https://github.com/nitesh123/node_redis/archive/modified.tar.gz",
     "rimraf": "~2.0.2",
-    "sprintf": "~0.1.1"
+    "sprintf": "~0.1.1",
+    "node-sentinel": "~0.0.6"
   },
   "devDependencies": {},
   "scripts": {

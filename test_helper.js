@@ -67,7 +67,9 @@ var Test_helper = function () {
   numclients = 16,
   test_list = new Array(
  
-   "unit/printver",
+	"unit/sentinel"
+	
+   /* "unit/printver",
 	"unit/auth",
 	"unit/protocol",
 	"unit/slowlog",	
@@ -101,7 +103,7 @@ var Test_helper = function () {
 	"integration/replication-3",
 	"integration/replication-4",
 	"unit/limits",
-	"additional/daemonize"
+	"additional/daemonize" */
   );
 
   //private methods

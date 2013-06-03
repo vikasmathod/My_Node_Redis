@@ -135,7 +135,10 @@ Server.prototype.start_server = function (cpid, options, s_callback) {
 					for (d in that.config)
 						count++;
 					//write new configuration to temporary file
-					that.config_file = that.tp.tmpfile(that.config['dir'], 'redis') + '.conf';
+					if(that.tags === 'sentinel')
+						that.config_file = that.tp.tmpfile(that.config['dir'], 'sentinel') + '.conf';
+					else
+						that.config_file = that.tp.tmpfile(that.config['dir'], 'redis') + '.conf';
 					var stream = fs.createWriteStream(that.config_file);
 					stream.once('open', function (fd) {
 						for (directive in that.config) {
@@ -166,7 +169,10 @@ Server.prototype.start_server = function (cpid, options, s_callback) {
 					that.stderr_stream = fs.createWriteStream(that.stderr_file);
 
 					that.stdout_stream.once('open', function (fd) {
-						that.server = child.spawn('.' + sep + 'redis' + sep + 'src' + sep + REDIS_SERVER, [that.config_file]);
+						if(that.tags === 'sentinel')
+							that.server = child.spawn('.' + sep + 'redis' + sep + 'src' + sep + REDIS_SERVER, [that.config_file,'--sentinel']);
+						else
+							that.server = child.spawn('.' + sep + 'redis' + sep + 'src' + sep + REDIS_SERVER, [that.config_file]);
 						that.server.stdout.pipe(that.stdout_stream, {
 							end : false
 						});
