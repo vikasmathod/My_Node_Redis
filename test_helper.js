@@ -66,10 +66,8 @@ var Test_helper = function () {
   start_client = false, counter = 0, test_array = [],
   numclients = 16,
   test_list = new Array(
- 
-	"unit/sentinel"
-	
-   /* "unit/printver",
+ 	
+    "unit/printver",
 	"unit/auth",
 	"unit/protocol",
 	"unit/slowlog",	
@@ -87,6 +85,7 @@ var Test_helper = function () {
 	"unit/aofrw",
 	"unit/introspection",
 	"unit/basic",
+	"unit/sentinel",
 	"unit/type/set",
 	"unit/type/list",
 	"unit/type/list2",
@@ -103,7 +102,7 @@ var Test_helper = function () {
 	"integration/replication-3",
 	"integration/replication-4",
 	"unit/limits",
-	"additional/daemonize" */
+	"additional/daemonize"
   );
 
   //private methods
