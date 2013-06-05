@@ -18,13 +18,16 @@ exports.Sentinel = (function () {
 	masterServer = new Server(),
 	slaveServer = new Server(),
 	server = new Server(),
+	server1 = new Server(),
 	sentinel = {},
 	name = 'Sentinel',
 	event_msg = '',
+	event_Data = {},
 	client = '',
 	sentinel_cli = '',
 	master_cli = '',
 	slave_cli = '',
+	sentinel_client = '',
 	tester = {},
 	server_pid = '',
 	server_port = '',
@@ -43,12 +46,14 @@ exports.Sentinel = (function () {
 	
 	function attachEvents(s){
 		s.on('reset-master', function (data) {
-			event_msg = 'reset-master ' + '\n' + data['details']['name'];
+			event_msg = 'reset-master';
+			event_Data = data;
 		});
 
 		//A new slave was detected and attached.
 		s.on('new-slave', function (data) {
-			event_msg = 'new-slave ' + '\n' + data;
+			event_msg = 'new-slave';
+			event_Data = data;
 		});
 
 		//A failover started by another Sentinel or any other external entity was detected (An attached slave turned into a master).
@@ -89,7 +94,8 @@ exports.Sentinel = (function () {
 
 		//A new sentinel for this master was detected and attached.
 		s.on('new-sentinel', function (data) {
-			event_msg = 'new-sentinel ' + '\n' + data;
+			event_msg = 'new-sentinel';
+			event_Data = data;
 		});
 
 		//The specified instance is now in Subjectively Down state.
@@ -180,22 +186,22 @@ exports.Sentinel = (function () {
 
 		//We are starting to monitor the new master, using the same name of the old one. The old master will be completely removed from our tables.
 		s.on('switch-master', function (event) {
-			event_msg = 'switch-master ' + '\n' + data;
+			event_msg = 'switch-master';
 		});
 
 		//Tilt mode entered.
 		s.on('tilt-mode-entered', function (event) {
-			event_msg = 'tilt-mode-entered ' + '\n' + data;
+			event_msg = 'tilt-mode-entered';
 		});
 
 		//Tilt mode exited.
 		s.on('tilt-mode-exited', function (event) {
-			event_msg = 'tilt-mode-exited ' + '\n' + data;
+			event_msg = 'tilt-mode-exited';
 		});
 
 		//Not documented
 		s.on('promoted-slave', function (event) {
-			event_msg = 'promoted-slave ' + '\n' + data;
+			event_msg = 'promoted-slave';
 		});
 	}
 	//public method
@@ -228,29 +234,32 @@ exports.Sentinel = (function () {
 					s_server_port = g.srv[cpid][s_server_pid]['port'];
 					s_server_host = g.srv[cpid][s_server_pid]['host'];
 					slave_cli = g.srv[cpid][s_server_pid]['client'];
-					
-					args = {};
-					overrides = {};
-					args['name'] = 'Sentinel';
-					args['tags'] = 'sentinel';
-					overrides['sentinel monitor'] = 'mymaster1 ' + m_server_host + ' ' + m_server_port + ' 2';
-					args['overrides'] = overrides;
-					server.start_server(cpid, args, function (err, res) {
-						if (err) {
-							callback(err, null);
-						}
-						server_pid = res;
-						server_port = g.srv[cpid][server_pid]['port'];
-						server_host = g.srv[cpid][server_pid]['host'];
-						// we already have a client while checking for the server, we dont need it now.
-						g.srv[cpid][server_pid]['client'].end();
-						sentinel_cli = new sentinel_mod(server_host, server_port);
-						attachEvents(sentinel_cli);
-						if (sentinel.debug_mode) {
-							log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[cpid][server_pid]['host'] + ':' + g.srv[cpid][server_pid]['port']);
-						}
-						all_tests = Object.keys(tester);
-						testEmitter.emit('next');
+					slave_cli.slaveof(m_server_host, m_server_port,function(err,res){
+						setTimeout(function(){
+							args = {};
+							overrides = {};
+							args['name'] = 'Sentinel';
+							args['tags'] = 'sentinel';
+							overrides['sentinel monitor'] = 'mymaster1 ' + m_server_host + ' ' + m_server_port + ' 2';
+							args['overrides'] = overrides;
+							server.start_server(cpid, args, function (err, res) {
+								if (err) {
+									callback(err, null);
+								}
+								server_pid = res;
+								server_port = g.srv[cpid][server_pid]['port'];
+								server_host = g.srv[cpid][server_pid]['host'];
+								// we already have a client while checking for the server, we dont need it now.
+								g.srv[cpid][server_pid]['client'].end();
+								sentinel_cli = new sentinel_mod(server_host, server_port);
+								attachEvents(sentinel_cli);
+								if (sentinel.debug_mode) {
+									log.notice(name + ':Client disconnected listeting to socket : ' + g.srv[cpid][server_pid]['host'] + ':' + g.srv[cpid][server_pid]['port']);
+								}
+								all_tests = Object.keys(tester);
+								testEmitter.emit('next');
+							});
+						},1000);
 					});
 				});
 			});
@@ -267,9 +276,6 @@ exports.Sentinel = (function () {
 				}
 		});
 		testEmitter.on('end', function () {
-			/* sentinel_cli.reset('mymaster', function (err, success) {
-				console.log('reset');
-			}); */
 			master_cli.end();
 			slave_cli.end();
 			masterServer.kill_server(client_pid, m_server_pid, function (err, res) {
@@ -326,10 +332,11 @@ exports.Sentinel = (function () {
 	tester.sentinel3 = function (errorCallback) {
 		var test_case = 'Get Master Address';
 		sentinel_cli.getMasterAddress('mymaster1', function(err, masterInfo) {
-			if(err){
-				errorCallback(err);
-			}
-			ut.assertOk('Please ask another Sentinel', err, test_case);
+			ut.assertMany(
+				[	
+					['equal', masterInfo['ip'],m_server_host],
+					['equal', masterInfo['port'], m_server_port]
+				],test_case);
 			testEmitter.emit('next');
 		});
 	}
@@ -337,9 +344,6 @@ exports.Sentinel = (function () {
 	tester.sentinel4 = function (errorCallback) {
 		var test_case = 'Check if master is down';
 		sentinel_cli.isMasterDown(m_server_host, m_server_port.toString(), function (err, isMasterDown) {
-			if(err){
-				errorCallback(err);
-			}
 			ut.assertEqual(isMasterDown['isDown'].toString(), 'false', test_case);
 			testEmitter.emit('next');
 		});
@@ -348,16 +352,50 @@ exports.Sentinel = (function () {
 	tester.sentinel5 = function (errorCallback) {
 		var test_case = 'Check if a server is leader';
 		sentinel_cli.isLeader(m_server_host, m_server_port.toString(), function (err, isLeader) {
-			if(err){
-				errorCallback(err);
-			}
 			ut.assertEqual(isLeader.toString(), 'false', test_case);
 			testEmitter.emit('next');
 		});
 	}
 	
 	tester.sentinel6 = function (errorCallback) {
+		var test_case = 'Slave Info';
+		sentinel_cli.slaves('mymaster1', function (err, slavesInfo) {
+			ut.assertEqual(slavesInfo[0]['port'], s_server_port, test_case);
+			testEmitter.emit('next');
+		});
+	}
+	
+	tester.sentinel7 = function (errorCallback) {
+		var test_case = 'Detect and Recognize newly attached Sentinel';
+		args = {};
+		overrides = {};
+		args['name'] = 'Sentinel';
+		args['tags'] = 'sentinel';
+		overrides['sentinel monitor'] = 'mymaster1 ' + m_server_host + ' ' + m_server_port + ' 2';
+		args['overrides'] = overrides;
+		server1.start_server(client_pid, args, function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			g.srv[client_pid][res]['client'].end();
+			setTimeout(function(){
+				ut.assertMany(
+				[
+					['equal', event_msg, 'new-sentinel'],
+					['equal', event_Data['details']['master-name'], 'mymaster1' ],
+					['ok', event_Data['details']['port'],g.srv[client_pid][res]['port']]
+				],test_case);
+				server1.kill_server(client_pid, res, function (err, res) {
+					testEmitter.emit('next');
+				});
+			},5000);
+		});
+	}
+	
+	tester.sentinel6 = function (errorCallback) {
 		var test_case = 'Reset Master';
+		event_msg = '';
+		event_Data = {};
 		sentinel_cli.reset('mymaster1', function (err, success) {
 			if(err){
 				errorCallback(err);
@@ -366,7 +404,7 @@ exports.Sentinel = (function () {
 				[
 					['ok', success, null],
 					['ok', 'reset-master', event_msg],
-					['ok', 'mymaster1', event_msg]
+					['ok', 'mymaster1', event_Data['details']['name']]
 				],test_case);
 			testEmitter.emit('next');
 		});
