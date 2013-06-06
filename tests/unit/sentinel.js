@@ -95,7 +95,6 @@ exports.Sentinel = (function () {
 		//A new sentinel for this master was detected and attached.
 		s.on('new-sentinel', function (data) {
 			event_msg = 'new-sentinel';
-			event_Data = data;
 		});
 
 		//The specified instance is now in Subjectively Down state.
@@ -378,21 +377,21 @@ exports.Sentinel = (function () {
 				errorCallback(err, null);
 			}
 			g.srv[client_pid][res]['client'].end();
-			setTimeout(function(){
+			sentinel_cli.on('new-sentinel', function (data) {		
 				ut.assertMany(
 				[
 					['equal', event_msg, 'new-sentinel'],
-					['equal', event_Data['details']['master-name'], 'mymaster1' ],
-					['ok', event_Data['details']['port'],g.srv[client_pid][res]['port']]
+					['equal', data['details']['master-name'], 'mymaster1' ],
+					['ok', data['details']['port'],g.srv[client_pid][res]['port']]
 				],test_case);
 				server1.kill_server(client_pid, res, function (err, res) {
 					testEmitter.emit('next');
 				});
-			},5000);
+			});
 		});
 	}
 	
-	tester.sentinel6 = function (errorCallback) {
+	tester.sentinel8 = function (errorCallback) {
 		var test_case = 'Reset Master';
 		event_msg = '';
 		event_Data = {};
