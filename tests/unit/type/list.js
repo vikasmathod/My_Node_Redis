@@ -1234,6 +1234,7 @@ exports.List = (function () {
 	tester.List19 = function (errorCallback) {
 		var test_case = 'BRPOPLPUSH with multiple blocked clients';
 		var result_array = new Array();
+		var error = '';
 		cli.del('blist', 'target1', 'target2', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -1243,15 +1244,19 @@ exports.List = (function () {
 					errorCallback(err);
 				}
 				client1.brpoplpush('blist', 'target1', 0, function (error1, result1) {
-					result_array.push(result1);
+					error = error1;
 				});
 				client2.brpoplpush('blist', 'target2', 0, function (error2, result2) {
 					result_array.push(result2);
 				});
 				cli.lpush('blist', 'foo', function (err, res) {
 					cli.lrange('target2', 0, -1, function (err, res1) {
-						result_array.push(res1);
-						ut.assertDeepEqual(result_array, [undefined, 'foo', ['foo']], test_case);
+						result_array.push(res1[0]);
+						ut.assertMany(
+							[	
+								['ok', 'wrong kind', error],
+								['deepequal', result_array, ['foo', 'foo']]
+							],test_case);
 						testEmitter.emit('next');
 					});
 				});

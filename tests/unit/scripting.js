@@ -1604,36 +1604,48 @@ exports.Scripting = (function () {
 			if (err) {
 				errorCallback(err, null);
 			}
-			server_pid1 = res;
-			client1 = g.srv[client_pid][server_pid1]['client'];
-			server_host = g.srv[client_pid][server_pid1]['host'];
-			server_port = g.srv[client_pid][server_pid1]['port'];
-			function killserver() {
-				server4.kill_server(client_pid, server_pid1, function (err, res) {
-					if (err) {
-						errorCallback(err, null);
+			setTimeout(function(){
+				server_pid1 = res;
+				client1 = g.srv[client_pid][server_pid1]['client'];
+				server_host = g.srv[client_pid][server_pid1]['host'];
+				server_port = g.srv[client_pid][server_pid1]['port'];
+				client1.on('error',function(err){
+					ut.fail(err,true);
+					killserver();
+				});
+				function killserver() {
+					client1.end();
+					server4.kill_server(client_pid, server_pid1, function (err, res) {
+						if (err) {
+							errorCallback(err, null);
+						}
+						testEmitter.emit('next');
+					});
+				}
+				client1.shutdown('somecommand', function (err, res) {
+					try {
+						if (!assert.ok(ut.match('syntax error', err), test_case)) {
+							client1.shutdown('save', function (err, res) {
+								client1.end();
+								setTimeout(function () {
+									var msg = fs.readFileSync(g.srv[client_pid][server_pid1]['stdout']).toString().split('\n');
+									var val = msg[msg.length - 4];
+									var res = ut.assertOk('Saving', val, test_case, true);
+									if(res){
+										ut.pass(test_case);
+										testEmitter.emit('next');
+									} else{
+										killserver();
+									}
+									
+								}, 500);
+							});
+						}
+					} catch (e) {
+						killserver();
+						ut.fail(e, true);
 					}
 				});
-			}
-
-			client1.shutdown('somecommand', function (err, res) {
-				try {
-					if (!assert.ok(ut.match('syntax error', err), test_case)) {
-						client1.shutdown('save', function (err, res) {
-							setTimeout(function () {
-								var msg = fs.readFileSync(g.srv[client_pid][server_pid1]['stdout']).toString().split('\n');
-								var val = msg[msg.length - 4];
-								ut.assertOk('Saving', val, test_case);
-								client1.end();
-								testEmitter.emit('next');
-							}, 500);
-						});
-					}
-				} catch (e) {
-					client1.end();
-					killserver();
-					ut.fail(e, true);
-				}
 			});
 		});
 	}

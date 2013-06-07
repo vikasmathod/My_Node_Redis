@@ -611,7 +611,7 @@ exports.Introspection = (function () {
 
 	 tester.introspection10 = function (errorCallback) {
 		var test_case = 'MONITOR can log commands issued by the scripting engine'
-			var tags = 'introspection10';
+		var tags = 'introspection10';
 		var overrides = {};
 		var responses = [];
 		var args = {};
@@ -636,13 +636,13 @@ exports.Introspection = (function () {
 						['ok','foo,bar', responses.toString()],
 						['equal',responses[0][0],'eval']
 					],test_case);
-				testEmitter.emit('next');
 				monitor_client.end();
+				client.end();
 				server10.kill_server(client_pid, server_pid, function (err, res) {
 					if (err) {
 						errorCallback(err);
 					}
-					client.end();
+					testEmitter.emit('next');
 				});
 			});
 			monitor_client.monitor(function (err, res) {

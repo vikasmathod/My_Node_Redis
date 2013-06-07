@@ -124,7 +124,9 @@ exports.Pubsub = (function () {
 				if (err) {
 					callback(err, null);
 				}
-				callback(null, unsub_counts)
+				setTimeout(function(){
+					callback(null, unsub_counts)
+				},1000);
 			});
 		}
 	}
