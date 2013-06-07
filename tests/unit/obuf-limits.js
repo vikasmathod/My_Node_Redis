@@ -76,8 +76,8 @@ exports.Obuf_limits = (function () {
 		}
 		testEmitter.emit('start');
 	}
-
-	//UnStable
+	
+	//test methods
 	tester.obuf_limits1 = function (errorCallback) {
 		var test_case = 'Client output buffer hard limit is enforced';
 		client.config('set', 'client-output-buffer-limit', 'pubsub 100000 0 0', function (err, res) {
@@ -90,52 +90,67 @@ exports.Obuf_limits = (function () {
 					errorCallback(err);
 				}
 				var i = 0,
-				omem = 0;
+				omem = 0,
+				batchPublish = 3000,
+				testpass = false;
 				try {
 					if (!assert.ok(ut.match(res, 'subscribe foo 1'), test_case)) {
 						/*
-						 * send 3300 publish command at once without waiting for reply
+						 * execute publish command in a batch
 						 * get the client list properties
 						 * and check for omem value
+						 * assert the value. If not	true then increase the batch size and redo the above three line
 						 * This tweak is implemented since the async calls made by publish and client list commands,
 						 * give enough time for redis to read and clear the output buffer and hence neither omem nor obl value
 						 * increase. Instead of waiting for reply on publish and then publishing again after the reply
-						 * 3300(random number picked after trail and error method) publish commands are sent which are queued
+						 * publish commands are sent which are queued
 						 * in buffer memory and thus causing increasing in OBL and omem properties
-						 */
-						g.asyncFor(0, -1, function (loop) {
-
-							//reading client list
-							client.client('list', function (err, res) {
-								clients = res.split('\n');
-								if (clients[1]) {
-									c = clients[1].split(' ');
-									omem = c[13].split('=')[1];
-
-									if (omem <= 200000) {
-										i = 0;
-										//3300(random number picked after trail and error method) publish commands are sent
-										//without waiting for reply
-										while (i < 3100) {
-											client.publish('foo', 'bar');
-											i++;
-										}
-										loop.next();
-									} else
+						*/ 
+						g.asyncFor(0, 10, function (outerloop) {
+							g.asyncFor(0, -1, function (loop) {
+								
+								//reading client list
+								client.client('list', function (err, res) {
+									clients = res.split('\n');
+									if (clients[1]) {
+										c = clients[1].split(' ');
+										omem = c[13].split('=')[1];
+										if (omem <= 200000) {
+											i = 0;
+											
+											while (i++ < batchPublish)
+												client.publish('foo', 'bar');
+												
+											loop.next();
+										} else
+											loop.break();
+									} else{
 										loop.break();
-								} else
-									loop.break();
+									}
+								});
+							}, function () {
+								if (omem >= 99000 && omem < 200000){
+									testpass = true;
+									outerloop.break();
+								}else{
+									setTimeout(function(){
+										batchPublish += 100;
+										outerloop.next();
+									},1000);
+								}
 							});
 						}, function () {
-							if (omem >= 99000 && omem < 200000)
+							if(testpass)
 								ut.pass(test_case);
 							else
 								ut.fail('Client output buffer hard limit is not enforced', true);
 							newClient.end();
 							testEmitter.emit('next');
 						});
+						
 					}
 				} catch (e) {
+					newClient.end();
 					ut.fail(e, true);
 					testEmitter.emit('next');
 				}
@@ -143,13 +158,14 @@ exports.Obuf_limits = (function () {
 		});
 	}
 
-	//UnStable
 	tester.obuf_limits2 = function (errorCallback) {
 		var test_case = 'Client output buffer soft limit is not enforced if time is not overreached';
 		var i = 0,
 		start_time = 0,
 		time_elapsed = 0,
-		omem = 0;
+		omem = 0,
+		batchPublish = 3000,
+		testpass = false;
 		client.config('set', 'client-output-buffer-limit', 'pubsub 0 100000 10', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -162,45 +178,58 @@ exports.Obuf_limits = (function () {
 				try {
 					if (!assert.ok(ut.match(res, 'subscribe foo 1'), test_case)) {
 						/*
-						 * send 3200 publish command at once without waiting for reply
+						 * execute publish command in a batch
 						 * get the client list properties
 						 * and check for omem value
+						 * assert the value. If not	true then increase the batch size and redo the above three line
 						 * This tweak is implemented since the async calls made by publish and client list commands,
 						 * give enough time for redis to read and clear the output buffer and hence neither omem nor obl value
 						 * increase. Instead of waiting for reply on publish and then publishing again after the reply
-						 * 3200(random number picked after trail and error method) publish commands are sent which are queued
+						 * publish commands are sent which are queued
 						 * in buffer memory and thus causing increasing in OBL and omem properties
-						 */
-						g.asyncFor(0, -1, function (loop) {
-							client.client('list', function (err, res) {
-								if (err) {
-									errorCallback(err);
-								}
-								clients = res.split('\n');
-								if (clients[1]) {
-									i = 0;
-									while (i < 3200) {
-										client.publish('foo', 'bar');
-										i++;
+						*/ 
+						g.asyncFor(0, 10, function (outerloop) {
+							g.asyncFor(0, -1, function (loop) {
+								client.client('list', function (err, res) {
+									if (err) {
+										errorCallback(err);
 									}
-									c = clients[1].split(' ');
-									omem = c[13].split('=')[1];
-									if (omem > 100000) {
-										start_time = (start_time == 0) ? new Date().getTime() / 1000 : start_time;
-										time_elapsed = new Date().getTime() / 1000 - start_time;
-										if (time_elapsed >= 5)
-											loop.break();
-										else
+									clients = res.split('\n');
+									if (clients[1]) {
+										i = 0;
+										
+										while (i++ < batchPublish) 
+											client.publish('foo', 'bar');
+										
+										c = clients[1].split(' ');
+										omem = c[13].split('=')[1];
+										if (omem > 100000) {
+											start_time = (start_time == 0) ? new Date().getTime() / 1000 : start_time;
+											time_elapsed = new Date().getTime() / 1000 - start_time;
+											if (time_elapsed >= 5)
+												loop.break();
+											else
+												loop.next();
+										} else {
 											loop.next();
+										}
 									} else {
-										loop.next();
+										loop.break();
 									}
-								} else {
-									loop.break();
+								});
+							}, function () {
+								if (omem >= 100000 && time_elapsed >= 5 && time_elapsed <= 10){
+									testpass = true;
+									outerloop.break();
+								}else{
+									setTimeout(function(){
+										batchPublish += 100;
+										outerloop.next();
+									},1000);
 								}
 							});
 						}, function () {
-							if (omem >= 100000 && time_elapsed >= 5 && time_elapsed <= 10)
+							if(testpass)
 								ut.pass(test_case);
 							else
 								ut.fail('Client output buffer soft limit enforcing failed', true);
@@ -209,20 +238,22 @@ exports.Obuf_limits = (function () {
 						});
 					}
 				} catch (e) {
+					newClient.end();
 					ut.fail(e, true);
 					testEmitter.emit('next');
 				}
 			});
 		});
-	}
+	} 
 
-	//UnStable
 	tester.obuf_limits3 = function (errorCallback) {
 		var test_case = 'Client output buffer soft limit is enforced if time is overreached';
 		var i = 0,
 		start_time = 0,
 		time_elapsed = 0,
-		omem = 0;
+		omem = 0,
+		batchPublish = 5000,
+		testpass = false;
 		client.config('set', 'client-output-buffer-limit', 'pubsub 0 100000 3', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -235,58 +266,72 @@ exports.Obuf_limits = (function () {
 				try {
 					if (!assert.ok(ut.match(res, 'subscribe foo 1'), test_case)) {
 						/*
-						 * send 50 publish command at once without waiting for reply
+						 * execute publish command in a batch
 						 * get the client list properties
 						 * and check for omem value
+						 * assert the value. If not	true then increase the batch size and redo the above three line
 						 * This tweak is implemented since the async calls made by publish and client list commands,
 						 * give enough time for redis to read and clear the output buffer and hence neither omem nor obl value
 						 * increase. Instead of waiting for reply on publish and then publishing again after the reply
-						 * 50(random number picked after trail and error method) publish commands are sent which are queued
+						 * publish commands are sent which are queued
 						 * in buffer memory and thus causing increasing in OBL and omem properties
-						 */
-						g.asyncFor(0, -1, function (loop) {
-							i = 0;
-							while (i < 3200) {
-								client.publish('foo', 'bar');
-								i++;
-							}
-							client.client('list', function (err, res) {
-								if (err) {
-									errorCallback(err);
-								}
-								clients = res.split('\n');
-								if (clients[1]) {
-									c = clients[1].split(' ');
+						*/ 
+						g.asyncFor(0, 10, function (outerloop) {
+							g.asyncFor(0, -1, function (loop) {
+								i = 0;
+								
+								while (i++ < batchPublish)
+									client.publish('foo', 'bar');
 
-									//omem value is cleared on reaching limit
-									//if this happens then stop publishing and check for last omem value recorded
-									if (omem < c[13].split('=')[1]) {
-										omem = c[13].split('=')[1];
-									} else
-										loop.break();
+								client.client('list', function (err, res) {
+									if (err) {
+										errorCallback(err);
+									}
+									clients = res.split('\n');
+									if (clients[1]) {
+										c = clients[1].split(' ');
 
-									if (omem > 100000) {
-										start_time = (start_time == 0) ? new Date().getTime() / 1000 : start_time;
-										time_elapsed = new Date().getTime() / 1000 - start_time;
-										if (time_elapsed >= 10)
+										//omem value is cleared on reaching limit
+										//if this happens then stop publishing and check for last omem value recorded
+										if (omem < c[13].split('=')[1]) {
+											omem = c[13].split('=')[1];
+										} else
 											loop.break();
-										else
+
+										if (omem > 100000) {
+											start_time = (start_time == 0) ? new Date().getTime() / 1000 : start_time;
+											time_elapsed = new Date().getTime() / 1000 - start_time;
+											if (time_elapsed >= 10)
+												loop.break();
+											else
+												loop.next();
+										} else
 											loop.next();
 									} else
-										loop.next();
-								} else
-									loop.break();
+										loop.break();
+								});
+							}, function () {
+								if (omem >= 100000 && time_elapsed < 6){
+									testpass = true;
+									outerloop.break();
+								}else{
+									setTimeout(function(){
+										batchPublish += 100;
+										outerloop.next();
+									},1000);
+								}
 							});
 						}, function () {
-							if (omem >= 100000 && time_elapsed < 6)
+							if(testpass)
 								ut.pass(test_case);
 							else
-								ut.fail('Client output buffer soft limit is not enforced ', true);
+								ut.fail('Client output buffer soft limit is not enforced', true);
 							newClient.end();
 							testEmitter.emit('next');
 						});
 					}
 				} catch (e) {
+					newClient.end();
 					ut.fail(e, true);
 					testEmitter.emit('next');
 				}
