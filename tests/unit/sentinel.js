@@ -224,6 +224,9 @@ exports.Sentinel = (function () {
 				args = {};
 				args['name'] = 'Sentinel_Slave';
 				args['tags'] = 'Sentinel_Slave';
+				overrides['slave-priority'] = 10;
+				overrides['repl-ping-slave-period'] = 30;
+				overrides['repl-timeout'] = 120;
 				args['overrides'] = overrides;
 				slaveServer.start_server(cpid, args, function (err, res) {
 					if (err) {
@@ -358,34 +361,48 @@ exports.Sentinel = (function () {
 	
 	tester.sentinel6 = function (errorCallback) {
 		var test_case = 'Slave Info';
-		sentinel_cli.slaves('mymaster1', function (err, slavesInfo) {
-			ut.assertEqual(slavesInfo[0]['port'], s_server_port, test_case);
-			testEmitter.emit('next');
+		sentinel_cli.slaves('mymaster', function (errMsg, res) {
+			sentinel_cli.slaves('mymaster1', function (err, slavesInfo) {
+				ut.assertMany(
+					[
+						['ok','No such master',errMsg],
+						['equal',slavesInfo[0]['port'], s_server_port]
+					],test_case);
+				testEmitter.emit('next');
+			});
 		});
 	}
 	
 	tester.sentinel7 = function (errorCallback) {
-		var test_case = 'Detect and Recognize newly attached Sentinel';
+		var test_case = 'Detect and Recognize newly attached Sentinel with config';
 		args = {};
 		overrides = {};
 		args['name'] = 'Sentinel';
 		args['tags'] = 'sentinel';
 		overrides['sentinel monitor'] = 'mymaster1 ' + m_server_host + ' ' + m_server_port + ' 2';
+		overrides['sentinel down-after-milliseconds'] = 'mymaster1 40000';
+		overrides['sentinel can-failover'] = 'mymaster1 yes';
+		overrides['sentinel failover-timeout'] = 'mymaster1 900000';
+		overrides['sentinel parallel-syncs'] = 'mymaster1 2';
 		args['overrides'] = overrides;
 		server1.start_server(client_pid, args, function (err, res) {
 			if (err) {
 				errorCallback(err, null);
 			}
 			g.srv[client_pid][res]['client'].end();
-			sentinel_cli.on('new-sentinel', function (data) {		
-				ut.assertMany(
-				[
-					['equal', event_msg, 'new-sentinel'],
-					['equal', data['details']['master-name'], 'mymaster1' ],
-					['ok', data['details']['port'],g.srv[client_pid][res]['port']]
-				],test_case);
-				server1.kill_server(client_pid, res, function (err, res) {
-					testEmitter.emit('next');
+			sentinel_cli.on('new-sentinel', function (data) {	
+				sentinel_cli.sentinels('mymaster1', function (err, sentinels) {
+					ut.assertMany(
+					[
+						['equal', event_msg, 'new-sentinel'],
+						['equal', data['details']['master-name'], 'mymaster1' ],
+						['equal', sentinels[0]['ip'], m_server_host ],
+						['equal', sentinels[0]['port'], data['details']['port'] ],
+						['equal', data['details']['port'],g.srv[client_pid][res]['port']]
+					],test_case);
+					server1.kill_server(client_pid, res, function (err, res) {
+						testEmitter.emit('next');
+					});
 				});
 			});
 		});
@@ -408,7 +425,6 @@ exports.Sentinel = (function () {
 			testEmitter.emit('next');
 		});
 	}
-	
 	
 	return sentinel;
 
