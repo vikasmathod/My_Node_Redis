@@ -1076,7 +1076,7 @@ exports.List = (function () {
 						errorCallback(err);
 					}
 					result_array.push(res[0]);
-					ut.assertDeepEqual(result_array, [2, ['blist', 'bar'], 'foo'], test_case);
+					ut.assertDeepEqual(result_array.toString(), ([2, ['blist', 'bar'], 'foo']).toString(), test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -1095,7 +1095,7 @@ exports.List = (function () {
 				}
 				result_array.push(res);
 				setTimeout(function(){
-					ut.assertDeepEqual(result_array, [[ 'foo' ], 'foo' ], test_case);
+					ut.assertDeepEqual(result_array.toString(), ([[ 'foo' ], 'foo' ]).toString(), test_case);
 					testEmitter.emit('next');
 				},100);
 			});
@@ -1424,7 +1424,7 @@ exports.List = (function () {
 					}
 					result_array.push(res);
 					setTimeout(function(){
-						ut.assertDeepEqual(result_array, [['blist1', 'foo'], 0], test_case);
+						ut.assertDeepEqual(result_array.sort().toString(), ([0, ['blist1', 'foo']]).toString(), test_case);
 						testEmitter.emit('next');
 					},200);
 				});
@@ -1586,7 +1586,7 @@ exports.List = (function () {
 					}
 					result_array.push(res);
 					setTimeout(function(){
-						ut.assertDeepEqual(result_array, [['blist1', 'foo'], 0], test_case);
+						ut.assertDeepEqual(result_array.sort().toString(), ([0, ['blist1', 'foo']]).toString(), test_case);
 						testEmitter.emit('next');
 					},200);
 				});
