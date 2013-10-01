@@ -1,3 +1,0 @@
-[submodule "src/Redis"]
-	path = src/Redis
-	url = https://github.com/MSOpenTech/redis.git
