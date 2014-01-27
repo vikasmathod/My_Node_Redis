@@ -153,7 +153,7 @@ exports.Zset = (function () {
 				if (res != 1) {
 					callback(new Error('key:zset does not exist'), null);
 				}
-				client.zremrangebyscore('zset', args, function (err, res) {
+				client.zremrangebyscore('zset', args[0], args[1], function (err, res) {
 					if (err) {
 						callback(err, null);
 					}

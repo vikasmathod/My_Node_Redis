@@ -369,7 +369,7 @@ exports.Protocol = (function () {
 					log.notice(name + ':Client connected  and listening on socket: ' + server_port + ':' + server_host);
 				}
 			});
-			stream.on('error', function (err) {
+			stream.on('error', function (err) {console.log(err);
 				errorCallback(err);
 			});
 			//flush

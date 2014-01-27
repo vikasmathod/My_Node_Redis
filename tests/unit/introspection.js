@@ -108,26 +108,17 @@ exports.Introspection = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								client.ping(function (err, res) {
-									if (res) {
-										errorCallback(res);
+								ut.assertOk('OK', result, test_case);
+								// client should be disconnected using kill command
+								if (intro.debug_mode) {
+									log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+								}
+								client.end();
+								server.kill_server(client_pid, server_pid, function (err, res) {
+									if (err) {
+										errorCallback(err);
 									}
-									ut.assertMany(
-										[
-											['equal',result, 'OK'],
-											['ok','Redis connection gone from end event', err]
-										],test_case);
-									// client should be disconnected using kill command
-									if (intro.debug_mode) {
-										log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-									}
-									client.end();
-									server.kill_server(client_pid, server_pid, function (err, res) {
-										if (err) {
-											errorCallback(err);
-										}
-										testEmitter.emit('next');
-									});
+									testEmitter.emit('next');
 								});
 							});
 						}
@@ -253,7 +244,7 @@ exports.Introspection = (function () {
 						if (res) {
 							errorCallback(res);
 						}
-						ut.assertOk('Can\'t BGSAVE while AOF log rewriting', err,test_case);
+						ut.assertOk('Can\'t BGSAVE while AOF log rewriting', err, test_case);
 						client.end();
 						if (intro.debug_mode) {
 							log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
@@ -636,7 +627,7 @@ exports.Introspection = (function () {
 				ut.assertMany(
 					[
 						['ok','foo,bar', responses.toString()],
-						['equal',responses[0][0],'eval']
+						['equal',responses[1][0],'eval']
 					],test_case);
 				monitor_client.end();
 				client.end();

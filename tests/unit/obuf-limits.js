@@ -91,7 +91,7 @@ exports.Obuf_limits = (function () {
 				}
 				var i = 0,
 				omem = 0,
-				batchPublish = 3000,
+				batchPublish = 8000,
 				testpass = false;
 				try {
 					if (!assert.ok(ut.match(res, 'subscribe foo 1'), test_case)) {
@@ -114,7 +114,7 @@ exports.Obuf_limits = (function () {
 									clients = res.split('\n');
 									if (clients[1]) {
 										c = clients[1].split(' ');
-										omem = c[14].split('=')[1];
+										omem = c[13].split('=')[1];
 										if (omem <= 200000) {
 											i = 0;
 											
@@ -164,7 +164,7 @@ exports.Obuf_limits = (function () {
 		start_time = 0,
 		time_elapsed = 0,
 		omem = 0,
-		batchPublish = 3000,
+		batchPublish = 8000,
 		testpass = false;
 		client.config('set', 'client-output-buffer-limit', 'pubsub 0 100000 10', function (err, res) {
 			if (err) {
@@ -202,7 +202,7 @@ exports.Obuf_limits = (function () {
 											client.publish('foo', 'bar');
 										
 										c = clients[1].split(' ');
-										omem = c[14].split('=')[1];
+										omem = c[13].split('=')[1];
 										if (omem > 100000) {
 											start_time = (start_time == 0) ? new Date().getTime() / 1000 : start_time;
 											time_elapsed = new Date().getTime() / 1000 - start_time;
@@ -293,8 +293,8 @@ exports.Obuf_limits = (function () {
 
 										//omem value is cleared on reaching limit
 										//if this happens then stop publishing and check for last omem value recorded
-										if (omem < c[14].split('=')[1]) {
-											omem = c[14].split('=')[1];
+										if (omem < c[13].split('=')[1]) {
+											omem = c[13].split('=')[1];
 										} else
 											loop.break();
 
