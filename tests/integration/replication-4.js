@@ -109,32 +109,34 @@ exports.Replication4 = (function () {
 					if (err) {
 						errorCallback(err, null);
 					}
-					server_pid2 = res;
-					slave_cli = g.srv[client_pid][server_pid2]['client'];
-					setTimeout(function(){load_handle0 = start_bg_complex_data(master_host, master_port, 0, 100000);},100);
-					setTimeout(function(){load_handle1 = start_bg_complex_data(master_host, master_port, 11, 100000);},100);
-					setTimeout(function(){load_handle2 = start_bg_complex_data(master_host, master_port, 12, 100000);},100);
-					
-					
-					start_actual_test(function (err, res) {
-						if (err) {
-							errorCallback(err);
-						}
-						monitor_cli.end();
-						slave_cli.end();
-						master_cli.end();
-						if (replication4.debug_mode) {
-							log.notice('Monitor client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
-							log.notice(g.srv[client_pid][server_pid2]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
-							log.notice(g.srv[client_pid][server_pid]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
-						}
-						kill_server(function (err, res) {
+					setTimeout(function () {
+						server_pid2 = res;
+						slave_cli = g.srv[client_pid][server_pid2]['client'];
+						setTimeout(function(){load_handle0 = start_bg_complex_data(master_host, master_port, 0, 100000);},100);
+						setTimeout(function(){load_handle1 = start_bg_complex_data(master_host, master_port, 11, 100000);},100);
+						setTimeout(function(){load_handle2 = start_bg_complex_data(master_host, master_port, 12, 100000);},100);
+						
+						
+						start_actual_test(function (err, res) {
 							if (err) {
-								errorCallback(err)
+								errorCallback(err);
 							}
-							testEmitter.emit('next');
+							monitor_cli.end();
+							slave_cli.end();
+							master_cli.end();
+							if (replication4.debug_mode) {
+								log.notice('Monitor client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+								log.notice(g.srv[client_pid][server_pid2]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+								log.notice(g.srv[client_pid][server_pid]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
+							}
+							kill_server(function (err, res) {
+								if (err) {
+									errorCallback(err)
+								}
+								testEmitter.emit('next');
+							});
 						});
-					});
+					},1000);
 				});
 			}, 100);
 		});
