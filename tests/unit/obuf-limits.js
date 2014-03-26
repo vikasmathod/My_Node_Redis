@@ -43,6 +43,7 @@ exports.Obuf_limits = (function () {
 				client = g.srv[client_pid][server_pid]['client'];
 				server_host = g.srv[client_pid][server_pid]['host'];
 				server_port = g.srv[client_pid][server_pid]['port'];
+				
 				all_tests = Object.keys(tester);
 
 				testEmitter.emit('next');
@@ -85,13 +86,16 @@ exports.Obuf_limits = (function () {
 				errorCallback(err);
 			}
 			var newClient = redis.createClient(server_port, server_host);
+			newClient.on("error", function (msg) {
+				
+			});
 			newClient.subscribe('foo', function (err, res) {
 				if (err) {
 					errorCallback(err);
 				}
 				var i = 0,
 				omem = 0,
-				batchPublish = 3000,
+				batchPublish = 8000,
 				testpass = false;
 				try {
 					if (!assert.ok(ut.match(res, 'subscribe foo 1'), test_case)) {
@@ -117,7 +121,7 @@ exports.Obuf_limits = (function () {
 										omem = c[14].split('=')[1];
 										if (omem <= 200000) {
 											i = 0;
-											
+
 											while (i++ < batchPublish)
 												client.publish('foo', 'bar');
 												
@@ -134,7 +138,7 @@ exports.Obuf_limits = (function () {
 									outerloop.break();
 								}else{
 									setTimeout(function(){
-										batchPublish += 100;
+										batchPublish += 200;
 										outerloop.next();
 									},1000);
 								}
@@ -164,13 +168,16 @@ exports.Obuf_limits = (function () {
 		start_time = 0,
 		time_elapsed = 0,
 		omem = 0,
-		batchPublish = 3000,
+		batchPublish = 8000,
 		testpass = false;
 		client.config('set', 'client-output-buffer-limit', 'pubsub 0 100000 10', function (err, res) {
 			if (err) {
 				errorCallback(err);
 			}
 			var newClient = redis.createClient(server_port, server_host);
+			newClient.on("error", function (msg) {
+				
+			});
 			newClient.subscribe('foo', function (err, res) {
 				if (err) {
 					errorCallback(err);
@@ -259,6 +266,13 @@ exports.Obuf_limits = (function () {
 				errorCallback(err);
 			}
 			var newClient = redis.createClient(server_port, server_host);
+			
+			newClient.on("error", function (msg) {
+				if (obuf_limits.debug_mode) {
+					console.log(msg);
+				}
+			});
+			
 			newClient.subscribe('foo', function (err, res) {
 				if (err) {
 					errorCallback(err);
@@ -293,7 +307,7 @@ exports.Obuf_limits = (function () {
 
 										//omem value is cleared on reaching limit
 										//if this happens then stop publishing and check for last omem value recorded
-										if (omem < c[14].split('=')[1]) {
+										if (omem < c[13].split('=')[1]) {
 											omem = c[14].split('=')[1];
 										} else
 											loop.break();
@@ -342,4 +356,4 @@ exports.Obuf_limits = (function () {
 	return obuf_limits;
 }
 
-	())
+	());
