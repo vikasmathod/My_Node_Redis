@@ -62,7 +62,7 @@ exports.Dump = (function () {
 			});
 		});
 		testEmitter.on('next', function () {
-			var test_case_name = all_tests.shift();
+			var test_case_name = all_tests.shift()
 				if (test_case_name) {
 					tester[test_case_name](function (error) {
 						ut.fail(error);
@@ -157,15 +157,13 @@ exports.Dump = (function () {
 									errorCallback(err);
 								}
 								ut.assertEqual(res, 'bar', test_case);
-								newClient.end();
-								testEmitter.emit('next');
 							});
 						}
 					} catch (e) {
 						ut.fail(e, true);
-						newClient.end();
-						testEmitter.emit('next');
 					}
+					newClient.end();
+					testEmitter.emit('next');
 				});
 			});
 		});
@@ -634,7 +632,7 @@ exports.Dump = (function () {
 																				if (err) {
 																					errorCallback(err);
 																				}
-																				ut.assertEqual(res, 10000, test_case);
+																				ut.assertEqual(res, 5000 * 20, test_case);
 																				second.end();
 																				server3.kill_server(client_pid, server_pid1, function (err, res) {
 																					if (err) {

@@ -381,7 +381,7 @@ exports.Pubsub = (function () {
 								errorCallback(err);
 							}
 							result.push(res);
-							ut.assertDeepEqual(result,[[1, 2, 3], 2, 0, 0],test_case);
+							ut.assertDeepEqual(result,[[1, 2, 3], 0, 0, 0],test_case);
 							client.end();
 							client1.end();
 							if (pubsub.debug_mode) {
@@ -423,7 +423,7 @@ exports.Pubsub = (function () {
 				result.push(sub_msg);
 				sub_msg = [];
 				unsub_msg = [];
-				ut.assertDeepEqual(result,[[1, 1, 1], 3, ['hello']],test_case);
+				ut.assertDeepEqual(result,[[1, 1, 1], 1, ['hello']],test_case);
 				client.end();
 				client1.end();
 				if (pubsub.debug_mode) {

@@ -1529,7 +1529,7 @@ exports.Scripting = (function () {
 					newClient.on('error', function (err) {
 						newClient.end();
 					});
-					newClient.eval("redis.call('set','x','y'); while true do end", 0, function(){});
+					newClient.eval("redis.call('set','x','y'); while true do end", 0);
 					setTimeout(function () {
 						client1.ping(function (err, res) {
 							try {
@@ -1604,8 +1604,8 @@ exports.Scripting = (function () {
 			if (err) {
 				errorCallback(err, null);
 			}
-			server_pid1 = res;
 			setTimeout(function(){
+				server_pid1 = res;
 				client1 = g.srv[client_pid][server_pid1]['client'];
 				server_host = g.srv[client_pid][server_pid1]['host'];
 				server_port = g.srv[client_pid][server_pid1]['port'];
