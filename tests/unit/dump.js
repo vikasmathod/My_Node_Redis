@@ -632,7 +632,7 @@ exports.Dump = (function () {
 																				if (err) {
 																					errorCallback(err);
 																				}
-																				ut.assertEqual(res, 5000 * 20, test_case);
+																				ut.assertEqual(res, 5000 * 2, test_case);
 																				second.end();
 																				server3.kill_server(client_pid, server_pid1, function (err, res) {
 																					if (err) {
