@@ -654,7 +654,7 @@ exports.Bitops = (function () {
 				errorCallback(err);
 			}
 			client.bitop('xor', 'dest', 'a', 'b', 'c', 'd', function (err, res) {
-				ut.assertOk('ERR', err, test_case);
+				ut.assertOk('WRONGTYPE', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
