@@ -573,11 +573,12 @@ exports.Scripting = (function () {
 			testEmitter.emit('next');
 		});
 	}
+	
 	tester.scripting47 = function (errorCallback) {
 		var test_case = 'EVAL - Redis status reply -> Lua Unknown command';
 
 		client.eval("local foo = redis.pcall('int.parse(2)')  return {type(foo),foo}", 0, function (err, res) {
-			ut.assertDeepEqual(res, ['table', 'Unknown Redis command called from Lua script'], test_case);
+			ut.assertDeepEqual(res, ['table', '@user_script: 1: Unknown Redis command called from Lua script'], test_case);
 			testEmitter.emit('next');
 		});
 	}
@@ -1489,7 +1490,7 @@ exports.Scripting = (function () {
 						var newClient = redis.createClient(server_port1, server_host1);
 
 					client1.config('set', 'lua-time-limit', 10);
-					newClient.eval('while true do end', 0, function (err, res) {});
+					newClient.eval('while true do end', 0, function (err, res) { if(res) callback(res); });
 					setTimeout(function () {
 						client1.ping(function (err, res) {
 							try {
@@ -1529,7 +1530,7 @@ exports.Scripting = (function () {
 					newClient.on('error', function (err) {
 						newClient.end();
 					});
-					newClient.eval("redis.call('set','x','y'); while true do end", 0);
+					newClient.eval("redis.call('set','x','y'); while true do end", 0, function (err, res) { if(res) callback(res); });
 					setTimeout(function () {
 						client1.ping(function (err, res) {
 							try {
@@ -1649,8 +1650,8 @@ exports.Scripting = (function () {
 			});
 		});
 	}
-
  
+  
 	 return scripting;
 }
 	())
