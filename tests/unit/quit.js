@@ -160,7 +160,6 @@ exports.Quit = (function () {
 			});
 		});
 	};
-	
 	tester.quit3 = function (errorCallback) {
 		var test_case = 'Pipelined commands after QUIT that exceed read buffer size';
 		ut.reconnect(redis, client_pid, server_pid, function (err, client) {

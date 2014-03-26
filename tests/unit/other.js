@@ -659,7 +659,7 @@ exports.Other = (function () {
 			if (err) {
 				errorCallback(err)
 			}
-			ut.assertEqual(res.length, 92, test_case);
+			ut.assertEqual(res.length, 100, test_case);
 			testEmitter.emit('next');
 		});
 	};

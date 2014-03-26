@@ -121,7 +121,7 @@ exports.Auth = (function () {
 	tester.Auth3 = function (errorCallback) {
 		var test_case = 'Arbitrary command gives an error when AUTH is required';
 		client.set('foo', 'bar', function (err, res) {
-			ut.assertOk('ERR operation not permitted',err,test_case);
+			ut.assertOk('NOAUTH Authentication required',err,test_case);
 			testEmitter.emit('next');
 		});
 	};
