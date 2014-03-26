@@ -339,7 +339,7 @@ exports.Set = (function () {
 				errorCallback(err);
 			}
 			client.sadd('mylist', 'bar', function (err, res) {
-				ut.assertOk('kind', err, test_case);
+				ut.assertOk('WRONGTYPE', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -968,11 +968,28 @@ exports.Set = (function () {
 							if (err) {
 								cb(err, null);
 							}
-							//The type is determined by type of the first key to diff against.
-							assert_encoding(type, 'setres', function (err, res) {
-								if (err) {
-									cb(err, null);
-								}
+							//When we start with intsets, we should always end with intsets.
+							if(type == 'intset'){
+								assert_encoding('intset', 'setres', function (err, res) {
+									if (err) {
+										cb(err, null);
+									}
+									client.smembers('setres', function (err, res) {
+										if (err) {
+											cb(err, null);
+										}
+										try {
+											if (!assert.deepEqual(res.sort(), [1, 2, 3, 4], test_case)) {
+												ut.pass(test_case);
+												cb(null, null);
+											}
+										} catch (e) {
+											ut.fail(e, true);
+											cb(e, null);
+										}
+									});
+								});
+							} else {
 								client.smembers('setres', function (err, res) {
 									if (err) {
 										cb(err, null);
@@ -987,7 +1004,7 @@ exports.Set = (function () {
 										cb(e, null);
 									}
 								});
-							});
+							}
 						});
 					},
 				}, function (err, rep) {
@@ -1014,7 +1031,7 @@ exports.Set = (function () {
 				errorCallback(err);
 			}
 			client.sinter('key1', 'noset', function (err, res) {
-				ut.assertOk('wrong kind', err, test_case);
+				ut.assertOk('WRONGTYPE', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1026,7 +1043,7 @@ exports.Set = (function () {
 				errorCallback(err);
 			}
 			client.sunion('key1', 'noset', function (err, res) {
-				ut.assertOk('wrong kind', err, test_case);
+				ut.assertOk('WRONGTYPE', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1470,7 +1487,7 @@ exports.Set = (function () {
 				errorCallback(err);
 			}
 			client.smove('x', 'myset2', 'foo', function (err, res) {
-				ut.assertOk('wrong kind', err, test_case);
+				ut.assertOk('WRONGTYPE', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1482,7 +1499,7 @@ exports.Set = (function () {
 				errorCallback(err);
 			}
 			client.smove('myset2', 'x', 'foo', function (err, res) {
-				ut.assertOk('wrong kind', err, test_case);
+				ut.assertOk('WRONGTYPE', err, test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1606,7 +1623,7 @@ exports.Set = (function () {
 			});
 		});
 	};
-
+ 
 	tester.set30 = function (errorCallback) {
 		var test_case = 'SINTER should handle non existing key as empty';
 		client.del('set1', 'set2', 'set3', function (err, res) {
@@ -2054,7 +2071,6 @@ exports.Set = (function () {
 			});
 		});
 	};
-
 	return set;
 
 }
