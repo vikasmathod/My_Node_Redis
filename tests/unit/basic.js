@@ -546,7 +546,7 @@ exports.Basic = (function () {
 	
 	tester.Basic18 = function (errorCallback) {
 		var test_case = 'INCR fails against a key holding a list';
-		client.rpush('mylist', 45, function (err, res) {
+		client.rpush('mylist', 1, function (err, res) {
 			if (err) {
 				errorCallback(err);
 			}
@@ -720,7 +720,7 @@ exports.Basic = (function () {
 					errorCallback(err);
 				}
 				client.incrbyfloat('mylist', 1.0, function (err, res) {
-					ut.assertOk('wrong kind', err, test_case);
+					ut.assertOk('WRONGTYPE', err, test_case);
 					client.del('mylist', function (err, res) {
 						if (err) {
 							errorCallback(err);
@@ -1798,7 +1798,7 @@ exports.Basic = (function () {
 					if (res) {
 						errorCallback(res);
 					}
-					ut.assertOk(err, null, test_case);
+					ut.assertOk('WRONGTYPE', err, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -2254,7 +2254,7 @@ exports.Basic = (function () {
 					if (res) {
 						errorCallback(res);
 					}
-					ut.assertOk(err, null, test_case);
+					ut.assertOk('WRONGTYPE', err, test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -2598,6 +2598,28 @@ exports.Basic = (function () {
 							['ok','out of range',err2],
 							['ok','out of range',err3]
 						],test_case);
+					testEmitter.emit('next');
+				});
+			});
+		});
+	}
+	
+	tester.basic76 = function(errorCallback){
+		var test_case = 'KEYS * two times with long key, Github issue #1208';
+		client.flushdb();
+		client.set('dlskeriewrioeuwqoirueioqwrueoqwrueqw', 'test', function(err, res){
+			if (err) {
+				errorCallback(err, null);
+			}
+			client.keys('*', function(err, res){
+				if (err) {
+					errorCallback(err, null);
+				}
+				client.keys('*', function(err, res){
+					if (err) {
+						errorCallback(err, null);
+					}
+					ut.assertEqual(res, 'dlskeriewrioeuwqoirueioqwrueoqwrueqw',test_case);
 					testEmitter.emit('next');
 				});
 			});

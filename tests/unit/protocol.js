@@ -1,6 +1,6 @@
 // The copyright in this software is being made available under the BSD License, included below. This software may be subject to other third party and contributor rights, including patent rights, and no such rights are granted under this license.
 //
-// Copyright (c) 2013, Microsoft Open Technologies, Inc. 
+// Copyright (c) 2013, Microsoft Open Technologies, Inc.
 //
 // All rights reserved.
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -85,8 +85,8 @@ exports.Protocol = (function () {
 
 		testEmitter.emit('start');
 	}
-	
-	// test methods 
+
+	// test methods
 	tester.Proto1 = function (errorCallback) {
 		var test_case = 'Handle an empty query';
 		var stream = net.createConnection(server_port, server_host);
@@ -266,7 +266,7 @@ exports.Protocol = (function () {
 		});
 		stream.write('*1\r\nfoo\r\n');
 	};
-	
+
 	tester.Proto9 = function (errorCallback) {
 		var test_case = 'Generic wrong number of args';
 		var stream = net.createConnection(server_port, server_host);
@@ -286,11 +286,35 @@ exports.Protocol = (function () {
 			}
 			testEmitter.emit('next');
 		});
-		stream.write(ut.formatCommand(['PING','x','y','z']));
+		stream.write(ut.formatCommand(['PING', 'x', 'y', 'z']));
 	};
-	
+
 	tester.Proto10 = function (errorCallback) {
-		g.asyncFor(0, seq.length, function (outerloop) {
+		var test_case = 'Unbalanced number of quotes';
+		var error = '';
+		var stream = net.createConnection(server_port, server_host, function (err, res) {
+				if (protocol.debug_mode) {
+					log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
+				}
+			});
+		stream.on('error', function (err) {
+			error = err
+		});
+		stream.on('data', function (data) {
+			ut.assertOk('unbalanced', data.toString(), test_case);
+			stream.end();
+			if (protocol.debug_mode) {
+				log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+			}
+			testEmitter.emit('next');
+		});
+		stream.write("set \"\"\"test-key\"\"\" test-value\r\n");
+		stream.write('ping\r\n');
+	};
+
+	tester.Proto11 = function (errorCallback) {
+		var x = seq.length;
+		g.asyncFor(0, x, function (outerloop) {
 			var retval;
 			var error = '';
 			var stream = net.createConnection(server_port, server_host);
@@ -299,9 +323,20 @@ exports.Protocol = (function () {
 					log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
 				}
 			});
+
 			stream.on('error', function (err) {
 				error = err;
 			});
+
+			stream.on('close', function (data) {
+				setTimeout(function () {
+					error = fs.readFileSync(server.stdout_file).toString().split('\n');
+					retval = error[error.length - 2];
+					ut.assertOk('Protocol error', retval, test_case);
+					outerloop.next();
+				}, 500);
+			});
+
 			var i = outerloop.iteration();
 			var test_case = 'Protocol desync regression test #' + i;
 			stream.write(seq[i]);
@@ -313,7 +348,11 @@ exports.Protocol = (function () {
 			payload += '\n';
 			var test_start = new Date().getSeconds();
 			var test_time_limit = 30;
-			g.asyncFor(0, -1, function (innerloop) {
+
+			//g.asyncFor(0, 1000 is changed from g.asyncFor(0, -1, ...) to g.asyncFor(0, 1000, ...)
+			//reason being on too many attempts to var stream = net.createConnection(server_port, server_host);
+			//error is thrown. this is however temporary. premanent fix will be given
+			g.asyncFor(0, 1000, function (innerloop) {
 				stream.write(payload, function (err, res) {
 					if (err) {
 						retval = err;
@@ -327,6 +366,12 @@ exports.Protocol = (function () {
 						//if {[read $s 1] ne ''} { set retval [gets $s] }
 						if (res)
 							retval = res;
+
+						if (ut.match('Protocol error', retval)) {
+							stream.end();
+							innerloop.break();
+						}
+
 						var elapsed = new Date().getSeconds() - test_start;
 						if (elapsed > test_time_limit) {
 							stream.end();
@@ -340,22 +385,12 @@ exports.Protocol = (function () {
 					}
 				});
 			}, function () {});
-
-			stream.on('close', function (data) {
-				setTimeout(function(){
-					error = fs.readFileSync(server.stdout_file).toString().split('\n');
-					retval = error[error.length - 2];
-					ut.assertOk('Protocol error', retval, test_case);
-					outerloop.next();
-				},500);
-			});
-
 		}, function () {
 			testEmitter.emit('next');
 		});
 	};
 
-	tester.Proto11 = function (errorCallback) {
+	tester.Proto12 = function (errorCallback) {
 		var test_case = 'Regression for a crash with blocking ops and pipelining';
 		client1 = redis.createClient(server_port, server_host);
 		client1.on('ready', function () {
@@ -385,7 +420,7 @@ exports.Protocol = (function () {
 				} else if (res) {
 					client1.rpush('nolist', 'a', function (err, res) {
 						if (err) {
-							ut.fail(err,true);
+							ut.fail(err, true);
 						} else if (res) {
 							ut.pass(test_case);
 						}

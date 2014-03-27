@@ -157,19 +157,65 @@ exports.Dump = (function () {
 									errorCallback(err);
 								}
 								ut.assertEqual(res, 'bar', test_case);
+								newClient.end();
+								testEmitter.emit('next');
 							});
 						}
 					} catch (e) {
 						ut.fail(e, true);
+						newClient.end();
+						testEmitter.emit('next');
 					}
-					newClient.end();
-					testEmitter.emit('next');
 				});
 			});
 		});
 	};
-	 
-	tester.dump3 = function (errorCallback) {
+	
+	tester.dump3 = function (errorCallback){
+		var test_case = 'RESTORE can set an expire that overflows a 32 bit integer';
+		var newClient = redis.createClient(server_port, server_host, {
+				return_buffers : true
+			});
+		newClient.on('error', function (err) {
+			newClient.end();
+		});
+		newClient.set('foo', 'bar');
+		newClient.dump('foo', function (err, res) {
+			if (err) {
+				errorCallback(err);
+			}
+			encoded = res;
+			newClient.del('foo');
+			newClient.restore('foo', 2569591501, encoded, function (err, res) {
+				if (err) {
+					errorCallback(err);
+				}
+				newClient.pttl('foo', function (err, ttl) {
+					if (err) {
+						errorCallback(err);
+					}
+					try{
+						if (!assert(ttl >= (2569591501-3000) && ttl <= 2569591501, test_case)) {
+							newClient.get('foo', function (err, res) {
+								if (err) {
+									errorCallback(err);
+								}
+								ut.assertEqual(res, 'bar', test_case);
+								newClient.end();
+								testEmitter.emit('next');
+							});
+						}
+					} catch (e) {
+						ut.fail(e, true);
+						newClient.end();
+						testEmitter.emit('next');
+					}
+				});
+			});
+		});
+	};
+
+	tester.dump4 = function (errorCallback) {
 		var test_case = 'RESTORE returns an error of the key already exists';
 		client.set('foo', 'bar');
 		client.restore('foo', 0, '...', function (err, res) {
@@ -178,7 +224,7 @@ exports.Dump = (function () {
 		});
 	};
 
-	tester.dump4 = function (errorCallback) {
+	tester.dump5 = function (errorCallback) {
 		var test_case = 'DUMP of non existing key returns nil'
 			client.dump('nonexisting_key', function (err, res) {
 				if (err) {
@@ -189,7 +235,7 @@ exports.Dump = (function () {
 			});
 	};
 
-	tester.dump5 = function (errorCallback) {
+	tester.dump6 = function (errorCallback) {
 		var test_case = 'MIGRATE is able to migrate a key between two instances';
 		var first = g.srv[client_pid][server_pid]['client'];
 		client.set('key', 'Some Value');
@@ -305,7 +351,7 @@ exports.Dump = (function () {
 		});
 	};
 
-	tester.dump6 = function (errorCallback) {
+	tester.dump7 = function (errorCallback) {
 		var test_case = 'MIGRATE propagates TTL correctly';
 		var first = g.srv[client_pid][server_pid]['client'];
 		client.set('key', 'Some Value');
@@ -425,7 +471,7 @@ exports.Dump = (function () {
 		});
 	};
 
-	tester.dump7 = function (errorCallback) {
+	tester.dump8 = function (errorCallback) {
 		var test_case = 'MIGRATE can correctly transfer hashes';
 		var first = g.srv[client_pid][server_pid]['client'];
 		client.del('key');
@@ -508,7 +554,7 @@ exports.Dump = (function () {
 		});
 	};
 
-	tester.dump8 = function (errorCallback) {
+	tester.dump9 = function (errorCallback) {
 		var test_case = 'MIGRATE timeout actually works';
 		var first = g.srv[client_pid][server_pid]['client'];
 		client.set('key', 'Some Value');
@@ -566,7 +612,7 @@ exports.Dump = (function () {
 		});
 	};
 
-	tester.dump9 = function (errorCallback) {
+	tester.dump10 = function (errorCallback) {
 		var test_case = 'MIGRATE can correctly transfer large values';
 		var first = g.srv[client_pid][server_pid]['client'];
 		client.del('key');

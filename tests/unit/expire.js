@@ -1,6 +1,6 @@
 // The copyright in this software is being made available under the BSD License, included below. This software may be subject to other third party and contributor rights, including patent rights, and no such rights are granted under this license.
 //
-// Copyright (c) 2013, Microsoft Open Technologies, Inc. 
+// Copyright (c) 2013, Microsoft Open Technologies, Inc.
 //
 // All rights reserved.
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -134,6 +134,7 @@ exports.Expire = (function () {
 			testEmitter.emit('next');
 		})
 	};
+	
 	tester.expire3 = function (errorCallback) {
 		var result_array = new Array();
 		var test_case = 'EXPIRE - After 6 seconds the key should no longer be here';
@@ -206,10 +207,10 @@ exports.Expire = (function () {
 						}
 						// has the same output in Tcl, providing leniency of +-1
 						ut.assertMany(
-						[
-							['deepequal',res1, 1],
-							['ok',checkrange(res2, 14, 16), null]
-						],test_case);
+							[
+								['deepequal', res1, 1],
+								['ok', checkrange(res2, 14, 16), null]
+							], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -281,7 +282,7 @@ exports.Expire = (function () {
 		var test_case = 'SETEX - Wrong time parameter';
 		try {
 			client.setex('z', -10, 'foo', function (err, res) {
-				ut.assertOk('invalid expire',err,test_case);
+				ut.assertOk('invalid expire', err, test_case);
 				testEmitter.emit('next');
 			});
 		} catch (e) {
@@ -448,7 +449,24 @@ exports.Expire = (function () {
 	};
 
 	tester.expire14 = function (errorCallback) {
-		var test_case = 'PTTL returns millisecond time to live';
+		var test_case = 'TTL returns time to live in seconds';
+		client.del('x');
+		client.setex('x', 10, 'somevalue', function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			client.ttl('x', function (err, ttl) {
+				if (err) {
+					errorCallback(err, null);
+				}
+				ut.assertOk((ttl > 8 && ttl <= 10), null, test_case);
+				testEmitter.emit('next');
+			});
+		});
+	};
+
+	tester.expire15 = function (errorCallback) {
+		var test_case = 'PTTL returns time to live in milliseconds';
 		client.del('x', function (err, res) {
 			if (err) {
 				errorCallback(err);
@@ -466,9 +484,9 @@ exports.Expire = (function () {
 							errorCallback(err);
 						}
 						ut.assertMany([
-							['ok',res1 > 900,null],
-							['ok',res1 <= 1000,null]
-						],test_case);
+								['ok', res1 > 900, null],
+								['ok', res1 <= 1000, null]
+							], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -476,14 +494,59 @@ exports.Expire = (function () {
 		});
 	};
 
-	tester.expire15 = function (errorCallback) {
+	tester.expire16 = function (errorCallback) {
+		var test_case = 'TTL / PTTL return -1 if key has no expire';
+		var resArray = [];
+		client.del('x');
+		client.set('x', 'hello', function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			client.ttl('x', function (err, res) {
+				if (err) {
+					errorCallback(err, null);
+				}
+				resArray.push(res);
+				client.pttl('x', function (err, res) {
+					if (err) {
+						errorCallback(err, null);
+					}
+					resArray.push(res);
+					ut.assertDeepEqual(resArray, [-1, -1], test_case);
+					testEmitter.emit('next');
+				});
+			});
+		});
+	};
+
+	tester.expire17 = function (errorCallback) {
+		var test_case = 'TTL / PTTL return -2 if key does not exit';
+		var resArray = [];
+		client.del('x');
+		client.ttl('x', function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			resArray.push(res);
+			client.pttl('x', function (err, res) {
+				if (err) {
+					errorCallback(err, null);
+				}
+				resArray.push(res);
+				ut.assertDeepEqual(resArray, [-2, -2], test_case);
+				testEmitter.emit('next');
+			});
+		});
+	};
+
+	tester.expire18 = function (errorCallback) {
 		var test_case = 'EXPIRE precision is now the millisecond';
 		//This test is very likely to do a false positive if the
 		//server is under pressure, so if it does not work give it a few more
 		//chances.
 		var res_A = '',
 		res_B = '';
-		g.asyncFor(0, 9, function (loop) {
+		g.asyncFor(0, 3, function (loop) {
 			client.del('x');
 			client.setex('x', 1, 'somevalue');
 
@@ -508,7 +571,7 @@ exports.Expire = (function () {
 		});
 	}
 
-	tester.expire16 = function (errorCallback) {
+	tester.expire19 = function (errorCallback) {
 		var test_case = 'Redis should actively expire keys incrementally';
 		var res1 = '1',
 		res2 = '';
@@ -556,13 +619,13 @@ exports.Expire = (function () {
 		}, 1000);
 		ut.assertMany(
 			[
-				['equal',res1, 1],
-				['equal',res2, 0]
-			],test_case);
+				['equal', res1, 1],
+				['equal', res2, 0]
+			], test_case);
 		testEmitter.emit('next');
 	};
 
-	tester.expire17 = function (errorCallback) {
+	tester.expire20 = function (errorCallback) {
 		var test_case = 'PEXPIRE/PSETEX/PEXPIREAT can set sub-second expires';
 		//This test is very likely to do a false positive if the
 		//server is under pressure, so if it does not work give it a few more
@@ -573,7 +636,7 @@ exports.Expire = (function () {
 		resD = '',
 		resE = '',
 		resF = '';
-		g.asyncFor(0, 9, function (loop) {
+		g.asyncFor(0, 3, function (loop) {
 			client.del('x', 'y', 'z');
 			client.psetex('x', 100, 'somevalue');
 			setTimeout(function () {
@@ -608,14 +671,14 @@ exports.Expire = (function () {
 							resF = res;
 						});
 						if (resA === 'somevalue' && resC === 'somevalue' && resD === 'somevalue' &&
-							resB === '' && resD === '' && resF === ''){
+							resB === '' && resD === '' && resF === '') {
 							loop.break();
 						}
 						loop.next();
 					}, 120);
 				}, 120);
 			}, 120);
-			
+
 		}, function () {
 			ut.assertDeepEqual([resA, resB], ['somevalue', null], test_case);
 			testEmitter.emit('next');
