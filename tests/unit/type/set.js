@@ -1,6 +1,6 @@
 // The copyright in this software is being made available under the BSD License, included below. This software may be subject to other third party and contributor rights, including patent rights, and no such rights are granted under this license.
 //
-// Copyright (c) 2013, Microsoft Open Technologies, Inc. 
+// Copyright (c) 2013, Microsoft Open Technologies, Inc.
 //
 // All rights reserved.
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -362,9 +362,9 @@ exports.Set = (function () {
 						}
 						ut.assertMany(
 							[
-								['equal',result, 1],
-								['ok',res, null]
-							],test_case);
+								['equal', result, 1],
+								['ok', res, null]
+							], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -422,9 +422,9 @@ exports.Set = (function () {
 							}
 							ut.assertMany(
 								[
-									['equal',result, 1],
-									['ok',res, null]
-								],test_case);
+									['equal', result, 1],
+									['ok', res, null]
+								], test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -452,9 +452,9 @@ exports.Set = (function () {
 					client.smembers('myset', function (err, res) {
 						ut.assertMany(
 							[
-								['deepequal',res.sort(), ['A', 'B', 'a', 'b', 'c'].sort()],
-								['deepequal',result_array, [3, 2]]
-							],test_case);
+								['deepequal', res.sort(), ['A', 'B', 'a', 'b', 'c'].sort()],
+								['deepequal', result_array, [3, 2]]
+							], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -579,10 +579,10 @@ exports.Set = (function () {
 						result_array.push(res);
 						client.smembers('myset', function (err, res) {
 							ut.assertMany(
-							[
-								['equal',res.sort().toString(), 'bar,ciao'],
-								['deepequal',result_array, [0, 1]]
-							],test_case);
+								[
+									['equal', res.sort().toString(), 'bar,ciao'],
+									['deepequal', result_array, [0, 1]]
+								], test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -614,10 +614,10 @@ exports.Set = (function () {
 						result_array.push(res);
 						client.smembers('myset', function (err, res) {
 							ut.assertMany(
-							[
-								['equal',res.sort().toString(), '3,5'],
-								['ok',result_array, [0, 1]]
-							],test_case);
+								[
+									['equal', res.sort().toString(), '3,5'],
+									['ok', result_array, [0, 1]]
+								], test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -648,10 +648,10 @@ exports.Set = (function () {
 						result_array.push(res);
 						client.smembers('myset', function (err, res) {
 							ut.assertMany(
-							[
-								['equal',res.sort(), 'a,c'],
-								['deepequal',result_array, [0, 2]]
-							],test_case);
+								[
+									['equal', res.sort(), 'a,c'],
+									['deepequal', result_array, [0, 2]]
+								], test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -969,7 +969,7 @@ exports.Set = (function () {
 								cb(err, null);
 							}
 							//When we start with intsets, we should always end with intsets.
-							if(type == 'intset'){
+							if (type == 'intset') {
 								assert_encoding('intset', 'setres', function (err, res) {
 									if (err) {
 										cb(err, null);
@@ -1128,9 +1128,9 @@ exports.Set = (function () {
 								}
 								ut.assertMany(
 									[
-										['equal',res, 0],
-										['deepequal',sortedres, Hcontent]
-									],test_case);
+										['equal', res, 0],
+										['deepequal', sortedres, Hcontent]
+									], test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -1202,9 +1202,9 @@ exports.Set = (function () {
 								}
 								ut.assertMany(
 									[
-										['equal',res, 0],
-										['deepequal',sortedres, Icontent]
-									],test_case);
+										['equal', res, 0],
+										['deepequal', sortedres, Icontent]
+									], test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -1596,7 +1596,6 @@ exports.Set = (function () {
 			testEmitter.emit('next');
 		});
 	};
-
 	tester.set29 = function (errorCallback) {
 		var test_case = 'SDIFF with first set empty';
 		client.del('set1', 'set2', 'set3', function (err, res) {
@@ -1623,8 +1622,77 @@ exports.Set = (function () {
 			});
 		});
 	};
- 
+
 	tester.set30 = function (errorCallback) {
+		var test_case = 'SDIFF with first set empty';
+		client.del('set1');
+		client.sadd('set1', 'a', 'b', 'c', 1, 2, 3, 4, 5, 6);
+		client.sdiff('set1', 'set1', function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			ut.assertEqual(res, '', test_case);
+			testEmitter.emit('next');
+		});
+	};
+
+	tester.set31 = function (errorCallback) {
+		var test_case = 'SDIFF fuzzing';
+		var set = {},
+		args = [],
+		num_sets = '',
+		num_elements = '',
+		innercount = 0,
+		ele = '';
+		g.asyncFor(0, 100, function (outerloop) {
+			set = {};
+			num_sets = g.randomInt(10) + 1;
+			g.asyncFor(0, num_sets, function (innerloop) {
+				innercount = innerloop.iteration();
+				num_elements = g.randomInt(100);
+				client.del('set_' + innercount);
+				args.push('set_' + innercount);
+				g.asyncFor(0, -1, function (loop) {
+					if (num_elements == 0)
+						loop.break();
+					else {
+						ele = ut.randomValue;
+						client.sadd('set_' + innercount, ele, function (err, res) {
+							if (err) {
+								errorCallback(err, null);
+							}
+							if (innercount == 0)
+								set[ele] = 'x';
+							else
+								delete set[ele];
+							num_elements--;
+							loop.next();
+						});
+					}
+				}, function () {
+					innerloop.next();
+				});
+			}, function () {
+				outerloop.next();
+			});
+		}, function () {
+			client.sdiff(args, function (err, res) {
+				if (err) {
+					errorCallback(err, null);
+				}
+				var result = res.sort().toString();
+				var c = 0,
+				myset_arr = [];
+				for (k in set) {
+					myset_arr[c++] = k
+				}
+				ut.assertEqual(myset_arr.toString(), res.sort().toString(), test_case);
+				testEmitter.emit('next');
+			});
+		});
+	};
+
+	tester.set32 = function (errorCallback) {
 		var test_case = 'SINTER should handle non existing key as empty';
 		client.del('set1', 'set2', 'set3', function (err, res) {
 			if (err) {
@@ -1647,7 +1715,7 @@ exports.Set = (function () {
 		});
 	};
 
-	tester.set30 = function (errorCallback) {
+	tester.set33 = function (errorCallback) {
 		var test_case = 'SINTER with same integer elements but different encoding';
 		client.del('set1', 'set2', 'set3', function (err, res) {
 			if (err) {
@@ -1688,7 +1756,7 @@ exports.Set = (function () {
 		});
 	};
 
-	tester.set31 = function (errorCallback) {
+	tester.set34 = function (errorCallback) {
 		var test_case = 'SMOVE with identical source and destination';
 		client.del('set', function (err, res) {
 			if (err) {
@@ -1713,7 +1781,7 @@ exports.Set = (function () {
 			});
 		});
 	};
-	tester.set32 = function (errorCallback) {
+	tester.set35 = function (errorCallback) {
 		var test_case = 'SRANDMEMBER with <count> against non existing key';
 		client.srandmember('nonexisting_key', 100, function (err, res) {
 			if (err) {
@@ -1724,7 +1792,7 @@ exports.Set = (function () {
 		});
 	};
 
-	tester.set33 = function (errorCallback) {
+	tester.set36 = function (errorCallback) {
 		var test_case = 'SRANDMEMBER with <count> - Hashtable';
 		var Hcontent = [1, 5, 10, 50, 125, 50000, 33959417, 4775547, 65434162, 12098459, 427716, 483706, 2726473884, 72615637475,
 			'MARY', 'PATRICIA', 'LINDA', 'BARBARA', 'ELIZABETH', 'JENNIFER', 'MARIA', 'SUSAN', 'MARGARET', 'DOROTHY', 'LISA', 'NANCY',
@@ -1899,7 +1967,7 @@ exports.Set = (function () {
 			});
 		});
 	};
-	tester.set34 = function (errorCallback) {
+	tester.set37 = function (errorCallback) {
 		var test_case = 'SRANDMEMBER with <count> - Intset';
 		var Icontent = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49];
 		var myset = [],
@@ -2071,6 +2139,7 @@ exports.Set = (function () {
 			});
 		});
 	};
+
 	return set;
 
 }

@@ -1,6 +1,6 @@
 // The copyright in this software is being made available under the BSD License, included below. This software may be subject to other third party and contributor rights, including patent rights, and no such rights are granted under this license.
 //
-// Copyright (c) 2013, Microsoft Open Technologies, Inc. 
+// Copyright (c) 2013, Microsoft Open Technologies, Inc.
 //
 // All rights reserved.
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -283,7 +283,7 @@ exports.Scripting = (function () {
 			client.config('set', 'lua-time-limit', 1, function (err, res) {
 
 				client.eval('local i = 0 while false do i=i+1 end', 0, function (err, res) {
-					ut.assertOk('execution time',err, test_case);
+					ut.assertOk('execution time', err, test_case);
 					testEmitter.emit('next');
 
 				});
@@ -477,14 +477,14 @@ exports.Scripting = (function () {
 	tester.scripting40 = function (errorCallback) {
 		var test_case = 'Test an example script DECR_IF_GT';
 		var script = '\
-				local current \
-				current = redis.call("get",KEYS[1]) \
-				if not current then return nil end \
-				if current > ARGV[1] then \
-				return redis.call("decr",KEYS[1]) \
-				else \
-				return redis.call("get",KEYS[1]) \
-				end';
+							local current \
+							current = redis.call("get",KEYS[1]) \
+							if not current then return nil end \
+							if current > ARGV[1] then \
+							return redis.call("decr",KEYS[1]) \
+							else \
+							return redis.call("get",KEYS[1]) \
+							end';
 		client.set('foo', 5);
 		var result = '';
 		client.eval(script, 1, 'foo', 2, function (err, res) {
@@ -553,15 +553,123 @@ exports.Scripting = (function () {
 						errorCallback(err)
 					}
 					ut.assertMany(
-							[
-								['equal',res1, res2],
-								['notequal',res2, res3]
-							],test_case);
+						[
+							['equal', res1, res2],
+							['notequal', res2, res3]
+						], test_case);
 					testEmitter.emit('next');
 				});
 			});
 		});
 
+	}
+
+	tester.scripting43 = function (errorCallback) {
+		var test_case = 'EVAL does not leak in the Lua stack';
+		client.set('x', 0);
+		//Use a non blocking client to speedup the loop
+		var client1 = redis.createClient(server_port, server_host);
+		client1.on('ready', function () {
+			if (scripting.debug_mode) {
+				log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
+			}
+		});
+		g.asyncFor(0, 10000, function (loop) {
+			client1.eval('return redis.call("incr",KEYS[1])', 1, 'x', function (err, res) {
+				if (err) {
+					errorCallback(err, null);
+				}
+				loop.next();
+			});
+		}, function () {
+			ut.serverInfo(client1, 'used_memory_lua', function (err, meminfo) {
+				if (err) {
+					errorCallback(err, null);
+				}
+				client.get('x', function (err, res) {
+					if (err) {
+						errorCallback(err, null);
+					}
+					ut.assertMany([
+							['ok', meminfo < (1024 * 100), null],
+							['equal', res, 10000]
+						], test_case);
+					client1.end();
+					testEmitter.emit('next');
+				});
+			});
+		});
+	}
+
+	tester.scripting44 = function (errorCallback) {
+		var test_case = 'EVAL processes writes from AOF in read-only slaves';
+		var test_pass = false;
+		client.flushall(function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			client.config('set', 'appendonly', 'yes', function (err, res) {
+				if (err) {
+					errorCallback(err, null);
+				}
+				client.eval('redis.call("set","foo","100")', 0, function (err, res) {
+					if (err) {
+						errorCallback(err, null);
+					}
+					client.eval('redis.call("incr","foo")', 0, function (err, res) {
+						if (err) {
+							errorCallback(err, null);
+						}
+						client.eval('redis.call("incr","foo")', 0, function (err, res) {
+							if (err) {
+								errorCallback(err, null);
+							}
+							ut.wait_for_condition(50, 100, function (cb) {
+								ut.serverInfo(client, 'aof_rewrite_in_progress', function (err, res) {
+									try {
+										if (!assert.equal(res, 0, test_case)) {
+											test_pass = true;
+											cb(true);
+										}
+									} catch (e) {
+										cb(false);
+									}
+								});
+							}, function () {
+								if (!test_pass) {
+									ut.fail('AOF rewrite can\'t complete after CONFIG SET appendonly yes.', true);
+									testEmitter.emit('next');
+								}
+								client.config('set', 'slave-read-only', 'yes', function (err, res) {
+									if (err) {
+										errorCallback(err, null);
+									}
+									client.slaveof('127.0.0.1', 0, function (err, res) {
+										if (err) {
+											errorCallback(err, null);
+										}
+										client.debug('loadaof', function (err, res) {
+											if (err) {
+												errorCallback(err, null);
+											}
+											client.get('foo', function (err, res) {
+												if (err) {
+													errorCallback(err, null);
+												}
+												ut.assertEqual(res, 102, test_case);
+												testEmitter.emit('next');
+											});
+										});
+									});
+								});
+							}, function () {
+								errorCallback(new Error('EVAL processes writes from AOF in read-only slaves failed'), null);
+							});
+						});
+					});
+				});
+			});
+		});
 	}
 
 	//Increase Code coverage
@@ -573,7 +681,7 @@ exports.Scripting = (function () {
 			testEmitter.emit('next');
 		});
 	}
-	
+
 	tester.scripting47 = function (errorCallback) {
 		var test_case = 'EVAL - Redis status reply -> Lua Unknown command';
 
@@ -591,9 +699,9 @@ exports.Scripting = (function () {
 			client.eval('return tonumber("a",50)', 0, function (errB, res) {
 				ut.assertMany(
 					[
-						['deepequal',result_array, [[0, 55, 10101101200000000, 38, 28306, 55]]],
-						['ok','base out of range', errB]
-					],test_case);
+						['deepequal', result_array, [[0, 55, 10101101200000000, 38, 28306, 55]]],
+						['ok', 'base out of range', errB]
+					], test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -610,13 +718,13 @@ exports.Scripting = (function () {
 							client.eval('return string.format("%o, %x, %X", -100,-100,-100)', 0, function (err, res6) {
 								ut.assertMany(
 									[
-										['deepequal',res1, 'Hello "Lua user!"'],
-										['deepequal',res2, 'Lua'],
-										['deepequal',res3, '3.141593e+000, 3.141593E+000'],
-										['deepequal',res4, '3.141593, 3.14159'],
-										['deepequal',res5, '-100, -100, 4294967196'],
-										['deepequal',res6, '37777777634, ffffff9c, FFFFFF9C']
-									],test_case);
+										['deepequal', res1, 'Hello "Lua user!"'],
+										['deepequal', res2, 'Lua'],
+										['deepequal', res3, '3.141593e+000, 3.141593E+000'],
+										['deepequal', res4, '3.141593, 3.14159'],
+										['deepequal', res5, '-100, -100, 4294967196'],
+										['deepequal', res6, '37777777634, ffffff9c, FFFFFF9C']
+									], test_case);
 								testEmitter.emit('next');
 							});
 						});
@@ -780,9 +888,9 @@ exports.Scripting = (function () {
 													resArray.push(res);
 													ut.assertMany(
 														[
-															['deepequal',resArray, [1, 'table', '14LUA', '1 space 4 space LUA', '4 space LUA', '14LUA5', 3, 2, '134', 'abc']],
-															['ok',"Error", errorMsg]
-														],test_case);
+															['deepequal', resArray, [1, 'table', '14LUA', '1 space 4 space LUA', '4 space LUA', '14LUA5', 3, 2, '134', 'abc']],
+															['ok', "Error", errorMsg]
+														], test_case);
 													testEmitter.emit('next');
 												});
 											});
@@ -830,9 +938,9 @@ exports.Scripting = (function () {
 					resultArray.push(res);
 					ut.assertMany(
 						[
-							['ok','function', resload],
-							['deepequal',resultArray, [[10, 20, 30], [10, 20]]]
-						],test_case);
+							['ok', 'function', resload],
+							['deepequal', resultArray, [[10, 20, 30], [10, 20]]]
+						], test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -843,20 +951,20 @@ exports.Scripting = (function () {
 		var test_case = 'EVAL - Redis status reply -> Lua coroutine and select';
 		var resultArray = [];
 		var script = '\
-					local co = coroutine.create(function ()\
-						return coroutine.wrap(function () return("hi") end)\
-					end)\
-					';
+								local co = coroutine.create(function ()\
+									return coroutine.wrap(function () return("hi") end)\
+								end)\
+								';
 		client.eval(script + ' return coroutine.status(co)', 0, function (err, res) {
 			resultArray.push(res);
 			client.eval(script + ' return {coroutine.resume(co),coroutine.status(co)}', 0, function (err, res) {
 				resultArray.push(res);
 				var script = '\
-									local co = coroutine.create(function (a,b)\
-									coroutine.yield(a + b, a - b)\
-									coroutine.running ()\
-									end)\
-									';
+														local co = coroutine.create(function (a,b)\
+														coroutine.yield(a + b, a - b)\
+														coroutine.running ()\
+														end)\
+														';
 				client.eval(script + ' return {coroutine.resume(co, 20, 10)}', 0, function (err, res) {
 					resultArray.push(res);
 					client.eval('return {select(-1, 1, 2, 3),select(1, 1, 2, 3),select(4, 1, 2, 3)}', 0, function (err, res) {
@@ -867,10 +975,10 @@ exports.Scripting = (function () {
 								client.eval('return select(-2,1)', 0, function (errN, res) {
 									ut.assertMany(
 										[
-											['deepequal',resultArray, ['suspended', [1, 'dead'], [1, 30, 10], [3, 1], [4]]],
-											['ok','out of range', errZ],
-											['ok','out of range', errN]
-										],test_case);
+											['deepequal', resultArray, ['suspended', [1, 'dead'], [1, 30, 10], [3, 1], [4]]],
+											['ok', 'out of range', errZ],
+											['ok', 'out of range', errN]
+										], test_case);
 									testEmitter.emit('next');
 								});
 							});
@@ -884,22 +992,22 @@ exports.Scripting = (function () {
 	tester.scripting58 = function (errorCallback) {
 		var test_case = 'EVAL - Redis status reply -> Lua newproxy';
 		var script = '\
-					local a = newproxy(true)\
-					getmetatable(a).__len = function() return 5 end\
-					local b = newproxy(a)\
-					local c = newproxy(false)\
-					local is_collected = false\
-					local o = newproxy(true)\
-					getmetatable(o).__gc = function() is_collected = true end\
-					o = nil; collectgarbage()\
-					return {type(a),#a,tostring(b ~= a),tostring(getmetatable(b) == getmetatable(a)),#b,tostring(not getmetatable(c)),tostring(is_collected)}';
+								local a = newproxy(true)\
+								getmetatable(a).__len = function() return 5 end\
+								local b = newproxy(a)\
+								local c = newproxy(false)\
+								local is_collected = false\
+								local o = newproxy(true)\
+								getmetatable(o).__gc = function() is_collected = true end\
+								o = nil; collectgarbage()\
+								return {type(a),#a,tostring(b ~= a),tostring(getmetatable(b) == getmetatable(a)),#b,tostring(not getmetatable(c)),tostring(is_collected)}';
 		client.eval(script, 0, function (err, res) {
 			client.eval('local a = newproxy(0) return {type(a)}', 0, function (errE, resE) {
 				ut.assertMany(
 					[
-						['deepequal',res, ['userdata', 5, 'true', 'true', 5, 'true', 'true']],
-						['ok','boolean or proxy expected', errE]
-					],test_case);
+						['deepequal', res, ['userdata', 5, 'true', 'true', 5, 'true', 'true']],
+						['ok', 'boolean or proxy expected', errE]
+					], test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -908,25 +1016,25 @@ exports.Scripting = (function () {
 	tester.scripting59 = function (errorCallback) {
 		var test_case = 'EVAL - Redis status reply -> Lua setfenv';
 		var script = '\
-					a = 1 \
-					setfenv(1, {})\
-					return {a}';
+								a = 1 \
+								setfenv(1, {})\
+								return {a}';
 		client.eval(script, 0, function (errG, res) {
 			script = '\
-							local a = 1; \
-							local newgt = {}\
-							setmetatable(newgt, {__index = _G})\
-							setfenv(1, newgt)\
-							return a';
+											local a = 1; \
+											local newgt = {}\
+											setmetatable(newgt, {__index = _G})\
+											setfenv(1, newgt)\
+											return a';
 			client.eval(script, 0, function (err, res) {
 				script = 'return {gcinfo(),getfenv(1)}';
 				client.eval(script, 0, function (errL, resL) {
 					ut.assertMany(
 						[
-							['deepequal',resL[1], []],
-							['equal',res, 1],
-							['ok','global variable', errG]
-						],test_case);
+							['deepequal', resL[1], []],
+							['equal', res, 1],
+							['ok', 'global variable', errG]
+						], test_case);
 					testEmitter.emit('next');
 				});
 			});
@@ -936,25 +1044,25 @@ exports.Scripting = (function () {
 	tester.scripting60 = function (errorCallback) {
 		var test_case = 'EVAL - Redis status reply -> Lua pcall and xpcall';
 		var script = '\
-					local add = function(a,b)\
-						return tonumber(a)+tonumber(b)\
-					end\
-					return {pcall(add,"a"," ")}';
+								local add = function(a,b)\
+									return tonumber(a)+tonumber(b)\
+								end\
+								return {pcall(add,"a"," ")}';
 		client.eval(script, 0, function (errP, resP) {
 			var script = '\
-							local add = function(a,b)\
-							return tonumber(a)+tonumber(b)\
-							end\
-							local err = function(a,b)\
-							return "Error in Function"\
-							end\
-							return {xpcall(add,err,"a"," ")}';
+											local add = function(a,b)\
+											return tonumber(a)+tonumber(b)\
+											end\
+											local err = function(a,b)\
+											return "Error in Function"\
+											end\
+											return {xpcall(add,err,"a"," ")}';
 			client.eval(script, 0, function (errXP, resXP) {
 				ut.assertMany(
 					[
-						['ok','nil value', resP[1]],
-						['ok','Error', resXP[1]]
-					],test_case);
+						['ok', 'nil value', resP[1]],
+						['ok', 'Error', resXP[1]]
+					], test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -963,46 +1071,46 @@ exports.Scripting = (function () {
 	tester.scripting61 = function (errorCallback) {
 		var test_case = 'EVAL - Redis status reply -> Lua Running code within code';
 		var script = 'local code = [[ return ("Redis") ]]\
-					local test = loadstring(code) return test()';
+								local test = loadstring(code) return test()';
 		client.eval(script, 0, function (errL, resL) {
 			script = 'local code = string.dump(function() return("Redis") end)\
-							local test = loadstring(code)\
-							return test()';
+											local test = loadstring(code)\
+											return test()';
 			client.eval(script, 0, function (errOL, resOL) {
 				script = 'local filefunc = dofile("test.lua")\
-									local returnedfunc = filefunc(2, 3)\
-									return returnedfunc';
+														local returnedfunc = filefunc(2, 3)\
+														return returnedfunc';
 				client.eval(script, 0, function (errStr, resStr) {
 					script = 'return {tostring(rawequal(1,1)),tostring(rawequal(1,2))}';
 					client.eval(script, 0, function (errLF, resLF) {
 						script = 'local code = string.dump(function() return(1) end)\
-								local test = loadstring(code)\
-								return test()';
+															local test = loadstring(code)\
+															return test()';
 						client.eval(script, 0, function (errLN, resLN) {
 							script = 'local code = string.dump(function() return(true) end)\
-									local test = loadstring(code)\
-									return test()';
+																	local test = loadstring(code)\
+																	return test()';
 							client.eval(script, 0, function (errLB, resLB) {
 								script = 'local code = string.dump(function() return("") end)\
-										local test = loadstring(code)\
-										return test()';
+																			local test = loadstring(code)\
+																			return test()';
 								client.eval(script, 0, function (errLNiL, resLNiL) {
 									script = 'local code = function(a)\
-												return a\
-												end\
-												local test = load(code)\
-												return test()';
+																						return a\
+																						end\
+																						local test = load(code)\
+																						return test()';
 									client.eval(script, 0, function (errLd, resLd) {
 										ut.assertMany(
 											[
-												['ok','Redis', resL],
-												['ok','Redis', resOL],
-												['ok','Error', errStr],
-												['deepequal',resLF, ['true', 'false']],
-												['ok',1, resLN],
-												['ok',1, resLB],
-												['ok','', resLNiL]
-											],test_case);
+												['ok', 'Redis', resL],
+												['ok', 'Redis', resOL],
+												['ok', 'Error', errStr],
+												['deepequal', resLF, ['true', 'false']],
+												['ok', 1, resLN],
+												['ok', 1, resLB],
+												['ok', '', resLNiL]
+											], test_case);
 										testEmitter.emit('next');
 									});
 								});
@@ -1017,24 +1125,24 @@ exports.Scripting = (function () {
 	tester.scripting62 = function (errorCallback) {
 		var test_case = 'EVAL - Redis status reply -> Lua pairs and ipairs';
 		var script = 'local Name = {"Jones","Smith","Patel","Brown","Ng"}\
-					local temp_table={}\
-					for index,val in ipairs(Name) do\
-					 table.insert(temp_table,index .. " - " .. val)\
-					end\
-					return table.concat(temp_table,",")';
+								local temp_table={}\
+								for index,val in ipairs(Name) do\
+								 table.insert(temp_table,index .. " - " .. val)\
+								end\
+								return table.concat(temp_table,",")';
 		client.eval(script, 0, function (errOL, resOL) {
 			script = 'local Name = {"Jones","Smith","Patel","Brown","Ng"}\
-							local temp_table={}\
-							for index,val in pairs(Name) do\
-								table.insert(temp_table,index .. " - " .. val)\
-							end\
-							return table.concat(temp_table,",")';
+											local temp_table={}\
+											for index,val in pairs(Name) do\
+												table.insert(temp_table,index .. " - " .. val)\
+											end\
+											return table.concat(temp_table,",")';
 			client.eval(script, 0, function (errStr, resStr) {
 				ut.assertMany(
 					[
 						['equal', resOL, '1 - Jones,2 - Smith,3 - Patel,4 - Brown,5 - Ng'],
-						['equal',resStr, '1 - Jones,2 - Smith,3 - Patel,4 - Brown,5 - Ng']
-					],test_case);
+						['equal', resStr, '1 - Jones,2 - Smith,3 - Patel,4 - Brown,5 - Ng']
+					], test_case);
 				testEmitter.emit('next');
 			});
 		});
@@ -1074,15 +1182,15 @@ exports.Scripting = (function () {
 									client.eval("local foo=cjson.null return cjson.decode(foo)", 0, function (errLD, res) {
 										ut.assertMany(
 											[
-												['ok','Expected value but found T_END', errTE],
-												['ok','Expected the end but found T_COMMA', errTC],
-												['ok','Expected object key string but found invalid token', errI],
-												['ok','Expected colon but found T_OBJ_END', errTO],
-												['ok','invalid number', errN],
-												['ok','Cannot serialise', errEn],
-												['ok','JSON parser does not support UTF-16 or UTF-32', errSy],
-												['ok','got userdata', errLD]
-											],test_case);
+												['ok', 'Expected value but found T_END', errTE],
+												['ok', 'Expected the end but found T_COMMA', errTC],
+												['ok', 'Expected object key string but found invalid token', errI],
+												['ok', 'Expected colon but found T_OBJ_END', errTO],
+												['ok', 'invalid number', errN],
+												['ok', 'Cannot serialise', errEn],
+												['ok', 'JSON parser does not support UTF-16 or UTF-32', errSy],
+												['ok', 'got userdata', errLD]
+											], test_case);
 										testEmitter.emit('next');
 									});
 								});
@@ -1135,9 +1243,9 @@ exports.Scripting = (function () {
 					client.eval("cjson.encode_sparse_array(true, 2, 3) cjson.encode_max_depth(5) return cjson.encode({ {{{{{ \"nested\" }}}}}})", 0, function (err, res) {
 						ut.assertMany(
 							[
-								['deepequal',res_Array, [['[null,null,"sparse test"]'], '["one",null,null,"sparse test"]', '{"2":"numeric string key test"}']],
-								['ok','excessive nesting', err]
-							],test_case);
+								['deepequal', res_Array, [['[null,null,"sparse test"]'], '["one",null,null,"sparse test"]', '{"2":"numeric string key test"}']],
+								['ok', 'excessive nesting', err]
+							], test_case);
 						testEmitter.emit('next');
 					});
 				});
@@ -1148,19 +1256,19 @@ exports.Scripting = (function () {
 	tester.scripting68 = function (errorCallback) {
 		var test_case = 'EVAL - Redis status reply -> Lua msgpack';
 		var script = '\
-						local payload = {1, 2, 3}\
-						local varpack = cmsgpack.pack(payload)\
-						local varunpack = cmsgpack.unpack(varpack)\
-						return {varunpack,cmsgpack.unpack(cmsgpack.pack(17)),cmsgpack.unpack(cmsgpack.pack(-1))\
-						,cmsgpack.unpack(cmsgpack.pack(true)),cmsgpack.unpack(cmsgpack.pack(false)),cmsgpack.unpack(cmsgpack.pack(1.5))\
-						,cmsgpack.unpack(cmsgpack.pack(101)),cmsgpack.unpack(cmsgpack.pack(-101)),cmsgpack.unpack(cmsgpack.pack(20001))\
-						,cmsgpack.unpack(cmsgpack.pack(-20001)),cmsgpack.unpack(cmsgpack.pack(-20000001)),cmsgpack.unpack(cmsgpack.pack(20000001))\
-						,cmsgpack.unpack(cmsgpack.pack(200000000001)),cmsgpack.unpack(cmsgpack.pack(-200000000001))\
-						,cmsgpack.unpack(cmsgpack.pack(0xff)),cmsgpack.unpack(cmsgpack.pack(0xffff)),cmsgpack.unpack(cmsgpack.pack(0xffffffff))\
-						,cmsgpack.unpack(cmsgpack.pack(-128)),cmsgpack.unpack(cmsgpack.pack(-32768)),cmsgpack.unpack(cmsgpack.pack(-2147483648))\
-						,cmsgpack.unpack(cmsgpack.pack(nil)),cmsgpack.unpack(cmsgpack.pack("abc")),cmsgpack.unpack(cmsgpack.pack("xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"))}';
+									local payload = {1, 2, 3}\
+									local varpack = cmsgpack.pack(payload)\
+									local varunpack = cmsgpack.unpack(varpack)\
+									return {varunpack,cmsgpack.unpack(cmsgpack.pack(17)),cmsgpack.unpack(cmsgpack.pack(-1))\
+									,cmsgpack.unpack(cmsgpack.pack(true)),cmsgpack.unpack(cmsgpack.pack(false)),cmsgpack.unpack(cmsgpack.pack(1.5))\
+									,cmsgpack.unpack(cmsgpack.pack(101)),cmsgpack.unpack(cmsgpack.pack(-101)),cmsgpack.unpack(cmsgpack.pack(20001))\
+									,cmsgpack.unpack(cmsgpack.pack(-20001)),cmsgpack.unpack(cmsgpack.pack(-20000001)),cmsgpack.unpack(cmsgpack.pack(20000001))\
+									,cmsgpack.unpack(cmsgpack.pack(200000000001)),cmsgpack.unpack(cmsgpack.pack(-200000000001))\
+									,cmsgpack.unpack(cmsgpack.pack(0xff)),cmsgpack.unpack(cmsgpack.pack(0xffff)),cmsgpack.unpack(cmsgpack.pack(0xffffffff))\
+									,cmsgpack.unpack(cmsgpack.pack(-128)),cmsgpack.unpack(cmsgpack.pack(-32768)),cmsgpack.unpack(cmsgpack.pack(-2147483648))\
+									,cmsgpack.unpack(cmsgpack.pack(nil)),cmsgpack.unpack(cmsgpack.pack("abc")),cmsgpack.unpack(cmsgpack.pack("xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"))}';
 		client.eval(script, 0, function (err, res) {
-			ut.assertDeepEqual(res, [ [ 1, 2, 3 ],17,-1,1, null, 1, 101, -101, 20001, -20001, -20000001, 20000001, 200000000001, -200000000001, 255, 65535, 4294967295, -128, -32768, -2147483648 ], test_case);
+			ut.assertDeepEqual(res, [[1, 2, 3], 17, -1, 1, null, 1, 101, -101, 20001, -20001, -20000001, 20000001, 200000000001, -200000000001, 255, 65535, 4294967295, -128, -32768, -2147483648], test_case);
 			testEmitter.emit('next');
 		});
 	}
@@ -1174,13 +1282,13 @@ exports.Scripting = (function () {
 					client.eval("cjson.refuse_invalid_numbers(false) return cjson.encode(tonumber(0/0))", 0, function (errRF, resRF) {
 						client.eval("cjson.encode_number_precision(15) return cjson.encode({1.23})", 0, function (errE, res) {
 							ut.assertMany(
-							[
-								['ok','NaN or Inf', errN],
-								['ok','invalid number', errI],
-								['equal',resP, '[1.2]'],
-								['equal',resRF, '-1.$'],
-								['ok','expected integer between 1 and 14', errE]
-							],test_case);
+								[
+									['ok', 'NaN or Inf', errN],
+									['ok', 'invalid number', errI],
+									['equal', resP, '[1.2]'],
+									['equal', resRF, '-1.$'],
+									['ok', 'expected integer between 1 and 14', errE]
+								], test_case);
 							testEmitter.emit('next');
 						});
 					});
@@ -1193,112 +1301,112 @@ exports.Scripting = (function () {
 		var test_case = 'EVAL - Redis status reply -> Lua Json unicode_escape';
 		var res_Array = [];
 		client.eval("return cjson.decode('\"\\\\u0000\"')", 0, function (err, res) {
-			res_Array.push(res);	
+			res_Array.push(res);
 			client.eval("return cjson.decode('\"\\\\uda00\\\\uDC00\"')", 0, function (err, res) {
 				client.eval("return cjson.decode('\"\\\\uda00\\\\u0000\"')", 0, function (errI, res) {
-					client.eval("return cjson.decode('\"\\\\uda00\\\\u\"')", 0, function (errI1, res) {		
+					client.eval("return cjson.decode('\"\\\\uda00\\\\u\"')", 0, function (errI1, res) {
 						client.eval("return cjson.decode('\"\\\\uda00\"')", 0, function (errI2, res) {
-							client.eval("return cjson.decode('\"\\\\u\"')", 0, function (errI3, res) {	
+							client.eval("return cjson.decode('\"\\\\u\"')", 0, function (errI3, res) {
 								ut.assertMany(
 									[
-										['deepequal',res_Array, ['\u0000']],
-										['ok','invalid unicode escape',errI],
-										['ok','invalid unicode escape',errI1],
-										['ok','invalid unicode escape',errI2],
-										['ok','invalid unicode escape',errI3]
-									],test_case);
-								testEmitter.emit('next');	
+										['deepequal', res_Array, ['\u0000']],
+										['ok', 'invalid unicode escape', errI],
+										['ok', 'invalid unicode escape', errI1],
+										['ok', 'invalid unicode escape', errI2],
+										['ok', 'invalid unicode escape', errI3]
+									], test_case);
+								testEmitter.emit('next');
 							});
 						});
 					});
-				});			
-			});			
+				});
+			});
 		});
 	}
-	
+
 	tester.scripting71 = function (errorCallback) {
 		var test_case = 'EVAL - Redis status reply -> Lua msgpack regression';
 		var script = '\
-						local failed = 0\
-						local passed = 0\
-						local hex = function(s)\
-							local i\
-							local h = ""\
-							for i = 1, #s do\
-								h = h .. string.format("%02x",string.byte(s,i))\
-							end\
-							return h\
-						end\
-						local test_pack = function(name,obj,raw)\
-							if hex(cmsgpack.pack(obj)) ~= raw then\
-								failed = failed+1\
-							else\
-								passed = passed+1\
-							end\
-						end\
-						local ascii_to_num = function(c)\
-							if (c >= string.byte("0") and c <= string.byte("9")) then\
-								return c - string.byte("0")\
-							elseif (c >= string.byte("A") and c <= string.byte("F")) then\
-								return (c - string.byte("A"))+10\
-							elseif (c >= string.byte("a") and c <= string.byte("f")) then\
-								return (c - string.byte("a"))+10\
-							end\
-						end\
-						local unhex = function(h)\
-							local i\
-							local s = ""\
-							for i = 1, #h, 2 do\
-								local high = ascii_to_num(string.byte(h,i))\
-								local low = ascii_to_num(string.byte(h,i+1))\
-								s = s .. string.char((high*16)+low)\
-							end\
-							return s\
-						end\
-						local compare_objects = function(a,b)\
-							if (type(a) == "table") then\
-								local count = 0\
-								for k,v in pairs(a) do\
-									count = count + 1\
-								end\
-								for k,v in pairs(b) do count = count - 1 end\
-								if count == 0 then return true else return false end\
-							else\
-								return a == b\
-							end\
-						end\
-						local test_unpack = function(name,raw,obj)\
-							if not compare_objects(cmsgpack.unpack(unhex(raw)),obj) then\
-								failed = failed+1\
-							else\
-								passed = passed+1\
-							end\
-						end\
-						local test_pack_and_unpack = function(name,obj,raw)\
-							test_pack(name,obj,raw)\
-							test_unpack(name,raw,obj)\
-						end\
-						test_pack_and_unpack("positive fixnum",0,"00")\
-						test_pack_and_unpack("negative fixnum",-1,"ff")\
-						test_pack_and_unpack("uint8",255,"ccff")\
-						test_pack_and_unpack("fix raw","a","a161")\
-						test_pack_and_unpack("fix array",{0},"9100")\
-						test_pack_and_unpack("fix map",{a=64},"81a16140")\
-						test_pack_and_unpack("nil",nil,"c0")\
-						test_pack_and_unpack("true",true,"c3")\
-						test_pack_and_unpack("false",false,"c2")\
-						test_pack_and_unpack("double",0.1,"cb3fb999999999999a")\
-						test_pack_and_unpack("uint16",32768,"cd8000")\
-						test_pack_and_unpack("uint32",1048576,"ce00100000")\
-						test_pack_and_unpack("int8",-64,"d0c0")\
-						test_pack_and_unpack("int16",-1024,"d1fc00")\
-						test_pack_and_unpack("int32",-1048576,"d2fff00000")\
-						test_pack_and_unpack("int64",-1099511627776,"d3ffffff0000000000")\
-						test_pack_and_unpack("raw16","                                        ","da002820202020202020202020202020202020202020202020202020202020202020202020202020202020")\
-						test_pack_and_unpack("array 16",{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},"dc001000000000000000000000000000000000")\
-						return {failed,passed}';
+									local failed = 0\
+									local passed = 0\
+									local hex = function(s)\
+										local i\
+										local h = ""\
+										for i = 1, #s do\
+											h = h .. string.format("%02x",string.byte(s,i))\
+										end\
+										return h\
+									end\
+									local test_pack = function(name,obj,raw)\
+										if hex(cmsgpack.pack(obj)) ~= raw then\
+											failed = failed+1\
+										else\
+											passed = passed+1\
+										end\
+									end\
+									local ascii_to_num = function(c)\
+										if (c >= string.byte("0") and c <= string.byte("9")) then\
+											return c - string.byte("0")\
+										elseif (c >= string.byte("A") and c <= string.byte("F")) then\
+											return (c - string.byte("A"))+10\
+										elseif (c >= string.byte("a") and c <= string.byte("f")) then\
+											return (c - string.byte("a"))+10\
+										end\
+									end\
+									local unhex = function(h)\
+										local i\
+										local s = ""\
+										for i = 1, #h, 2 do\
+											local high = ascii_to_num(string.byte(h,i))\
+											local low = ascii_to_num(string.byte(h,i+1))\
+											s = s .. string.char((high*16)+low)\
+										end\
+										return s\
+									end\
+									local compare_objects = function(a,b)\
+										if (type(a) == "table") then\
+											local count = 0\
+											for k,v in pairs(a) do\
+												count = count + 1\
+											end\
+											for k,v in pairs(b) do count = count - 1 end\
+											if count == 0 then return true else return false end\
+										else\
+											return a == b\
+										end\
+									end\
+									local test_unpack = function(name,raw,obj)\
+										if not compare_objects(cmsgpack.unpack(unhex(raw)),obj) then\
+											failed = failed+1\
+										else\
+											passed = passed+1\
+										end\
+									end\
+									local test_pack_and_unpack = function(name,obj,raw)\
+										test_pack(name,obj,raw)\
+										test_unpack(name,raw,obj)\
+									end\
+									test_pack_and_unpack("positive fixnum",0,"00")\
+									test_pack_and_unpack("negative fixnum",-1,"ff")\
+									test_pack_and_unpack("uint8",255,"ccff")\
+									test_pack_and_unpack("fix raw","a","a161")\
+									test_pack_and_unpack("fix array",{0},"9100")\
+									test_pack_and_unpack("fix map",{a=64},"81a16140")\
+									test_pack_and_unpack("nil",nil,"c0")\
+									test_pack_and_unpack("true",true,"c3")\
+									test_pack_and_unpack("false",false,"c2")\
+									test_pack_and_unpack("double",0.1,"cb3fb999999999999a")\
+									test_pack_and_unpack("uint16",32768,"cd8000")\
+									test_pack_and_unpack("uint32",1048576,"ce00100000")\
+									test_pack_and_unpack("int8",-64,"d0c0")\
+									test_pack_and_unpack("int16",-1024,"d1fc00")\
+									test_pack_and_unpack("int32",-1048576,"d2fff00000")\
+									test_pack_and_unpack("int64",-1099511627776,"d3ffffff0000000000")\
+									test_pack_and_unpack("raw16","                                        ","da002820202020202020202020202020202020202020202020202020202020202020202020202020202020")\
+									test_pack_and_unpack("array 16",{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},"dc001000000000000000000000000000000000")\
+									return {failed,passed}';
 		client.eval(script, 0, function (err, res) {
-			ut.assertDeepEqual(res, [0,36], test_case);
+			ut.assertDeepEqual(res, [0, 36], test_case);
 			testEmitter.emit('next');
 		});
 	}
@@ -1369,7 +1477,7 @@ exports.Scripting = (function () {
 				one : function (cb) {
 					var test_case = 'Before the slave connects we issue two EVAL commands';
 					slave_cli.eval("redis.call('incr','x'); redis.call('nonexisting')", 0, function (err, res) {
-						slave_cli.eval("return redis.call('incr','x')", 0, function (err, res) {	
+						slave_cli.eval("return redis.call('incr','x')", 0, function (err, res) {
 							ut.assertEqual(res, 2, test_case);
 							cb(null, true);
 						});
@@ -1490,7 +1598,10 @@ exports.Scripting = (function () {
 						var newClient = redis.createClient(server_port1, server_host1);
 
 					client1.config('set', 'lua-time-limit', 10);
-					newClient.eval('while true do end', 0, function (err, res) { if(res) callback(res); });
+					newClient.eval('while true do end', 0, function (err, res) {
+						if (res)
+							callback(res);
+					});
 					setTimeout(function () {
 						client1.ping(function (err, res) {
 							try {
@@ -1530,7 +1641,10 @@ exports.Scripting = (function () {
 					newClient.on('error', function (err) {
 						newClient.end();
 					});
-					newClient.eval("redis.call('set','x','y'); while true do end", 0, function (err, res) { if(res) callback(res); });
+					newClient.eval("redis.call('set','x','y'); while true do end", 0, function (err, res) {
+						if (res)
+							callback(res);
+					});
 					setTimeout(function () {
 						client1.ping(function (err, res) {
 							try {
@@ -1592,7 +1706,7 @@ exports.Scripting = (function () {
 
 		}
 	}
-	
+
 	tester.scripting74 = function (errorCallback) {
 		var test_case = 'Shutdown save works';
 		var tags = 'scripting';
@@ -1605,13 +1719,13 @@ exports.Scripting = (function () {
 			if (err) {
 				errorCallback(err, null);
 			}
-			setTimeout(function(){
+			setTimeout(function () {
 				server_pid1 = res;
 				client1 = g.srv[client_pid][server_pid1]['client'];
 				server_host = g.srv[client_pid][server_pid1]['host'];
 				server_port = g.srv[client_pid][server_pid1]['port'];
-				client1.on('error',function(err){
-					ut.fail(err,true);
+				client1.on('error', function (err) {
+					ut.fail(err, true);
 					killserver();
 				});
 				function killserver() {
@@ -1632,13 +1746,13 @@ exports.Scripting = (function () {
 									var msg = fs.readFileSync(g.srv[client_pid][server_pid1]['stdout']).toString().split('\n');
 									var val = msg[msg.length - 4];
 									var res = ut.assertOk('Saving', val, test_case, true);
-									if(res){
+									if (res) {
 										ut.pass(test_case);
 										testEmitter.emit('next');
-									} else{
+									} else {
 										killserver();
 									}
-									
+
 								}, 500);
 							});
 						}
@@ -1650,8 +1764,7 @@ exports.Scripting = (function () {
 			});
 		});
 	}
- 
-  
-	 return scripting;
+
+	return scripting;
 }
 	())

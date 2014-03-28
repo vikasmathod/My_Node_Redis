@@ -294,7 +294,7 @@ exports.Aof = (function () {
 		});
 	};
 	tester.Aof7_8 = function (errorCallback) {
-		//Test that SPOP (that modifies the client its argc/argv) is correctly free'd
+		//Test that SPOP (that modifies the client's argc/argv) is correctly free'd
 		try {
 			var st = create_aof();
 			append_to_aof(st, ut.formatCommand(['sadd', 'set', 'foo']));

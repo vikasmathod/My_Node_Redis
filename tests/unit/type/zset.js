@@ -2379,7 +2379,7 @@ exports.Zset = (function () {
 												cb(err, null);
 											}
 											try {
-												if (!assert.deepEqual(res, aux[i], test_case)) {
+												if (!assert.deepEqual(parseInt(res), parseInt(aux[i]), test_case)) {
 													loop.next();
 												}
 											} catch (e) {
@@ -2427,7 +2427,7 @@ exports.Zset = (function () {
 													cb(err, null);
 												}
 												try {
-													if (!assert.deepEqual(res, aux[i], test_case)) {
+													if (!assert.deepEqual(parseInt(res), parseInt(aux[i]), test_case)) {
 														loop.next();
 													}
 												} catch (e) {
