@@ -16,6 +16,10 @@ exports.Replication4 = (function () {
 	ut = new Utility(),
 	server = new Server(),
 	server1 = new Server(),
+	server2 = new Server(),
+	server3 = new Server(),
+	server4 = new Server(),
+	server5 = new Server(),
 	replication4 = {},
 	name = 'Replication4',
 	tester = {},
@@ -259,6 +263,331 @@ exports.Replication4 = (function () {
 		};
 	};
 
+	tester.Repl42 = function(errorCallback){
+		var tags = 'repl-42';var overrides = {};
+		var args = {};
+		args['name'] = name + '(Master)';
+		args['tags'] = tags;
+		server2.start_server(client_pid, args, function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			server_pid = res;
+			// nesting calls to start_server
+			setTimeout(function () { // to give some time for the master to start.
+				master_cli = g.srv[client_pid][server_pid]['client'];
+				master_host = g.srv[client_pid][server_pid]['host'];
+				master_port = g.srv[client_pid][server_pid]['port'];
+				var tags = 'repl-mr12';
+				var overrides = {};
+				var args = {};
+				args['tags'] = tags;
+				args['name'] = name + '(Slave0)';
+				args['overrides'] = overrides;
+				server3.start_server(client_pid, args, function (err, res) {
+					if (err) {
+						errorCallback(err, null);
+					}
+					server_pid2 = res;
+					slave_cli = g.srv[client_pid][server_pid2]['client'];
+					start_actual_test(function (err, res) {
+						if (err) {
+							errorCallback(err);
+						}
+						slave_cli.end();
+						master_cli.end();
+						if (replication4.debug_mode) {
+							log.notice('Monitor client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+							log.notice(g.srv[client_pid][server_pid2]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+							log.notice(g.srv[client_pid][server_pid]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
+						}
+						kill_server(function (err, res) {
+							if (err) {
+								errorCallback(err)
+							}
+							testEmitter.emit('next');
+						});
+					});
+				});
+			}, 100);
+		});
+		
+		function kill_server(callback) {
+			server2.kill_server(client_pid, server_pid, function (err, res) {
+				if (err) {
+					callback(err, null);
+				} else {
+					server3.kill_server(client_pid, server_pid2, function (err, res) {
+						if (err) {
+							callback(err, null);
+						} else if (res) {
+							callback(null, true);
+						}
+					});
+				}
+			});
+		};
+		
+		function start_actual_test(callback) {
+			async.series({
+				one : function (cb) {
+					var test_case = 'First server should have role slave after SLAVEOF';
+					slave_cli.slaveof(master_host, master_port, function (err, res) {
+						if(err){
+							cb(err, null);
+						}
+						var test_pass = false;
+						ut.wait_for_condition(50, 100, function (callback) {
+							ut.serverInfo(slave_cli, 'master_link_status', function (err, res) {
+								if (err) {
+									callback(err);
+								}
+								if (res == 'up') {
+									test_pass = true;
+									callback(true);
+								} else
+									callback(false);
+							});
+						},
+						function () {
+							ut.assertOk(test_pass, null, test_case);
+							cb(null, true);
+						},
+						function () {
+							errorCallback(new Error('Replication not started.'), null);
+						});
+					});
+				},
+				two: function(cb){
+					var test_case = 'With min-slaves-to-write (1,3): master should be writable';
+					master_cli.config('set', 'min-slaves-max-lag', 3, function(err, res){
+						if(err){
+							cb(err, null);
+						}
+						master_cli.config('set', 'min-slaves-to-write', 1, function(err, res){
+							if(err){
+								cb(err, null);
+							}
+							master_cli.set('foo', 'bar', function(err, res){
+								if(err){
+									cb(err, null);
+								}
+								ut.assertEqual(res, 'OK', test_case);
+								cb(null, true);
+							})
+						});
+					});
+				},
+				three: function(cb){
+					var test_case = 'With min-slaves-to-write (2,3): master should not be writable';
+					master_cli.config('set', 'min-slaves-max-lag', 3, function(err, res){
+						if(err){
+							cb(err, null);
+						}
+						master_cli.config('set', 'min-slaves-to-write', 2, function(err, res){
+							if(err){
+								cb(err, null);
+							}
+							master_cli.set('foo', 'bar', function(err, res){
+								ut.assertOk('NOREPLICAS', err, test_case);
+								cb(null, true);
+							})
+						});
+					});
+				},
+				/* four: function(cb){
+					var result = [];
+					var test_case = 'With min-slaves-to-write: master not writable with lagged slave';
+					master_cli.config('set', 'min-slaves-max-lag', 2, function(err, res){
+						if(err){
+							cb(err, null);
+						}
+						master_cli.config('set', 'min-slaves-to-write', 1, function(err, res){
+							if(err){
+								cb(err, null);
+							}
+							master_cli.set('foo', 'bar', function(err, res){
+								if(err){
+									cb(err, null);
+								}
+								result.push(res);
+								master_cli.debug('sleep', 10, function(err, res){
+									if(err){
+										cb(err, null);
+									}
+									setTimeout(function(){
+										master_cli.set('foo', 'bar', function(err, res){
+											console.log(err);
+											console.log(res);
+											result.push(err);
+											ut.assertMany([
+												['equal', result[0], 'OK'],
+												['ok', result[1],'NOREPLICAS']
+											],test_case);
+											cb(null, true);
+										});
+									},4000);
+								});
+							})
+						});
+					});
+				}, */
+			}, function (err, rep) {
+				if (err) {
+					callback(err, null);
+				}
+				callback(null, true);
+			});
+		};
+	};
+	
+	tester.Repl43 = function(errorCallback){
+		var tags = 'repl-43';
+		var overrides = {};
+		var args = {};
+		args['name'] = name + '(Master)';
+		args['tags'] = tags;
+		server4.start_server(client_pid, args, function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			server_pid = res;
+			// nesting calls to start_server
+			setTimeout(function () { // to give some time for the master to start.
+				master_cli = g.srv[client_pid][server_pid]['client'];
+				master_host = g.srv[client_pid][server_pid]['host'];
+				master_port = g.srv[client_pid][server_pid]['port'];
+				var tags = 'repl-mr23';
+				var overrides = {};
+				var args = {};
+				args['tags'] = tags;
+				args['name'] = name + '(Slave0)';
+				args['overrides'] = overrides;
+				server5.start_server(client_pid, args, function (err, res) {
+					if (err) {
+						errorCallback(err, null);
+					}
+					server_pid2 = res;
+					slave_cli = g.srv[client_pid][server_pid2]['client'];
+					start_actual_test(function (err, res) {
+						if (err) {
+							errorCallback(err);
+						}
+						slave_cli.end();
+						master_cli.end();
+						if (replication4.debug_mode) {
+							log.notice('Monitor client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+							log.notice(g.srv[client_pid][server_pid2]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid2]['host'] + ':' + g.srv[client_pid][server_pid2]['port']);
+							log.notice(g.srv[client_pid][server_pid]['name'] + ':Client disconnected listeting to socket : ' + g.srv[client_pid][server_pid]['host'] + ':' + g.srv[client_pid][server_pid]['port']);
+						}
+						kill_server(function (err, res) {
+							if (err) {
+								errorCallback(err)
+							}
+							testEmitter.emit('next');
+						});
+					});
+				});
+			}, 100);
+		});
+		
+		function kill_server(callback) {
+			server4.kill_server(client_pid, server_pid, function (err, res) {
+				if (err) {
+					callback(err, null);
+				} else {
+					server5.kill_server(client_pid, server_pid2, function (err, res) {
+						if (err) {
+							callback(err, null);
+						} else if (res) {
+							callback(null, true);
+						}
+					});
+				}
+			});
+		};
+		
+		function start_actual_test(callback) {
+			async.series({
+				one : function (cb) {
+					var test_case = 'First server should have role slave after SLAVEOF';
+					slave_cli.slaveof(master_host, master_port, function (err, res) {
+						if(err){
+							cb(err, null);
+						}
+						var test_pass = false;
+						ut.wait_for_condition(50, 100, function (callback) {
+							ut.serverInfo(slave_cli, 'master_link_status', function (err, res) {
+								if (err) {
+									callback(err);
+								}
+								if (res == 'up') {
+									test_pass = true;
+									callback(true);
+								} else
+									callback(false);
+							});
+						},
+						function () {
+							ut.assertOk(test_pass, null, test_case);
+							cb(null, true);
+						},
+						function () {
+							errorCallback(new Error('Replication not started.'), null);
+						});
+					});
+				},
+				two: function(cb){
+					var test_case = 'Replication: commands with many arguments (issue #1221)';
+					// We now issue large MSET commands, that may trigger a specific
+					// class of bugs, see issue #1221.
+					var cmd = [];
+					g.asyncFor(0, 100, function(loop){
+						for(var x = 0; x < 1000; x++){
+							cmd.push(ut.randomKey,ut.randomValue);
+						}
+						master_cli.mset(cmd, function(err, res){
+							if(err){
+								cb(err, null);
+							}
+							loop.next();
+						});
+					}, function(){
+						var retry = 10;
+						g.asyncFor(0, retry, function(loop){
+							master_cli.debug('digest', function(err, master_digest){
+								if(err){
+									cb(err, null);
+								}
+								slave_cli.debug('digest', function(err, slave_digest){
+									if(err){
+										cb(err, null);
+									}
+									if(master_digest != slave_digest){
+										setTimeout(function(){
+											loop.next();
+										},1000);
+									}
+									else
+										loop.break();
+								});
+							});
+						},function(){
+							master_cli.dbsize(function(err, res){
+								ut.assertOk((res > 0), null, test_case);
+								cb(null, true);
+							});
+						});
+					});
+				},
+			}, function (err, rep) {
+				if (err) {
+					callback(err, null);
+				}
+				callback(null, true);
+			});
+		};
+	};
 	return replication4;
 
 }

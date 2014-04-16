@@ -1,6 +1,6 @@
 // The copyright in this software is being made available under the BSD License, included below. This software may be subject to other third party and contributor rights, including patent rights, and no such rights are granted under this license.
 //
-// Copyright (c) 2013, Microsoft Open Technologies, Inc. 
+// Copyright (c) 2013, Microsoft Open Technologies, Inc.
 //
 // All rights reserved.
 // Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -113,15 +113,26 @@ exports.Replication3 = (function () {
 			if (err) {
 				errorCallback(err)
 			}
-			setTimeout(function () {
-				ut.serverInfo(slave_cli, 'role', function (err, res) {
+			var test_pass = false;
+			ut.wait_for_condition(50, 100, function (cb) {
+				ut.serverInfo(slave_cli, 'master_link_status', function (err, res) {
 					if (err) {
-						errorCallback(err)
+						cb(err);
 					}
-					ut.assertEqual(res, 'slave', test_case);
-					testEmitter.emit('next');
+					if (res == 'up') {
+						test_pass = true;
+						cb(true);
+					} else
+						cb(false);
 				});
-			}, 1000);
+			},
+				function () {
+				ut.assertOk(test_pass, null, test_case);
+				testEmitter.emit('next');
+			},
+				function () {
+				errorCallback(new Error('Replication not started.'), null);
+			});
 		});
 	};
 
@@ -146,11 +157,11 @@ exports.Replication3 = (function () {
 								if (err) {
 									errorCallback(err);
 								}
-								var bool_Res = ut.assertDeepEqual(digest, digest0, test_case,true);
-								if(bool_Res){
+								var bool_Res = ut.assertDeepEqual(digest, digest0, test_case, true);
+								if (bool_Res) {
 									ut.pass(test_case);
 									testEmitter.emit('next');
-								} else{
+								} else {
 									ut.csvdump(master_cli, function (err, csv1) {
 										if (err) {
 											errorCallback(err);
@@ -174,6 +185,131 @@ exports.Replication3 = (function () {
 			}, 4000);
 		});
 	};
+
+	tester.Repl33 = function (errorCallback) {
+		var test_case = 'MASTER and SLAVE consistency with EVALSHA replication';
+		//Enough to trigger the Script Cache LRU eviction.
+		var numops = 20000;
+		// While we are at it, enable AOF to test it will be consistent as well
+		// after the test.
+		var oldsha = [],
+		j = 0,
+		key = '',
+		script = '',
+		sha1 = '',
+		expected_sha1hexres = 0,
+		actual_sha1hexres = 0,
+		actual_evalsha = 0;
+		master_cli.config('set', 'appendonly', 'yes', function (err, res) {
+			if (err) {
+				errorCallback(err, null);
+			}
+			g.asyncFor(0, numops, function (loop) {
+				j = loop.iteration();
+				key = 'key:' + j;
+				//Make sure to create scripts that have different SHA1s
+				script = "return redis.call('incr','" + key + "')";
+				master_cli.eval("return redis.sha1hex(\"" + script + "\")", 0, function (err, sha1) {
+					if (err) {
+						errorCallback(err, null);
+					}
+					oldsha.push(sha1);
+					master_cli.eval(script, 0, function (err, res) {
+						if (err) {
+							errorCallback(err, null);
+						}
+						master_cli.evalsha(sha1, 0, function (err, res) {
+							if (err) {
+								errorCallback(err, null);
+							}
+							actual_sha1hexres += res;
+							expected_sha1hexres += 2;
+							//Additionally call one of the old scripts as well.
+							master_cli.evalsha(oldsha[oldsha.length - 1], 0, function (err, res2) {
+								if (err) {
+									errorCallback(err, null);
+								}
+								actual_evalsha += res2
+
+								if (j == numops / 2) {
+									try {
+										master_cli.bgrewriteaof();
+									} catch (e) {}
+								}
+								loop.next();
+							});
+						});
+					});
+				});
+			}, function () {
+				ut.wait_for_condition(50, 100, function (cb) {
+					master_cli.dbsize(function (err, master_dbsize) {
+						if (err) {
+							cb(err, null);
+						}
+						slave_cli.dbsize(function (err, slave_dbsize) {
+							if (err) {
+								cb(err, null);
+							}
+							master_cli.debug('digest', function (err, digest) {
+								if (err) {
+									errorCallback(err);
+								}
+								slave_cli.debug('digest', function (err, digest0) {
+									if (err) {
+										errorCallback(err);
+									}
+									if (master_dbsize == slave_dbsize && digest == digest0)
+										cb(false);
+									else
+										cb(true);
+								});
+							});
+						});
+					});
+				}, function () {
+					ut.csvdump(master_cli, function (err, csv1) {
+						if (err) {
+							errorCallback(err);
+						}
+						ut.csvdump(slave_cli, function (err, csv2) {
+							if (err) {
+								errorCallback(err);
+							}
+							fs.writeFileSync('./tests/tmp/repldump1.txt', csv1);
+							fs.writeFileSync('./tests/tmp/repldump2.txt', csv2);
+							console.log('Master - Slave inconsistency');
+							console.log('Run diff -u against /tmp/repldump*.txt for more info');
+							testEmitter.emit('next');
+						});
+					});
+				}, function () {
+					master_cli.debug('digest', function (err, old_digest) {
+						if (err) {
+							errorCallback(err);
+						}
+						master_cli.config('set', 'appendonly', 'no', function (err, res) {
+							if (err) {
+								errorCallback(err);
+							}
+							master_cli.debug('digest', function (err, new_digest) {
+								if (err) {
+									errorCallback(err);
+								}
+								ut.assertMany(
+									[
+										['equal', expected_sha1hexres, actual_sha1hexres],
+										['ok', (actual_evalsha > expected_sha1hexres), null],
+										['equal', old_digest, new_digest]
+									], test_case);
+								testEmitter.emit('next');
+							});
+						});
+					});
+				});
+			});
+		});
+	}
 
 	return replication3;
 

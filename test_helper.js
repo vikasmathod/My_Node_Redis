@@ -86,6 +86,7 @@ var Test_helper = function () {
 	"unit/introspection",
 	"unit/basic",
 	"unit/sentinel",
+	"unit/memefficiency",
 	"unit/type/set",
 	"unit/type/list",
 	"unit/type/list2",
