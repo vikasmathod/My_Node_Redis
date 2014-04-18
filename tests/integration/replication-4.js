@@ -395,7 +395,7 @@ exports.Replication4 = (function () {
 						});
 					});
 				},
-				/* four: function(cb){
+				four: function(cb){
 					var result = [];
 					var test_case = 'With min-slaves-to-write: master not writable with lagged slave';
 					master_cli.config('set', 'min-slaves-max-lag', 2, function(err, res){
@@ -411,27 +411,31 @@ exports.Replication4 = (function () {
 									cb(err, null);
 								}
 								result.push(res);
-								master_cli.debug('sleep', 10, function(err, res){
+								//tweak made for redis::defer (right way has to be implemented)
+								master_cli.config('set', 'min-slaves-to-write', 2, function(err, res){
 									if(err){
 										cb(err, null);
 									}
-									setTimeout(function(){
-										master_cli.set('foo', 'bar', function(err, res){
-											console.log(err);
-											console.log(res);
-											result.push(err);
-											ut.assertMany([
-												['equal', result[0], 'OK'],
-												['ok', result[1],'NOREPLICAS']
-											],test_case);
-											cb(null, true);
-										});
-									},4000);
+									slave_cli.debug('sleep', 6, function(err, res){
+									if(err){
+										cb(err, null);
+									}
+										setTimeout(function(){
+											master_cli.set('foo', 'bar', function(err, res){
+												result.push(err);
+												ut.assertMany([
+													['equal', result[0], 'OK'],
+													['ok', 'NOREPLICAS', result[1]]
+												],test_case);
+												cb(null, true);
+											});
+										},4000);
+									});
 								});
 							})
 						});
 					});
-				}, */
+				}, 
 			}, function (err, rep) {
 				if (err) {
 					callback(err, null);
