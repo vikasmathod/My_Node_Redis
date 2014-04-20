@@ -66,7 +66,6 @@ var Test_helper = function () {
   start_client = false, counter = 0, test_array = [],
   numclients = 16,
   test_list = new Array(
- 	
     "unit/printver",
 	"unit/auth",
 	"unit/protocol",
@@ -85,6 +84,7 @@ var Test_helper = function () {
 	"unit/aofrw",
 	"unit/introspection",
 	"unit/basic",
+	"unit/scan",
 	"unit/sentinel",
 	"unit/memefficiency",
 	"unit/type/set",
