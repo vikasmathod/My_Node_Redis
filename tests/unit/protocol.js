@@ -38,6 +38,7 @@ exports.Protocol = (function () {
 			var args = {};
 			args['name'] = name;
 			args['tags'] = tags;
+			overrides['loglevel'] = 'verbose';
 			args['overrides'] = overrides;
 			server.start_server(cpid, args, function (err, res) {
 				if (err) {
@@ -86,6 +87,75 @@ exports.Protocol = (function () {
 		testEmitter.emit('start');
 	}
 
+	function desync_regression_test(x, callback) {
+		var retval,
+		error = '';
+		var test_case = 'Protocol desync regression test #' + x;
+		var stream = net.createConnection(server_port, server_host);
+		stream.on('error', function (err) {
+			error = err;
+		});
+
+		stream.on('close', function (data) {
+			setTimeout(function () {
+				error = fs.readFileSync(server.stdout_file).toString().split('\n');
+				retval = (x === 2) ? error[error.length - 3] : error[error.length - 2];
+				ut.assertOk('Protocol error', retval, test_case);
+				callback(null, true);
+			}, 500);
+		});
+
+		stream.write(seq[x]);
+
+		//windows - set nonblocking
+		//fconfigure $s -blocking false
+
+		var payload = g.fillString(1024, 'A');
+		payload += '\n';
+		var test_start = new Date().getSeconds();
+		var test_time_limit = 30;
+
+		//g.asyncFor(0, 1000 is changed from g.asyncFor(0, -1, ...) to g.asyncFor(0, 1000, ...)
+		//reason being on too many attempts to var stream = net.createConnection(server_port, server_host);
+		//error is thrown. this is however temporary. premanent fix will be given
+		g.asyncFor(0, -1, function (innerloop) {
+			stream.write(payload, function (err, res) {
+				if (err) {
+					retval = err;
+					stream.end();
+					if (protocol.debug_mode) {
+						log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+					}
+					innerloop.break();
+				} else {
+					//windows - if data available, read line
+					//if {[read $s 1] ne ''} { set retval [gets $s] }
+					if (res)
+						retval = res;
+
+					if (ut.match('Protocol error', retval)) {
+						stream.end();
+						innerloop.break();
+					}
+
+					var elapsed = new Date().getSeconds() - test_start;
+					if (elapsed > test_time_limit) {
+						stream.end();
+						if (protocol.debug_mode) {
+							log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
+						}
+						errorCallback(new Error('assertion:Redis did not closed connection after protocol desync'));
+						innerloop.break();
+					}
+				}
+				setTimeout(function () {
+					innerloop.next();
+				});
+			});
+		}, function () {});
+
+	};
+	
 	// test methods
 	tester.Proto1 = function (errorCallback) {
 		var test_case = 'Handle an empty query';
@@ -312,84 +382,20 @@ exports.Protocol = (function () {
 		stream.write('ping\r\n');
 	};
 
-	tester.Proto11 = function (errorCallback) {
-		var x = seq.length;
-		g.asyncFor(0, x, function (outerloop) {
-			var retval;
-			var error = '';
-			var stream = net.createConnection(server_port, server_host);
-			stream.on('connect', function () {
-				if (protocol.debug_mode) {
-					log.notice(name + ':Client connected  and listening on socket: ' + server_host + ':' + server_port);
+	tester.proto11 = function (errorCallback) {
+		var x = '', i = 0;
+		g.asyncFor(0, seq.length, function (outerloop) {;
+			desync_regression_test(i++, function (err, res) {
+				if (err) {
+					errorCallback(err)
 				}
+				outerloop.next();
 			});
-
-			stream.on('error', function (err) {
-				error = err;
-			});
-
-			stream.on('close', function (data) {
-				setTimeout(function () {
-					error = fs.readFileSync(server.stdout_file).toString().split('\n');
-					retval = error[error.length - 2];
-					ut.assertOk('Protocol error', retval, test_case);
-					outerloop.next();
-				}, 500);
-			});
-
-			var i = outerloop.iteration();
-			var test_case = 'Protocol desync regression test #' + i;
-			stream.write(seq[i]);
-
-			//windows - set nonblocking
-			//fconfigure $s -blocking false
-
-			var payload = g.fillString(1024, 'A');
-			payload += '\n';
-			var test_start = new Date().getSeconds();
-			var test_time_limit = 30;
-
-			//g.asyncFor(0, 1000 is changed from g.asyncFor(0, -1, ...) to g.asyncFor(0, 1000, ...)
-			//reason being on too many attempts to var stream = net.createConnection(server_port, server_host);
-			//error is thrown. this is however temporary. premanent fix will be given
-			g.asyncFor(0, 1000, function (innerloop) {
-				stream.write(payload, function (err, res) {
-					if (err) {
-						retval = err;
-						stream.end();
-						if (protocol.debug_mode) {
-							log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-						}
-						innerloop.break();
-					} else {
-						//windows - if data available, read line
-						//if {[read $s 1] ne ''} { set retval [gets $s] }
-						if (res)
-							retval = res;
-
-						if (ut.match('Protocol error', retval)) {
-							stream.end();
-							innerloop.break();
-						}
-
-						var elapsed = new Date().getSeconds() - test_start;
-						if (elapsed > test_time_limit) {
-							stream.end();
-							if (protocol.debug_mode) {
-								log.notice(name + ':Client disconnected listeting to socket : ' + server_host + ':' + server_port);
-							}
-							errorCallback(new Error('assertion:Redis did not closed connection after protocol desync'));
-							innerloop.break();
-						}
-						innerloop.next();
-					}
-				});
-			}, function () {});
 		}, function () {
 			testEmitter.emit('next');
 		});
-	};
-
+	}
+	
 	tester.Proto12 = function (errorCallback) {
 		var test_case = 'Regression for a crash with blocking ops and pipelining';
 		client1 = redis.createClient(server_port, server_host);
