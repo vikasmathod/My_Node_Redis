@@ -109,8 +109,8 @@ exports.Introspection = (function () {
 									errorCallback(err);
 								}
 								client.ping(function (err, res) {
-									if (res) {
-										errorCallback(res);
+									if (err) {
+										errorCallback(err);
 									}
 									ut.assertMany(
 										[
@@ -636,7 +636,7 @@ exports.Introspection = (function () {
 				ut.assertMany(
 					[
 						['ok','foo,bar', responses.toString()],
-						['equal',responses[0][0],'eval']
+						['equal',responses[1][0],'eval']
 					],test_case);
 				monitor_client.end();
 				client.end();
